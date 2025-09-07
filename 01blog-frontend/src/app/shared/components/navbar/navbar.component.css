@@ -142,6 +142,7 @@
   font-weight: 400;
   white-space: nowrap;
   transition: color 0.15s ease;
+  cursor: default;
 }
 
 /* .icons {
