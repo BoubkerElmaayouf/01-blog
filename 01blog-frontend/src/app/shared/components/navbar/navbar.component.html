@@ -1,0 +1,101 @@
+<mat-toolbar class="navbar">
+  <!-- Left section with hamburger menu and logo -->
+  <div class="navbar-left">
+    <!-- <button 
+      mat-icon-button 
+      class="hamburger-menu"
+      (click)="toggleMobileMenu()"
+      aria-label="Open menu"
+    >
+      <mat-icon>menu</mat-icon>
+    </button> -->
+    
+    <div class="logo-container">
+      cocoon
+    </div>
+  </div>
+
+  <!-- Center section with search -->
+  <div class="navbar-center">
+    <div class="search-container">
+      <mat-icon class="search-icon">search</mat-icon>
+      <input 
+        type="text" 
+        class="search-input" 
+        placeholder="Search"
+        [(ngModel)]="searchQuery"
+        (keyup.enter)="onSearch()"
+      />
+    </div>
+  </div>
+
+  <!-- Right section with actions -->
+  <div class="navbar-right">
+    <button 
+      mat-icon-button 
+      class="write-button"
+      (click)="onWriteClick()"
+      aria-label="Write"
+    >
+    <mat-icon class="icons">post_add</mat-icon>
+    </button>
+    
+    <span class="write-text desktop-only">Write</span>
+    
+    <button 
+      mat-icon-button 
+      class="notification-button"
+      (click)="onNotificationClick()"
+      aria-label="Notifications"
+    >
+      <mat-icon>notifications_none</mat-icon>
+    </button>
+
+    <button mat-button [matMenuTriggerFor]="userMenu" class="user-avatar">
+      <img 
+        [src]="userProfile.avatar" 
+        alt="User Avatar" 
+        class="avatar-image"
+      />
+    </button>
+
+    <mat-menu #userMenu="matMenu" class="user-menu" xPosition="before" yPosition="below">
+      <!-- User Profile Header -->
+      <div class="profile-header" mat-menu-item disabled>
+        <img 
+          [src]="userProfile.avatar" 
+          alt="Profile Avatar" 
+          class="profile-avatar"
+        />
+        <div class="profile-info">
+          <div class="profile-name">{{ userProfile.name }}</div>
+          <div class="profile-email">{{ userProfile.email }}</div>
+        </div>
+      </div>
+      
+      <mat-divider class="profile-divider"></mat-divider>
+      
+      <button mat-menu-item (click)="onMenuItemClick('profile')" class="menu-item">
+        <mat-icon>person_outline</mat-icon>
+        <span>Profile</span>
+      </button>
+      
+      <button mat-menu-item (click)="onMenuItemClick('privacy')" class="menu-item">
+        <mat-icon>description</mat-icon>
+        <span>Privacy Policy</span>
+      </button>
+      
+      <button mat-menu-item (click)="onMenuItemClick('report')" class="menu-item">
+        <mat-icon>flag</mat-icon>
+        <span>Report an issue</span>
+      </button>
+      
+      <mat-divider class="logout-divider"></mat-divider>
+      
+      <button mat-menu-item (click)="onLogout()" class="logout-item">
+        <mat-icon>logout</mat-icon>
+        <span>Logout</span>
+      </button>
+    </mat-menu>
+  </div>
+</mat-toolbar>
