@@ -3,12 +3,14 @@ import { LandingComponent } from './features/landing/landing.component';
 import { LoginComponent } from './features/login/login.component';
 import {ExploreComponent} from './features/explore/explore.component'
 import {WriteComponent} from './features/write/write.component'
+import {ProfileComponent} from './features/profile/profile.component'
 
 export const routes: Routes = [
   { path: '', component: LandingComponent },
   {path: 'login', component: LoginComponent},
   {path: 'explore', component: ExploreComponent},
-  {path: 'write', component: WriteComponent}
+  {path: 'write', component: WriteComponent},
+  {path:'profile', component:ProfileComponent}
 //   {
 //     path: 'auth',
 //     loadChildren: () =>

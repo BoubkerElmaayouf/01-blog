@@ -1,15 +1,6 @@
 <mat-toolbar class="navbar">
   <!-- Left section with hamburger menu and logo -->
   <div class="navbar-left">
-    <!-- <button 
-      mat-icon-button 
-      class="hamburger-menu"
-      (click)="toggleMobileMenu()"
-      aria-label="Open menu"
-    >
-      <mat-icon>menu</mat-icon>
-    </button> -->
-    
     <div class="logo-container">
       <a routerLink="/">
         Cocoon
@@ -78,20 +69,20 @@
       
       <mat-divider class="profile-divider"></mat-divider>
       
-      <button mat-menu-item (click)="onMenuItemClick('profile')" class="menu-item">
+      <a mat-menu-item routerLink="/profile" class="menu-item">
         <mat-icon>person_outline</mat-icon>
         <span>Profile</span>
-      </button>
-      
-      <button mat-menu-item (click)="onMenuItemClick('privacy')" class="menu-item">
+      </a>
+
+      <a mat-menu-item routerLink="/privacy-policy" class="menu-item">
         <mat-icon>description</mat-icon>
         <span>Privacy Policy</span>
-      </button>
-      
-      <button mat-menu-item (click)="onMenuItemClick('report')" class="menu-item">
+      </a>
+
+      <a mat-menu-item routerLink="/report" class="menu-item">
         <mat-icon>flag</mat-icon>
         <span>Report an issue</span>
-      </button>
+      </a>
       
       <mat-divider class="logout-divider"></mat-divider>
       

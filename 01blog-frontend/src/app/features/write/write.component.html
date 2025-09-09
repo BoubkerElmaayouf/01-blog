@@ -1,1 +1,130 @@
 <app-navbar></app-navbar>
+
+<div class="write-container">
+  <!-- Header with Actions -->
+  <div class="write-header">
+    <div class="header-content">
+      <h1>Create New Post</h1>
+      <div class="header-actions">
+        <button  class="action-btn draft-btn" (click)="onSaveDraft()">
+          <mat-icon>save</mat-icon>
+          Save Draft
+        </button>
+        <button  class="action-btn publish-btn" (click)="onPublish()">
+          <mat-icon>publish</mat-icon>
+          Publish
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Form -->
+  <div class="form-container">
+    <form [formGroup]="postForm" class="post-form">
+      
+      <!-- Title and Category Row -->
+      <div class="title-category-row">
+        <mat-form-field class="title-field">
+          <mat-label>Post Title</mat-label>
+          <input 
+            matInput 
+            formControlName="title" 
+            placeholder="Enter an engaging title for your post"
+            maxlength="100">
+          <mat-hint align="end">{{ postForm.get('title')?.value?.length || 0 }}/100</mat-hint>
+          <mat-error *ngIf="postForm.get('title')?.invalid && postForm.get('title')?.touched">
+            {{ getErrorMessage('title') }}
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field class="category-field">
+          <mat-label>Category</mat-label>
+          <mat-select formControlName="category" placeholder="Select a category">
+            <mat-option *ngFor="let category of categories" [value]="category.value">
+              {{ category.label }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="postForm.get('category')?.invalid && postForm.get('category')?.touched">
+            {{ getErrorMessage('category') }}
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- Banner Upload Section -->
+      <div class="banner-section">
+        <label class="section-label">Banner Image</label>
+        
+        <!-- Hidden File Input -->
+        <input 
+          type="file" 
+          #bannerFileInput
+          accept="image/*" 
+          (change)="onFileSelected($event, bannerFileInput)" 
+          style="display: none">
+
+        <!-- Image Preview -->
+        <div class="image-preview-container" *ngIf="imagePreview">
+          <img [src]="imagePreview" alt="Banner preview" class="banner-preview">
+          <button 
+            type="button" 
+            mat-mini-fab 
+            class="remove-image-btn" 
+            (click)="removeImage(bannerFileInput)"
+            color="warn">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+
+        <!-- Upload Area -->
+        <div class="upload-area" [class.has-image]="imagePreview">
+          <button 
+            type="button" 
+            mat-stroked-button 
+            class="upload-btn" 
+            (click)="triggerFileInput(bannerFileInput)">
+            <mat-icon>cloud_upload</mat-icon>
+            {{ imagePreview ? 'Change Banner' : 'Upload Banner' }}
+          </button>
+          
+          <p class="upload-hint" *ngIf="!imagePreview">
+            Recommended: 1200x630px, Max: 5MB (JPG, PNG, WebP)
+          </p>
+        </div>
+      </div>
+
+      <!-- Rich Text Editor -->
+      <div class="editor-section">
+        <label class="section-label">Content</label>
+        <div class="editor-container">
+          <div #editor class="quill-editor"></div>
+        </div>
+        <mat-error 
+          *ngIf="postForm.get('content')?.invalid && postForm.get('content')?.touched"
+          class="content-error">
+          Content is required
+        </mat-error>
+      </div>
+
+    </form>
+
+    <!-- Mobile Action Buttons -->
+    <div class="mobile-actions">
+      <button 
+        type="button" 
+        mat-stroked-button 
+        class="mobile-action-btn draft-btn" 
+        (click)="onSaveDraft()">
+        <mat-icon>save</mat-icon>
+        Save Draft
+      </button>
+      <button 
+        type="button" 
+        mat-flat-button 
+        class="mobile-action-btn publish-btn" 
+        (click)="onPublish()">
+        <mat-icon>publish</mat-icon>
+        Publish
+      </button>
+    </div>
+  </div>
+</div>
