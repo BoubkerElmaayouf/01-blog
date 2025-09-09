@@ -1,0 +1,80 @@
+<app-navbar></app-navbar>
+
+<div class="explore-container">
+  <!-- Header Section -->
+  <div class="explore-header">
+    <h1>Explore</h1>
+  </div>
+
+  <!-- Category Navigation -->
+  <div class="category-nav">
+    <div class="category-buttons">
+      <button 
+        *ngFor="let category of categories"
+        [class.active]="selectedCategory === category"
+        (click)="selectCategory(category)"
+        class="category-btn">
+        {{ category }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Articles Grid -->
+  <div class="articles-container">
+    <article 
+      *ngFor="let article of filteredArticles"
+      class="article-card"
+      (click)="onArticleClick(article)">
+      
+      <!-- Article Content -->
+      <div class="article-content">
+        <!-- Publication Info -->
+        <div class="publication-info" *ngIf="article.publication">
+          <div class="publication-badge">
+            <span class="publication-icon">📝</span>
+            <span class="publication-text">in {{ article.publication }}</span>
+            <span class="author-text">by {{ article.author }}</span>
+          </div>
+        </div>
+        
+        <!-- Article Title -->
+        <h2 class="article-title">{{ article.title }}</h2>
+        
+        <!-- Article Subtitle -->
+        <p class="article-subtitle">{{ article.subtitle }}</p>
+        
+        <!-- Article Meta -->
+        <div class="article-meta">
+          <div class="meta-left">
+            <span class="publish-date">{{ article.publishDate }}</span>
+            <span class="read-stats">{{ article.readTime }}</span>
+            <span class="claps">{{ article.claps }}</span>
+          </div>
+          
+          <div class="meta-right">
+            <button 
+              mat-icon-button 
+              class="action-btn bookmark-btn"
+              (click)="onBookmark(article, $event)"
+              aria-label="Bookmark article">
+              <mat-icon>bookmark_border</mat-icon>
+            </button>
+            
+            <button 
+              mat-icon-button 
+              class="action-btn more-btn"
+              (click)="onMore(article, $event)"
+              aria-label="More options">
+              <mat-icon>more_horiz</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Article Image -->
+      <div class="article-image">
+        <img [src]="article.imageUrl" [alt]="article.title" loading="lazy">
+      </div>
+    </article>
+  </div>
+</div>

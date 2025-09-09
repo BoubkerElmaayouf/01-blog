@@ -1,0 +1,96 @@
+/* Navbar base */
+.navbar {
+  background: #fff;
+  border-bottom: 1px solid #e6e6e6;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Inner wrapper with side padding */
+.navbar-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 200px; /* Default desktop padding */
+}
+
+/* Logo */
+.logo-container {
+  font-size: 22px;
+  font-weight: bold;
+  color: #000;
+}
+
+/* Nav links */
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.nav-link {
+  font-size: 15px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.84);
+  text-decoration: none;
+}
+
+.nav-link:hover {
+  color: #000;
+}
+
+/* Button */
+.get-started-btn {
+  font-size: 16px;
+  border-radius: 20px;
+  padding: 6px 20px;
+  border: 1px solid #000;
+  background: #000;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.get-started-btn:hover {
+  background: #fff;
+  color: #000;
+}
+
+/* Responsiveness */
+@media (max-width: 1400px) {
+  .navbar-content {
+    padding: 0 150px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .navbar-content {
+    padding: 0 100px;
+  }
+}
+
+@media (max-width: 992px) {
+  .navbar-content {
+    padding: 0 60px;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar-content {
+    padding: 0 20px;
+  }
+  .nav-link {
+    font-size: 14px;
+  }
+  .logo-container {
+    font-size: 18px;
+  }
+}

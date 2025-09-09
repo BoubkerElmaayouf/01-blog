@@ -1,12 +1,11 @@
-// landing.component.ts
 import { Component } from '@angular/core';
-import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
+import { LandBarComponent } from '../../shared/components/landNavbar/landBar.component';
 
 @Component({
   selector: 'app-landing',
-  standalone: true,           // 👈 important for standalone Angular
+  standalone: true,
   templateUrl: './landing.component.html',
-  styleUrls: ['./landing.component.css'], // or .scss if you prefer
-  imports: [NavbarComponent]
+  styleUrls: ['./landing.component.css'],
+  imports: [LandBarComponent]
 })
 export class LandingComponent {}
