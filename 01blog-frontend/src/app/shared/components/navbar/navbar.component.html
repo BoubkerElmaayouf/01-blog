@@ -11,7 +11,9 @@
     </button> -->
     
     <div class="logo-container">
-      cocoon
+      <a routerLink="/">
+        Cocoon
+      </a>
     </div>
   </div>
 
@@ -31,14 +33,15 @@
 
   <!-- Right section with actions -->
   <div class="navbar-right">
-    <button 
-      mat-icon-button 
+      <a
+      mat-icon-button
       class="write-button"
-      (click)="onWriteClick()"
       aria-label="Write"
+      routerLink="/write"
     >
-    <mat-icon class="icons">post_add</mat-icon>
-    </button>
+      <mat-icon class="icons">post_add</mat-icon>
+    </a>
+
     
     <span class="write-text desktop-only">Write</span>
     
