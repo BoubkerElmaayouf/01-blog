@@ -161,6 +161,249 @@ a {
   height: 24px;
 }
 
+/* Notification Menu Styles */
+::ng-deep .notification-menu {
+  margin-top: 8px;
+}
+
+::ng-deep .notification-menu .mat-mdc-menu-panel {
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+  border: 1px solid #e6e6e6 !important;
+  min-width: 360px !important;
+  max-width: 400px !important;
+  max-height: 500px !important;
+  padding: 0 !important;
+  background-color: #ffffff !important;
+}
+
+::ng-deep .mat-mdc-menu-panel.notification-menu {
+  background-color: #ffffff !important;
+  opacity: 1 !important;
+  backdrop-filter: none !important;
+}
+
+/* Notification Header */
+::ng-deep .notification-menu .notification-header {
+  display: flex !important;
+  align-items: center !important;
+  padding: 16px 20px 12px 20px !important;
+  height: auto !important;
+  cursor: default !important;
+  background-color: transparent !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+}
+
+::ng-deep .notification-menu .notification-header:hover {
+  background-color: transparent !important;
+}
+
+.notification-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  font-size: 18px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.9);
+}
+
+.mark-all-read-btn {
+  width: 32px !important;
+  height: 32px !important;
+  color: rgba(0, 0, 0, 0.54) !important;
+}
+
+.mark-all-read-btn:hover {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+  color: rgba(0, 0, 0, 0.8) !important;
+}
+
+.mark-all-read-btn:disabled {
+  color: rgba(0, 0, 0, 0.26) !important;
+}
+
+.mark-all-read-btn mat-icon {
+  font-size: 18px !important;
+  width: 18px !important;
+  height: 18px !important;
+}
+
+/* Notification Divider */
+::ng-deep .notification-menu .notification-divider {
+  border-top: 1px solid #f2f2f2 !important;
+  margin: 0 !important;
+}
+
+/* Notifications Container */
+.notifications-container {
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+/* Empty State */
+.empty-notifications {
+  padding: 40px 20px !important;
+  text-align: center;
+  cursor: default !important;
+}
+
+.empty-notifications:hover {
+  background-color: transparent !important;
+}
+
+.empty-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: rgba(0, 0, 0, 0.54);
+}
+
+.empty-icon {
+  font-size: 32px !important;
+  width: 32px !important;
+  height: 32px !important;
+  color: rgba(0, 0, 0, 0.38);
+}
+
+/* Notification Items */
+::ng-deep .notification-menu .notification-item {
+  font-family: inherit !important;
+  padding: 0 !important;
+  color: rgba(0, 0, 0, 0.8) !important;
+  display: block !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  height: auto !important;
+  min-height: 72px !important;
+  transition: background-color 0.15s ease !important;
+}
+
+::ng-deep .notification-menu .notification-item:hover {
+  background-color: #f9f9f9 !important;
+}
+
+::ng-deep .notification-menu .notification-item.unread {
+  background-color: #f8f9ff !important;
+}
+
+::ng-deep .notification-menu .notification-item.unread:hover {
+  background-color: #f0f2ff !important;
+}
+
+.notification-content {
+  display: flex;
+  align-items: flex-start;
+  padding: 16px 20px;
+  gap: 12px;
+  position: relative;
+}
+
+.notification-avatar {
+  flex-shrink: 0;
+}
+
+.notification-avatar img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.notification-details {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.notification-text {
+  font-size: 14px;
+  line-height: 1.4;
+  color: rgba(0, 0, 0, 0.87);
+}
+
+.notification-text strong {
+  font-weight: 600;
+  margin-right: 4px;
+}
+
+.notification-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.notification-time {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.54);
+}
+
+.toggle-read-btn {
+  width: 28px !important;
+  height: 28px !important;
+  color: rgba(0, 0, 0, 0.54) !important;
+  opacity: 0;
+  transition: opacity 0.15s ease !important;
+}
+
+.notification-item:hover .toggle-read-btn,
+.notification-item.unread .toggle-read-btn {
+  opacity: 1;
+}
+
+.toggle-read-btn:hover {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+  color: rgba(0, 0, 0, 0.8) !important;
+}
+
+.toggle-read-btn mat-icon {
+  font-size: 16px !important;
+  width: 16px !important;
+  height: 16px !important;
+}
+
+.unread-indicator {
+  position: absolute;
+  right: 16px;
+  top: 24px;
+  width: 8px;
+  height: 8px;
+  background-color: #1976d2;
+  border-radius: 50%;
+}
+
+/* View All Notifications */
+::ng-deep .notification-menu .view-all-notifications {
+  font-family: inherit !important;
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+  height: 48px !important;
+  padding: 0 20px !important;
+  color: #1976d2 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  font-weight: 500 !important;
+}
+
+::ng-deep .notification-menu .view-all-notifications:hover {
+  background-color: #e3f2fd !important;
+  color: #1976d2 !important;
+}
+
+::ng-deep .notification-menu .view-all-notifications mat-icon {
+  color: #1976d2 !important;
+  font-size: 18px !important;
+  width: 18px !important;
+  height: 18px !important;
+}
+
 .user-avatar {
   width: 32px;
   height: 32px;
@@ -355,6 +598,11 @@ a {
   .write-text {
     display: none;
   }
+  
+  ::ng-deep .notification-menu .mat-mdc-menu-panel {
+    min-width: 340px !important;
+    max-width: 360px !important;
+  }
 }
 
 @media (max-width: 768px) {
@@ -384,6 +632,26 @@ a {
 
   .medium-logo {
     height: 22px;
+  }
+  
+  ::ng-deep .notification-menu .mat-mdc-menu-panel {
+    min-width: 320px !important;
+    max-width: 340px !important;
+    max-height: 400px !important;
+  }
+  
+  .notification-content {
+    padding: 12px 16px;
+    gap: 10px;
+  }
+  
+  .notification-avatar img {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .notification-text {
+    font-size: 13px;
   }
 }
 
@@ -432,6 +700,38 @@ a {
     width: 20px;
     height: 20px;
   }
+  
+  ::ng-deep .notification-menu .mat-mdc-menu-panel {
+    min-width: 280px !important;
+    max-width: 320px !important;
+    left: 10px !important;
+    right: 10px !important;
+  }
+  
+  .notification-title {
+    font-size: 16px;
+  }
+  
+  .notifications-container {
+    max-height: 280px;
+  }
+  
+  .notification-content {
+    padding: 12px 16px;
+  }
+  
+  .notification-avatar img {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .notification-text {
+    font-size: 12px;
+  }
+  
+  .notification-time {
+    font-size: 11px;
+  }
 }
 
 /* Large desktop styles */
@@ -443,6 +743,11 @@ a {
   .navbar-center {
     margin: 0 48px;
     max-width: 800px;
+  }
+  
+  ::ng-deep .notification-menu .mat-mdc-menu-panel {
+    min-width: 380px !important;
+    max-width: 420px !important;
   }
 }
 
