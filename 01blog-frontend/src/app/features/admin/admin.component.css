@@ -5,6 +5,8 @@
   color: #000000;
   display: flex;
   flex-direction: column;
+  width: 100%;
+  overflow-x: hidden;
 
 }
 
@@ -310,6 +312,7 @@
 @media (max-width: 768px) {
     .admin-header {
         padding: 0 24px;
+        font-size: 22px;
     }
 
   .admin-content {
