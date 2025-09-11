@@ -8,7 +8,7 @@ import {PolicyPrivacyComponent} from './features/privacy-policy/policy.component
 import {ContactComponent} from './features/contact/contact.component'
 import {ReportComponent} from './features/report/report.component'
 import { AboutComponent } from './features/about/about.component';
-
+import {AdminComponent} from './features/admin/admin.component'
 export const routes: Routes = [
   { path: '', component: LandingComponent },
   {path: 'login', component: LoginComponent},
@@ -18,7 +18,8 @@ export const routes: Routes = [
   {path: 'privacy-policy', component: PolicyPrivacyComponent},
   {path: 'contact', component: ContactComponent},
   {path: 'report', component: ReportComponent},
-  {path: 'about', component: AboutComponent}
+  {path: 'about', component: AboutComponent},
+  {path: 'admin', component: AdminComponent}
 //   {
 //     path: 'auth',
 //     loadChildren: () =>
