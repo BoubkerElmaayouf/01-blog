@@ -6,13 +6,13 @@
   max-width: 600px;
   margin: 0 auto;
   flex: 1; /* pushes footer down */
-  margin-top: 50px;
   height: 80vh;
 }
 
 .logo {
   width: 80px;
   height: auto;
+  margin-top: 64px;
 }
 
 .contact-header {

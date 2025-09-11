@@ -6,13 +6,13 @@
   max-width: 800px;
   margin: 0 auto;
   flex: 1;
-  margin-top: 50px;
 }
 
 .logo {
   margin: 24px 0;
   width: 100px;
   height: auto;
+  margin-top: 64px;
 }
 
 .logo-header {

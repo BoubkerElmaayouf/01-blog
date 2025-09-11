@@ -5,14 +5,14 @@
   align-items: center;
   padding: 24px;
   max-width: 600px;
-  margin: 100px auto;
+  margin: 0 auto;
   flex: 1;
 }
 
 .logo {
-  margin-bottom: 24px;
   width: 80px;
   height: auto;
+  margin-top: 64px;
 }
 
 h2 {
@@ -43,15 +43,13 @@ button {
 .footer {
     position: relative;
     bottom: 0;
-    top: 40%;
   text-align: center;
   padding-top: 16px;
   font-size: 14px;
   color: gray;
   border-top: 1px solid #e0e0e0;
-  margin-top: 40px;
+  margin-top: 64px;
   height: 64px;
-    margin-top: -300px;
 }
 
 @media (max-width: 600px) {
