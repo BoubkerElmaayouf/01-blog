@@ -1,27 +1,27 @@
-.contact-container {
+.report-container {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   align-items: center;
   padding: 24px;
   max-width: 600px;
-  margin: 0 auto;
-  flex: 1; /* pushes footer down */
-  margin-top: 50px;
-  height: 80vh;
+  margin: 100px auto;
+  flex: 1;
 }
 
 .logo {
+  margin-bottom: 24px;
   width: 80px;
   height: auto;
 }
 
-.contact-header {
-  font-size: 24px;
-  font-weight: 600;
+h2 {
   margin-bottom: 24px;
+  font-weight: 500;
+  color: black;
 }
 
-.contact-form {
+.report-form {
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -41,20 +41,21 @@ button {
 
 /* Footer */
 .footer {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    position: relative;
+    bottom: 0;
+    top: 40%;
   text-align: center;
-  /* padding: 16px; */
   padding-top: 16px;
   font-size: 14px;
   color: gray;
   border-top: 1px solid #e0e0e0;
   margin-top: 40px;
+  height: 64px;
+    margin-top: -300px;
 }
 
 @media (max-width: 600px) {
-  .contact-container {
+  .report-container {
     padding: 16px;
   }
 }

@@ -1,0 +1,56 @@
+<app-navbar></app-navbar>
+
+<div class="report-container">
+  <div class="logo">
+    <svg viewBox="0 0 120 140" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M30 20 Q20 15 15 25 Q10 35 15 45 L25 120 Q30 130 40 130 L80 130 Q90 130 95 120 L105 45 Q110 35 105 25 Q100 15 90 20"
+        stroke="black" stroke-width="2.5" fill="none"/>
+      <path d="M25 35 Q60 30 95 35" stroke="black" stroke-width="2" fill="none"/>
+      <path d="M27 50 Q60 45 93 50" stroke="black" stroke-width="2" fill="none"/>
+      <path d="M29 65 Q60 60 91 65" stroke="black" stroke-width="2" fill="none"/>
+      <path d="M31 80 Q60 75 89 80" stroke="black" stroke-width="2" fill="none"/>
+      <path d="M33 95 Q60 90 87 95" stroke="black" stroke-width="2" fill="none"/>
+      <path d="M35 110 Q60 105 85 110" stroke="black" stroke-width="2" fill="none"/>
+      <path
+        d="M60 20 Q55 10 50 5 Q45 2 40 5 Q35 8 40 12 Q45 15 50 12 Q55 8 60 12 Q65 16 70 12 Q75 8 80 12 Q85 16 90 12 Q95 8 90 5"
+        stroke="black" stroke-width="2.5" fill="none"/>
+    </svg>
+  </div>
+  <h1>Report to Cocoon</h1>
+  <h2>Report an Issue</h2>
+
+  <form [formGroup]="reportForm" (ngSubmit)="onSubmit()" class="report-form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Email</mat-label>
+      <input matInput type="email" formControlName="email" placeholder="Enter your email" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Reason</mat-label>
+      <mat-select formControlName="reason">
+        <mat-option *ngFor="let reason of reasons" [value]="reason">
+          {{ reason }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Description</mat-label>
+      <textarea
+        matInput
+        formControlName="description"
+        rows="4"
+        placeholder="Provide more details here">
+      </textarea>
+    </mat-form-field>
+
+    <button mat-raised-button color="primary" type="submit" [disabled]="reportForm.invalid">
+      Submit Report
+    </button>
+  </form>
+</div>
+
+<footer class="footer">
+  © Cocoon. All rights reserved.
+</footer>

@@ -34,7 +34,11 @@
   align-items: center;
   gap: 24px;
 }
-
+.logo-header {
+  color: black;
+  cursor: pointer;
+  text-decoration: none;
+}
 .nav-link {
   font-size: 15px;
   font-weight: 500;
