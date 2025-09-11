@@ -16,4 +16,7 @@ import { NavbarComponent } from "../../shared/components/navbar/navbar.component
   templateUrl: "./about.component.html",
   styleUrls: ["./about.component.css"],
 })
-export class AboutComponent {}
+
+export class AboutComponent {
+    
+}
