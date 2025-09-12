@@ -7,8 +7,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { LandBarComponent } from '../../shared/components/landNavbar/landBar.component';
 import {RouterModule } from '@angular/router';
+import { ImageUploadService } from '../../utils/image-upload.service';
 
 @Component({
   selector: 'app-login',
@@ -25,7 +27,8 @@ import {RouterModule } from '@angular/router';
     MatButtonModule,
     MatIconModule,
     MatCardModule,
-    RouterModule
+    MatSnackBarModule,
+    RouterModule,
   ]
 })
 export class LoginComponent {
@@ -35,8 +38,9 @@ export class LoginComponent {
   hideRegisterPassword = true;
   selectedFile: File | null = null;
   avatarPreview: string | null = null;
+  isUploading = false;
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder ,  private imageUploadService: ImageUploadService, private snackBar: MatSnackBar) {
     this.loginForm = this.fb.group({
       emailOrUsername: ['', [Validators.required]],
       password: ['', [Validators.required, Validators.minLength(6)]]
@@ -47,7 +51,8 @@ export class LoginComponent {
       lastName: ['', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
       bio: [''],
-      password: ['', [Validators.required, Validators.minLength(6)]]
+      password: ['', [Validators.required, Validators.minLength(6)]],
+      avatarUrl: ['']
     });
   }
 
@@ -60,15 +65,52 @@ export class LoginComponent {
     }
   }
 
-  onRegister() {
-    if (this.registerForm.valid) {
-      console.log('Register form submitted:', this.registerForm.value);
-      console.log('Selected avatar:', this.selectedFile);
-      // Handle registration logic here
-    } else {
-      console.log('Register form is invalid');
+async onRegister() {
+  if (this.registerForm.valid) {
+    if (this.selectedFile) {
+      try {
+        this.isUploading = true;
+        const url = await this.imageUploadService.uploadImage(this.selectedFile);
+        this.registerForm.patchValue({ avatarUrl: url });
+
+        // Success snackbar for avatar upload
+        this.snackBar.open('Avatar uploaded successfully!', 'Close', {
+          duration: 3000,
+          panelClass: ['snackbar-success']
+        });
+
+      } catch (err: any) {
+        //  Error snackbar
+        this.snackBar.open(err.message || 'Image upload failed', 'Close', {
+          duration: 4000,
+          panelClass: ['snackbar-error']
+        });
+        return; // stop the registration if upload failed
+      } finally {
+        this.isUploading = false;
+      }
     }
+
+    // Success snackbar for registration submission
+    this.snackBar.open('Registration form submitted successfully!', 'Close', {
+      duration: 3000,
+      panelClass: ['snackbar-success']
+    });
+
+    console.log('Register form submitted:', this.registerForm.value);
+    // 🚀 send this.registerForm.value to your backend
+
+  } else {
+    // Snackbar for invalid form
+    this.snackBar.open('Please fill out all required fields correctly.', 'Close', {
+      duration: 4000,
+      panelClass: ['snackbar-error']
+    });
+
+    console.log('Register form is invalid');
   }
+}
+
 
   onFileSelected(event: any) {
     const file = event.target.files[0];
