@@ -12,20 +12,20 @@ export class ImageUploadService {
 
     async uploadImage(file: File): Promise<string> {
 
-    const isImage = file.type.startsWith('image/');
-    const fileSizeBytes = file.size; // in bytes
-    const fileSizeMB = fileSizeBytes / (1024 * 1024); // convert to MB
+    // const isImage = file.type.startsWith('image/');
+    // const fileSizeBytes = file.size; // in bytes
+    // const fileSizeMB = fileSizeBytes / (1024 * 1024); // convert to MB
 
-    if (!isImage) {
-    throw new Error('Only image files are allowed.');
-    }
+    // if (!isImage) {
+    // throw new Error('Only image files are allowed.');
+    // }
 
-    if (fileSizeMB < 1) {
-    throw new Error('File size must be at least 1 MB.');
-    }
-    if (fileSizeMB > 5) {
-    throw new Error('File size must not exceed 5 MB.');
-    }
+    // if (fileSizeMB < 1) {
+    // throw new Error('File size must be at least 1 MB.');
+    // }
+    // if (fileSizeMB > 5) {
+    // throw new Error('File size must not exceed 5 MB.');
+    // }
 
 
 

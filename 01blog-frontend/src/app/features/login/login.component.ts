@@ -11,6 +11,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { LandBarComponent } from '../../shared/components/landNavbar/landBar.component';
 import {RouterModule } from '@angular/router';
 import { ImageUploadService } from '../../utils/image-upload.service';
+import { AuthService } from '../../core/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -40,7 +41,7 @@ export class LoginComponent {
   avatarPreview: string | null = null;
   isUploading = false;
 
-  constructor(private fb: FormBuilder ,  private imageUploadService: ImageUploadService, private snackBar: MatSnackBar) {
+  constructor(private fb: FormBuilder ,  private imageUploadService: ImageUploadService, private snackBar: MatSnackBar, private authService: AuthService) {
     this.loginForm = this.fb.group({
       emailOrUsername: ['', [Validators.required]],
       password: ['', [Validators.required, Validators.minLength(6)]]
@@ -52,7 +53,7 @@ export class LoginComponent {
       email: ['', [Validators.required, Validators.email]],
       bio: [''],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      avatarUrl: ['']
+      profilePic: ['']
     });
   }
 
@@ -67,50 +68,39 @@ export class LoginComponent {
 
 async onRegister() {
   if (this.registerForm.valid) {
+    // handle avatar upload (already done in your code)
     if (this.selectedFile) {
+      //console.log("selectedFile:", this.selectedFile);
+      
       try {
         this.isUploading = true;
         const url = await this.imageUploadService.uploadImage(this.selectedFile);
-        this.registerForm.patchValue({ avatarUrl: url });
-
-        // Success snackbar for avatar upload
-        this.snackBar.open('Avatar uploaded successfully!', 'Close', {
-          duration: 3000,
-          panelClass: ['snackbar-success']
-        });
-
+        console.log("Image uploaded:", url);
+        
+        this.registerForm.patchValue({ profilePic: url });
       } catch (err: any) {
-        //  Error snackbar
-        this.snackBar.open(err.message || 'Image upload failed', 'Close', {
-          duration: 4000,
-          panelClass: ['snackbar-error']
-        });
-        return; // stop the registration if upload failed
+        this.snackBar.open(err.message || 'Image upload failed', 'Close', { duration: 4000 });
+        return;
       } finally {
         this.isUploading = false;
       }
     }
 
-    // Success snackbar for registration submission
-    this.snackBar.open('Registration form submitted successfully!', 'Close', {
-      duration: 3000,
-      panelClass: ['snackbar-success']
+    console.log("---------------> ",this.registerForm.value);
+    
+
+    // 🚀 Send to backend
+    this.authService.register(this.registerForm.value).subscribe({
+      next: (res) => {
+        this.snackBar.open('User registered successfully!', 'Close', { duration: 3000 });
+        console.log('Registered user:', res);
+      },
+      error: (err) => {
+        this.snackBar.open(err.error?.message || 'Registration failed', 'Close', { duration: 4000 });
+      }
     });
-
-    console.log('Register form submitted:', this.registerForm.value);
-    // 🚀 send this.registerForm.value to your backend
-
-  } else {
-    // Snackbar for invalid form
-    this.snackBar.open('Please fill out all required fields correctly.', 'Close', {
-      duration: 4000,
-      panelClass: ['snackbar-error']
-    });
-
-    console.log('Register form is invalid');
   }
 }
-
 
   onFileSelected(event: any) {
     const file = event.target.files[0];
