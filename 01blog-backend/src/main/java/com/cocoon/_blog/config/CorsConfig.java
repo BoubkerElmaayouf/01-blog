@@ -1,4 +1,4 @@
-package com.example._blog.config;
+package com.cocoon._blog.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

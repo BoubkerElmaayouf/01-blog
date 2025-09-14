@@ -1,4 +1,4 @@
-package com.example._blog.config;
+package com.cocoon._blog.config;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
