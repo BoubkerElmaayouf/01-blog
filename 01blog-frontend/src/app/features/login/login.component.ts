@@ -59,48 +59,61 @@ export class LoginComponent {
 
   onLogin() {
     if (this.loginForm.valid) {
-      console.log('Login form submitted:', this.loginForm.value);
-      // Handle login logic here
+      this.authService.login(this.loginForm.value).subscribe({
+        next: (res) => {
+          this.snackBar.open('Login successful!', 'Close', { duration: 3000 });
+
+          // ✅ Save JWT in localStorage
+          localStorage.setItem('token', res.token);
+          window.location.href = '/explore';
+          console.log('JWT Token:', res.token);
+        },
+        error: (err) => {
+          this.snackBar.open(err.error || 'Invalid credentials', 'Close', { duration: 4000 });
+        }
+      });
     } else {
       console.log('Login form is invalid');
     }
   }
 
-async onRegister() {
-  if (this.registerForm.valid) {
-    // handle avatar upload (already done in your code)
-    if (this.selectedFile) {
-      //console.log("selectedFile:", this.selectedFile);
-      
-      try {
-        this.isUploading = true;
-        const url = await this.imageUploadService.uploadImage(this.selectedFile);
-        console.log("Image uploaded:", url);
+
+
+  async onRegister() {
+    if (this.registerForm.valid) {
+      // handle avatar upload (already done in your code)
+      if (this.selectedFile) {
+        //console.log("selectedFile:", this.selectedFile);
         
-        this.registerForm.patchValue({ profilePic: url });
-      } catch (err: any) {
-        this.snackBar.open(err.message || 'Image upload failed', 'Close', { duration: 4000 });
-        return;
-      } finally {
-        this.isUploading = false;
+        try {
+          this.isUploading = true;
+          const url = await this.imageUploadService.uploadImage(this.selectedFile);
+          console.log("Image uploaded:", url);
+          
+          this.registerForm.patchValue({ profilePic: url });
+        } catch (err: any) {
+          this.snackBar.open(err.message || 'Image upload failed', 'Close', { duration: 4000 });
+          return;
+        } finally {
+          this.isUploading = false;
+        }
       }
+
+      console.log("---------------> ",this.registerForm.value);
+      
+
+      // 🚀 Send to backend
+      this.authService.register(this.registerForm.value).subscribe({
+        next: (res) => {
+          this.snackBar.open('User registered successfully!', 'Close', { duration: 3000 });
+          console.log('Registered user:', res);
+        },
+        error: (err) => {
+          this.snackBar.open(err.error?.message || 'Registration failed', 'Close', { duration: 4000 });
+        }
+      });
     }
-
-    console.log("---------------> ",this.registerForm.value);
-    
-
-    // 🚀 Send to backend
-    this.authService.register(this.registerForm.value).subscribe({
-      next: (res) => {
-        this.snackBar.open('User registered successfully!', 'Close', { duration: 3000 });
-        console.log('Registered user:', res);
-      },
-      error: (err) => {
-        this.snackBar.open(err.error?.message || 'Registration failed', 'Close', { duration: 4000 });
-      }
-    });
   }
-}
 
   onFileSelected(event: any) {
     const file = event.target.files[0];
