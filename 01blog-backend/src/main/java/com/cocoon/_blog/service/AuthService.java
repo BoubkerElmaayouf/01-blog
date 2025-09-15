@@ -39,6 +39,6 @@ public class AuthService {
         }
 
         // ✅ Return JWT token
-        return jwtService.generateToken(user.getEmail());
+        return jwtService.generateToken(user.getEmail(), user.getId(), user.getRole());
     }
 }

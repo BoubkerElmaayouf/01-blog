@@ -43,15 +43,15 @@ export class AuthService {
     return !!localStorage.getItem('token');
   }
 
-  // Fetch current user from backend (with JWT attached)
-  getCurrentUser(): Observable<User | null> {
-    if (this.currentUser) {
-      return of(this.currentUser); // return cached user
-    }
+  // // Fetch current user from backend (with JWT attached)
+  // getCurrentUser(): Observable<User | null> {
+  //   if (this.currentUser) {
+  //     return of(this.currentUser); // return cached user
+  //   }
 
-    return this.http.get<User>(`${this.baseUrl}/me`).pipe(
-      tap(user => this.currentUser = user),
-      catchError(() => of(null)) // return null if error (unauthenticated)
-    );
-  }
+  //   return this.http.get<User>(`${this.baseUrl}/me`).pipe(
+  //     tap(user => this.currentUser = user),
+  //     catchError(() => of(null)) // return null if error (unauthenticated)
+  //   );
+  // }
 }

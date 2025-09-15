@@ -12,6 +12,7 @@ import { LandBarComponent } from '../../shared/components/landNavbar/landBar.com
 import {RouterModule } from '@angular/router';
 import { ImageUploadService } from '../../utils/image-upload.service';
 import { AuthService } from '../../core/auth.service';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -41,7 +42,7 @@ export class LoginComponent {
   avatarPreview: string | null = null;
   isUploading = false;
 
-  constructor(private fb: FormBuilder ,  private imageUploadService: ImageUploadService, private snackBar: MatSnackBar, private authService: AuthService) {
+  constructor(private fb: FormBuilder ,  private imageUploadService: ImageUploadService, private snackBar: MatSnackBar, private authService: AuthService, private router: Router) {
     this.loginForm = this.fb.group({
       emailOrUsername: ['', [Validators.required]],
       password: ['', [Validators.required, Validators.minLength(6)]]
@@ -65,7 +66,8 @@ export class LoginComponent {
 
           // ✅ Save JWT in localStorage
           localStorage.setItem('token', res.token);
-          window.location.href = '/explore';
+          // Router.navigate(['']);
+          this.router.navigate(['/explore']);
           console.log('JWT Token:', res.token);
         },
         error: (err) => {
