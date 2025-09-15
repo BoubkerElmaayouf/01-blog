@@ -1,6 +1,5 @@
 package com.cocoon._blog.service;
 
-import com.cocoon._blog.config.JwtService;
 import com.cocoon._blog.dto.LoginRequest;
 import com.cocoon._blog.dto.RegisterRequest;
 import com.cocoon._blog.entity.User;

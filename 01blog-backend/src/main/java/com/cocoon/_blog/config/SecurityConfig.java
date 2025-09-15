@@ -17,10 +17,12 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable()) // disable CSRF for APIs
             .cors(cors -> {}) // enable global CORS (from CorsConfig)
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll() // allow register/login without auth
-                .anyRequest().authenticated() // everything else needs authentication
+           .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/**").permitAll() // login/register open
+// need valid JWT
+                .anyRequest().authenticated()
             );
+
 
         return http.build();
     }

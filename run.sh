@@ -10,7 +10,7 @@ echo "🚀 Starting 01Blog Project..."
 
 # Open backend in new terminal
 echo "➡️ Opening backend (Spring Boot) in new terminal..."
-gnome-terminal -- bash -c "cd $BACKEND_DIR && ./mvnw spring-boot:run; exec bash"
+gnome-terminal -- bash -c "cd $BACKEND_DIR && ./mvnw clean compile  &&  ./mvnw spring-boot:run; exec bash"
 
 # Open frontend in new terminal
 echo "➡️ Opening frontend (Angular) in new terminal..."
