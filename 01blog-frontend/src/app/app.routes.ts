@@ -9,26 +9,26 @@ import {ContactComponent} from './features/contact/contact.component'
 import {ReportComponent} from './features/report/report.component'
 import { AboutComponent } from './features/about/about.component';
 import {AdminComponent} from './features/admin/admin.component'
+// import { AuthGuard } from './core/auth-guard';
+
 export const routes: Routes = [
   { path: '', component: LandingComponent },
   {path: 'login', component: LoginComponent},
+  
+  // Protected routes
+  // {path: 'explore', component: ExploreComponent, canActivate: [AuthGuard]},
+  // { path: 'write', component: WriteComponent, canActivate: [AuthGuard] },
+  // { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
+  // { path: 'admin', component: AdminComponent, canActivate: [AuthGuard] },
+  
   {path: 'explore', component: ExploreComponent},
-  {path: 'write', component: WriteComponent},
-  {path:'profile', component:ProfileComponent},
+  { path: 'write', component: WriteComponent },
+  { path: 'profile', component: ProfileComponent },
+  { path: 'admin', component: AdminComponent },
+
+
   {path: 'privacy-policy', component: PolicyPrivacyComponent},
   {path: 'contact', component: ContactComponent},
   {path: 'report', component: ReportComponent},
   {path: 'about', component: AboutComponent},
-  {path: 'admin', component: AdminComponent}
-//   {
-//     path: 'auth',
-//     loadChildren: () =>
-//       import('./features/auth/auth.routes').then((m) => m.AUTH_ROUTES),
-//   },
-//   {
-//     path: 'posts',
-//     loadChildren: () =>
-//       import('./features/posts/posts.routes').then((m) => m.POSTS_ROUTES),
-//   },
-  // add more lazy routes (admin, users, notifications) here
 ];
