@@ -47,21 +47,25 @@
     <!-- Article Footer -->
     <footer class="article-footer">
       <div class="engagement-section">
-        <button class="engagement-btn" type="button">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <button 
+          class="engagement-btn like-btn" 
+          [class.liked]="isLiked"
+          (click)="onLikeArticle()" 
+          type="button">
+          <svg width="20" height="20" viewBox="0 0 24 24" [attr.fill]="isLiked ? '#ef4444' : 'none'" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
           </svg>
-          Like
+          <span>{{ likesCount }}</span>
         </button>
         
-        <button class="engagement-btn" type="button">
+        <button class="engagement-btn" (click)="onToggleComments()" type="button">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
           </svg>
-          Comment
+          <span>{{ comments.length }}</span>
         </button>
         
-        <button class="engagement-btn" type="button">
+        <button class="engagement-btn" (click)="onShareArticle()" type="button">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="18" cy="5" r="3"></circle>
             <circle cx="6" cy="12" r="3"></circle>
@@ -73,5 +77,66 @@
         </button>
       </div>
     </footer>
+
+    <!-- Comments Section -->
+    <section class="comments-section" [class.show]="showComments">
+      <div class="comments-header">
+        <h3>Comments ({{ comments.length }})</h3>
+      </div>
+
+      <!-- Add Comment Form -->
+      <div class="add-comment-form">
+        <div class="comment-input-container">
+          <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=50&h=50&fit=crop&crop=face" alt="Your avatar" class="comment-avatar">
+          <div class="comment-input-wrapper">
+            <textarea 
+              [(ngModel)]="newComment" 
+              placeholder="What are your thoughts?"
+              class="comment-input"
+              rows="3"
+              maxlength="500"></textarea>
+            <div class="comment-actions">
+              <span class="char-count">{{ newComment.length }}/500</span>
+              <button 
+                class="comment-submit-btn" 
+                (click)="onAddComment()" 
+                [disabled]="!newComment.trim()"
+                type="button">
+                Post Comment
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comments List -->
+      <div class="comments-list">
+        <div class="comment" *ngFor="let comment of comments">
+          <div class="comment-header">
+            <img [src]="comment.avatar" [alt]="comment.author" class="comment-avatar">
+            <div class="comment-info">
+              <span class="comment-author">{{ comment.author }}</span>
+              <span class="comment-time">{{ getTimeAgo(comment.createdAt) }}</span>
+            </div>
+          </div>
+          <div class="comment-content">
+            <p>{{ comment.content }}</p>
+          </div>
+          <div class="comment-actions-row">
+            <button 
+              class="comment-like-btn" 
+              [class.liked]="comment.isLiked"
+              (click)="onLikeComment(comment)"
+              type="button">
+              <svg width="16" height="16" viewBox="0 0 24 24" [attr.fill]="comment.isLiked ? '#ef4444' : 'none'" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+              </svg>
+              <span>{{ comment.likes }}</span>
+            </button>
+            <button class="comment-reply-btn" type="button">Reply</button>
+          </div>
+        </div>
+      </div>
+    </section>
   </article>
 </main>
