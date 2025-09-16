@@ -8,7 +8,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { CommonModule } from '@angular/common';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
 import { NavbarComponent } from "../../shared/components/navbar/navbar.component";
+import { ImageUploadService } from "../../utils/image-upload.service";
 
 // Quill imports
 declare var Quill: any;
@@ -26,7 +30,8 @@ declare var Quill: any;
         MatSelectModule,
         MatButtonModule,
         MatIconModule,
-        MatToolbarModule
+        MatToolbarModule,
+        MatSnackBarModule
     ],
     templateUrl: "./write.component.html",
     styleUrls: ['./write.component.css'], 
@@ -38,6 +43,7 @@ export class WriteComponent implements OnInit, AfterViewInit {
     quillEditor: any;
     selectedFile: File | null = null;
     imagePreview: string | null = null;
+    isPublishing: boolean = false;
     
     categories = [
         { value: 'technology', label: 'Technology' },
@@ -50,7 +56,13 @@ export class WriteComponent implements OnInit, AfterViewInit {
         { value: 'entertainment', label: 'Entertainment' }
     ];
 
-    constructor(private fb: FormBuilder) {
+    constructor(
+        private fb: FormBuilder,
+        private http: HttpClient,
+        private snackBar: MatSnackBar,
+        private router: Router,
+        private imageUploadService: ImageUploadService
+    ) {
         this.postForm = this.fb.group({
             title: ['', [Validators.required, Validators.minLength(3)]],
             banner: [''],
@@ -103,7 +115,8 @@ export class WriteComponent implements OnInit, AfterViewInit {
                             [{ 'font': [] }],
                             [{ 'align': [] }],
                             ['clean'],
-                            ['link', 'image']
+                            ['link', 'image'],
+                            ['video'],
                         ]
                     }
                 });
@@ -143,31 +156,122 @@ export class WriteComponent implements OnInit, AfterViewInit {
         fileInput.click();
     }
 
-    onSaveDraft(): void {
-        if (this.postForm.valid) {
-            const formData = {
-                ...this.postForm.value,
-                content: this.quillEditor?.root.innerHTML || '',
-                status: 'draft'
-            };
+    private async extractAndUploadImagesFromContent(content: string): Promise<string> {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(content, 'text/html');
+        const images = doc.querySelectorAll('img');
+        
+        for (const img of Array.from(images)) {
+            const src = img.getAttribute('src');
             
-            console.log('Saving draft:', formData);
-            // Implement your draft saving logic here
+            // Skip if it's already a Cloudinary URL or external URL
+            if (!src || src.startsWith('http') || src.startsWith('https://res.cloudinary.com')) {
+                continue;
+            }
+            
+            // Handle base64 images
+            if (src.startsWith('data:image')) {
+                try {
+                    // Convert base64 to File
+                    const response = await fetch(src);
+                    const blob = await response.blob();
+                    const file = new File([blob], 'content-image.png', { type: blob.type });
+                    
+                    // Upload to Cloudinary
+                    const cloudinaryUrl = await this.imageUploadService.uploadImage(file);
+                    img.setAttribute('src', cloudinaryUrl);
+                } catch (error) {
+                    console.error('Error uploading content image:', error);
+                }
+            }
         }
+        
+        return doc.body.innerHTML;
     }
 
-    onPublish(): void {
-        if (this.postForm.valid) {
-            const formData = {
-                ...this.postForm.value,
-                content: this.quillEditor?.root.innerHTML || '',
-                status: 'published'
-            };
-            
-            console.log('Publishing post:', formData);
-            // Implement your publish logic here
-        } else {
+    async onPublish(): Promise<void> {
+        if (!this.postForm.valid) {
             this.markFormGroupTouched();
+            this.snackBar.open('Please fill in all required fields', 'Close', {
+                duration: 3000,
+                panelClass: ['error-snackbar']
+            });
+            return;
+        }
+
+        this.isPublishing = true;
+
+        try {
+            let bannerUrl = '';
+            let processedContent = this.quillEditor?.root.innerHTML || '';
+
+            // Upload banner image if exists
+            if (this.selectedFile) {
+                this.snackBar.open('Uploading banner image...', '', { duration: 2000 });
+                bannerUrl = await this.imageUploadService.uploadImage(this.selectedFile);
+            }
+
+            // Process and upload images in content
+            this.snackBar.open('Processing content images...', '', { duration: 2000 });
+            processedContent = await this.extractAndUploadImagesFromContent(processedContent);
+
+            // Get JWT token from localStorage or wherever you store it
+            const token = localStorage.getItem('token'); // Adjust this based on where you store your token
+            
+            if (!token) {
+                throw new Error('Authentication token not found. Please log in again.');
+            }
+
+            // Prepare post data
+            const postData = {
+                title: this.postForm.get('title')?.value,
+                topic: this.postForm.get('category')?.value,
+                banner: bannerUrl,
+                description: processedContent,
+                videos: [] // empty array instead of string
+            };
+
+
+            // Create headers
+            const headers = new HttpHeaders({
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            });
+
+            this.snackBar.open('Publishing post...', '', { duration: 2000 });
+
+            // Make API call
+            const response = await this.http.post('http://localhost:8080/api/post/create', postData, { headers }).toPromise();
+
+            this.snackBar.open('Post published successfully!', 'Close', {
+                duration: 3000,
+                panelClass: ['success-snackbar']
+            });
+
+            // Reset form
+            this.postForm.reset();
+            this.selectedFile = null;
+            this.imagePreview = null;
+            if (this.quillEditor) {
+                this.quillEditor.setContents([]);
+            }
+            console.log('contnet after reset', this.quillEditor?.root.innerHTML);
+            
+            // Navigate to posts list or home page
+            // this.router.navigate(['/posts']); // Uncomment and adjust route as needed
+
+        } catch (error: any) {
+            console.error('Error publishing post:', error);
+            this.snackBar.open(
+                error.message || 'Failed to publish post. Please try again.',
+                'Close',
+                {
+                    duration: 5000,
+                    panelClass: ['error-snackbar']
+                }
+            );
+        } finally {
+            this.isPublishing = false;
         }
     }
 
@@ -188,3 +292,4 @@ export class WriteComponent implements OnInit, AfterViewInit {
         return '';
     }
 }
+

@@ -12,7 +12,21 @@ export class ImageUploadService {
 
     async uploadImage(file: File): Promise<string> {
 
-    // const isImage = file.type.startsWith('image/');
+       const url = `https://api.cloudinary.com/v1_1/${this.cloudName}/image/upload`
+
+       const fromData = new FormData();
+        fromData.append('file', file)
+        fromData.append('upload_preset', this.uploadPreset)
+
+        const res = await lastValueFrom(this.http.post<any>(url, fromData))
+
+        return res.secure_url
+    }
+}
+
+
+
+  // const isImage = file.type.startsWith('image/');
     // const fileSizeBytes = file.size; // in bytes
     // const fileSizeMB = fileSizeBytes / (1024 * 1024); // convert to MB
 
@@ -26,17 +40,3 @@ export class ImageUploadService {
     // if (fileSizeMB > 5) {
     // throw new Error('File size must not exceed 5 MB.');
     // }
-
-
-
-       const url = `https://api.cloudinary.com/v1_1/${this.cloudName}/image/upload`
-
-       const fromData = new FormData();
-        fromData.append('file', file)
-        fromData.append('upload_preset', this.uploadPreset)
-
-        const res = await lastValueFrom(this.http.post<any>(url, fromData))
-
-        return res.secure_url
-    }
-}

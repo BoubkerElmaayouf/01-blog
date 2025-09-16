@@ -6,13 +6,13 @@
     <div class="header-content">
       <h1>Create New Post</h1>
       <div class="header-actions">
-        <button  class="action-btn draft-btn" (click)="onSaveDraft()">
-          <mat-icon>save</mat-icon>
-          Save Draft
-        </button>
-        <button  class="action-btn publish-btn" (click)="onPublish()">
-          <mat-icon>publish</mat-icon>
-          Publish
+        <button 
+          mat-flat-button
+          class="action-btn publish-btn" 
+          (click)="onPublish()"
+          [disabled]="isPublishing">
+          <mat-icon>{{ isPublishing ? 'hourglass_empty' : 'publish' }}</mat-icon>
+          {{ isPublishing ? 'Publishing...' : 'Publish' }}
         </button>
       </div>
     </div>
@@ -30,7 +30,8 @@
             matInput 
             formControlName="title" 
             placeholder="Enter an engaging title for your post"
-            maxlength="100">
+            maxlength="100"
+            [disabled]="isPublishing">
           <mat-hint align="end">{{ postForm.get('title')?.value?.length || 0 }}/100</mat-hint>
           <mat-error *ngIf="postForm.get('title')?.invalid && postForm.get('title')?.touched">
             {{ getErrorMessage('title') }}
@@ -39,7 +40,7 @@
 
         <mat-form-field class="category-field">
           <mat-label>Category</mat-label>
-          <mat-select formControlName="category" placeholder="Select a category">
+          <mat-select formControlName="category" placeholder="Select a category" [disabled]="isPublishing">
             <mat-option *ngFor="let category of categories" [value]="category.value">
               {{ category.label }}
             </mat-option>
@@ -60,7 +61,8 @@
           #bannerFileInput
           accept="image/*" 
           (change)="onFileSelected($event, bannerFileInput)" 
-          style="display: none">
+          style="display: none"
+          [disabled]="isPublishing">
 
         <!-- Image Preview -->
         <div class="image-preview-container" *ngIf="imagePreview">
@@ -70,7 +72,8 @@
             mat-mini-fab 
             class="remove-image-btn" 
             (click)="removeImage(bannerFileInput)"
-            color="warn">
+            color="warn"
+            [disabled]="isPublishing">
             <mat-icon>close</mat-icon>
           </button>
         </div>
@@ -81,7 +84,8 @@
             type="button" 
             mat-stroked-button 
             class="upload-btn" 
-            (click)="triggerFileInput(bannerFileInput)">
+            (click)="triggerFileInput(bannerFileInput)"
+            [disabled]="isPublishing">
             <mat-icon>cloud_upload</mat-icon>
             {{ imagePreview ? 'Change Banner' : 'Upload Banner' }}
           </button>
@@ -95,7 +99,7 @@
       <!-- Rich Text Editor -->
       <div class="editor-section">
         <label class="section-label">Content</label>
-        <div class="editor-container">
+        <div class="editor-container" [class.disabled]="isPublishing">
           <div #editor class="quill-editor"></div>
         </div>
         <mat-error 
@@ -111,19 +115,12 @@
     <div class="mobile-actions">
       <button 
         type="button" 
-        mat-stroked-button 
-        class="mobile-action-btn draft-btn" 
-        (click)="onSaveDraft()">
-        <mat-icon>save</mat-icon>
-        Save Draft
-      </button>
-      <button 
-        type="button" 
         mat-flat-button 
         class="mobile-action-btn publish-btn" 
-        (click)="onPublish()">
-        <mat-icon>publish</mat-icon>
-        Publish
+        (click)="onPublish()"
+        [disabled]="isPublishing">
+        <mat-icon>{{ isPublishing ? 'hourglass_empty' : 'publish' }}</mat-icon>
+        {{ isPublishing ? 'Publishing...' : 'Publish' }}
       </button>
     </div>
   </div>
