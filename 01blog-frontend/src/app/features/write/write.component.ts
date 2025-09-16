@@ -36,6 +36,8 @@ declare var Quill: any;
     templateUrl: "./write.component.html",
     styleUrls: ['./write.component.css'], 
 })
+
+
 export class WriteComponent implements OnInit, AfterViewInit {
     @ViewChild('editor', { static: false }) editorElement!: ElementRef;
     

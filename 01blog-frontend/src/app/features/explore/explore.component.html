@@ -1,7 +1,6 @@
 <app-navbar></app-navbar>
 
 <div class="explore-container">
-  <!-- Header Section -->
   <div class="explore-header">
     <h1>Explore</h1>
   </div>
@@ -19,62 +18,104 @@
     </div>
   </div>
 
-  <!-- Articles Grid -->
+  <!-- Posts Grid -->
   <div class="articles-container">
     <article 
-      *ngFor="let article of filteredArticles"
+      *ngFor="let post of filteredPosts"
       class="article-card"
-      (click)="onArticleClick(article)">
+      (click)="onPostClick(post)">
       
-      <!-- Article Content -->
+      <!-- Post Content -->
       <div class="article-content">
-        <!-- Publication Info -->
-        <div class="publication-info" *ngIf="article.publication">
+        <div class="publication-info">
           <div class="publication-badge">
-            <span class="publication-icon">📝</span>
-            <span class="publication-text">in {{ article.publication }}</span>
-            <span class="author-text">by {{ article.author }}</span>
+            <img class="author-avatar" [src]="post.profilePic" [alt]="post.firstName + ' ' + post.lastName">
+            <span class="author-text">{{ post.firstName }} {{ post.lastName }}</span>
+            <span class="publication-dot">·</span>
+            <span class="publish-date">{{ post.createdAt | date:'MMM d yyyy' }}</span>
           </div>
         </div>
         
-        <!-- Article Title -->
-        <h2 class="article-title">{{ article.title }}</h2>
+        <h2 class="article-title">{{ post.title }}</h2>
         
-        <!-- Article Subtitle -->
-        <p class="article-subtitle">{{ article.subtitle }}</p>
-        
-        <!-- Article Meta -->
         <div class="article-meta">
-          <div class="meta-left">
-            <span class="publish-date">{{ article.publishDate }}</span>
-            <span class="read-stats">{{ article.readTime }}</span>
-            <span class="claps">{{ article.claps }}</span>
+          <div class="interaction-stats">
+            <!-- Like Button -->
+            <button 
+              mat-button 
+              class="interaction-btn like-btn"
+              [class.active]="post.isLiked"
+              (click)="onLike(post, $event)"
+              aria-label="Like post">
+              <mat-icon [class.liked]="post.isLiked">
+                {{ post.isLiked ? 'favorite' : 'favorite_border' }}
+              </mat-icon>
+              <span>{{ formatCount(post.likes) }}</span>
+            </button>
+
+            <!-- Comment Button -->
+            <button 
+              mat-button 
+              class="interaction-btn comment-btn"
+              (click)="onComment(post, $event)"
+              aria-label="View comments">
+              <mat-icon>chat_bubble_outline</mat-icon>
+              <span>{{ formatCount(post.comments) }}</span>
+            </button>
+
+            <!-- Save Button -->
+            <button 
+              mat-button 
+              class="interaction-btn save-btn"
+              [class.active]="post.isSaved"
+              (click)="onSave(post, $event)"
+              aria-label="Save post">
+              <mat-icon [class.saved]="post.isSaved">
+                {{ post.isSaved ? 'bookmark' : 'bookmark_border' }}
+              </mat-icon>
+              <span>{{ formatCount(post.saves) }}</span>
+            </button>
           </div>
           
           <div class="meta-right">
-            <button 
-              mat-icon-button 
-              class="action-btn bookmark-btn"
-              (click)="onBookmark(article, $event)"
-              aria-label="Bookmark article">
-              <mat-icon>bookmark_border</mat-icon>
-            </button>
-            
+            <!-- More Options Menu -->
             <button 
               mat-icon-button 
               class="action-btn more-btn"
-              (click)="onMore(article, $event)"
+              [matMenuTriggerFor]="moreMenu"
+              (click)="$event.stopPropagation()"
               aria-label="More options">
               <mat-icon>more_horiz</mat-icon>
             </button>
+            
+            <mat-menu #moreMenu="matMenu" class="more-menu">
+              <button mat-menu-item (click)="onReport(post)">
+                <mat-icon>flag</mat-icon>
+                <span>Report</span>
+              </button>
+              <button mat-menu-item (click)="onUpdate(post)">
+                <mat-icon>edit</mat-icon>
+                <span>Update</span>
+              </button>
+              <button mat-menu-item (click)="onDelete(post)" class="delete-item">
+                <mat-icon>delete</mat-icon>
+                <span>Delete</span>
+              </button>
+            </mat-menu>
           </div>
         </div>
       </div>
       
-      <!-- Article Image -->
       <div class="article-image">
-        <img [src]="article.imageUrl" [alt]="article.title" loading="lazy">
+        <img [src]="post.banner" [alt]="post.title" loading="lazy">
       </div>
     </article>
+
+    <!-- Empty state -->
+    <div *ngIf="filteredPosts.length === 0" class="empty-state">
+      <mat-icon class="empty-icon">article</mat-icon>
+      <h3>No posts found</h3>
+      <p>Try selecting a different category to discover more content.</p>
+    </div>
   </div>
 </div>

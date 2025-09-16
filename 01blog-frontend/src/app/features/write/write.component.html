@@ -102,7 +102,7 @@
         <div class="editor-container" [class.disabled]="isPublishing">
           <div #editor class="quill-editor"></div>
         </div>
-        <mat-error 
+        <mat-error
           *ngIf="postForm.get('content')?.invalid && postForm.get('content')?.touched"
           class="content-error">
           Content is required

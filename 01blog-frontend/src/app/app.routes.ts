@@ -11,6 +11,7 @@ import { AboutComponent } from './features/about/about.component';
 import {AdminComponent} from './features/admin/admin.component'
 import { authGuard } from './core/auth-guard';
 import { noAuthGuard } from './core/noAuthGuard';
+import { ArticleComponent } from './features/article/article.component';
 
 export const routes: Routes = [
   { path: '', component: LandingComponent, canActivate: [noAuthGuard] },
@@ -18,6 +19,7 @@ export const routes: Routes = [
   
   // Protected routes
   {path: 'explore', component: ExploreComponent, canActivate: [authGuard]},
+  {path: 'explore/:id', component: ArticleComponent, canActivate: [authGuard]},
   { path: 'write', component: WriteComponent, canActivate: [authGuard] },
   { path: 'profile', component: ProfileComponent, canActivate: [authGuard] },
   { path: 'admin', component: AdminComponent, canActivate: [authGuard] },

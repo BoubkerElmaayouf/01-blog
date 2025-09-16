@@ -103,7 +103,7 @@ public class PostService {
         return ResponseEntity.ok(posts);
     }
 
-    // Optional: Get posts of current logged-in user (using userId from JWT)
+    // Get posts of current logged-in user (using userId from JWT)
     public ResponseEntity<?> getMyPosts(Long userId) {
         return getPostByUserId(userId); // reuse the same logic
     }

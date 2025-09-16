@@ -57,4 +57,10 @@ public class PostController {
     public ResponseEntity<?> getPostByUserId(@PathVariable Long userId) {
         return postService.getPostByUserId(userId);
     }
+
+    @GetMapping("/mine")
+    public ResponseEntity<?> getMyPosts(Long id) {
+        return postService.getMyPosts(id);
+    }
+
 }
