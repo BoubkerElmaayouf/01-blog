@@ -42,4 +42,19 @@ public class PostController {
             return ResponseEntity.badRequest().body("Invalid token or request: " + e.getMessage());
         }
     }
+
+    @GetMapping("/all")
+    public ResponseEntity<?> getAllPosts() {
+        return postService.getAllPosts();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getPostById(@PathVariable Long id) {
+        return postService.getPostsById(id);
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<?> getPostByUserId(@PathVariable Long userId) {
+        return postService.getPostByUserId(userId);
+    }
 }
