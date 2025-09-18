@@ -2,19 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
-
-interface Article {
-  id: number;
-  title: string;
-  topic: string;
-  banner: string;
-  description: string;
-  videos: any[];
-  createdAt: string;
-  firstName: string;
-  lastName: string;
-  profilePic: string;
-}
+import { ArticleService, Article } from '../../services/article.service';
+import { ActivatedRoute } from '@angular/router';
 
 interface Comment {
   id: number;
@@ -32,23 +21,14 @@ interface Comment {
   templateUrl: './article.component.html',
   styleUrls: ['./article.component.css']
 })
+
+
 export class ArticleComponent implements OnInit {
-  article: Article = {
-    id: 1,
-    title: "this is my first post",
-    topic: "technology",
-    banner: "https://res.cloudinary.com/dsv24pun2/image/upload/v1758050040/rjiott3w7fflfwgr4gjw.jpg",
-    description: "<h1>heeader </h1><p><br></p><p class=\"ql-align-center\"><img src=\"https://res.cloudinary.com/dsv24pun2/image/upload/v1758050040/gbb1ed8u7trpdqcec5wn.jpg\"></p><p class=\"ql-align-center\"><br></p><p class=\"ql-align-center\"><strong>this is what this is </strong></p>",
-    videos: [],
-    createdAt: "2025-09-16T20:14:01.312701",
-    firstName: "d",
-    lastName: "d",
-    profilePic: "https://res.cloudinary.com/dsv24pun2/image/upload/v1758049984/ic4lp85bbjom7fhqhdsy.jpg"
-  };
+  article!: Article;
 
   // Interactive states
   isLiked: boolean = false;
-  likesCount: number = 42;
+  likesCount: number = 0;
   showComments: boolean = false;
   newComment: string = '';
   comments: Comment[] = [
@@ -81,9 +61,22 @@ export class ArticleComponent implements OnInit {
     }
   ];
 
+  constructor(
+    private articleService: ArticleService,
+    private route: ActivatedRoute
+  ) {}
+
   ngOnInit(): void {
-    // In a real app, you would fetch the article data from a service here
-    // this.articleService.getArticle(id).subscribe(article => this.article = article);
+    const id = Number(this.route.snapshot.paramMap.get('id')) || 1;
+    this.articleService.getArticleById(id).subscribe({
+      next: (data) => {
+        this.article = data;
+        this.likesCount = 42; // set initial likes (or fetch from API if available)
+      },
+      error: (err) => {
+        console.error('❌ Error fetching article:', err);
+      }
+    });
   }
 
   getFormattedDate(dateString: string): string {
@@ -97,15 +90,13 @@ export class ArticleComponent implements OnInit {
   }
 
   getReadingTime(description: string): number {
-    // Remove HTML tags and calculate reading time (average 200 words per minute)
     const text = description.replace(/<[^>]*>/g, '');
-    const wordCount = text.split(' ').length;
+    const wordCount = text.split(' ').filter(Boolean).length;
     return Math.ceil(wordCount / 200);
   }
 
   onReportArticle(): void {
     console.log('Article reported:', this.article.id);
-    // In a real app, you might show a snackbar or modal here
     alert('Article has been reported. Thank you for your feedback.');
   }
 
@@ -117,7 +108,6 @@ export class ArticleComponent implements OnInit {
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
 
-  // Interactive methods
   onLikeArticle(): void {
     this.isLiked = !this.isLiked;
     this.likesCount += this.isLiked ? 1 : -1;
@@ -149,7 +139,6 @@ export class ArticleComponent implements OnInit {
   }
 
   onShareArticle(): void {
-    // Check if Web Share API is available and supported
     if (navigator.share && this.canUseWebShare()) {
       navigator.share({
         title: this.article.title,
@@ -165,25 +154,21 @@ export class ArticleComponent implements OnInit {
   }
 
   private canUseWebShare(): boolean {
-    // Web Share API requires HTTPS or localhost
     return window.location.protocol === 'https:' || 
            window.location.hostname === 'localhost' ||
            window.location.hostname === '127.0.0.1';
   }
 
   private fallbackShare(): void {
-    // Try clipboard API first
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(window.location.href)
         .then(() => {
-          console.log
-          ('✅ Article link copied to clipboard!');
+          console.log('✅ Article link copied to clipboard!');
         })
         .catch(() => {
           this.showShareModal();
         });
     } else {
-      // If clipboard API not available, show share modal
       this.showShareModal();
     }
   }
@@ -212,16 +197,13 @@ export class ArticleComponent implements OnInit {
       }
     ];
 
-    // Create a simple modal-like experience
     const choice = confirm(
       `Share this article!\n\nClick OK to copy the link to clipboard, or Cancel to see sharing options.`
     );
 
     if (choice) {
-      // Try to copy link manually
       this.copyToClipboardFallback(currentUrl);
     } else {
-      // Show sharing options
       let message = 'Choose how to share:\n\n';
       shareOptions.forEach((option, index) => {
         message += `${index + 1}. ${option.name}\n`;
@@ -237,7 +219,6 @@ export class ArticleComponent implements OnInit {
   }
 
   private copyToClipboardFallback(text: string): void {
-    // Fallback method for copying to clipboard
     const textArea = document.createElement('textarea');
     textArea.value = text;
     textArea.style.position = 'fixed';

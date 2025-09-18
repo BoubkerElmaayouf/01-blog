@@ -10,7 +10,7 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { FormsModule } from '@angular/forms';
 import { MatDividerModule } from '@angular/material/divider';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 export interface Notification {
   id: string;
@@ -110,6 +110,7 @@ export class NavbarComponent implements OnInit {
       read: false
     }
   ];
+
 
   ngOnInit(): void {
     // Initialize component
@@ -256,6 +257,10 @@ export class NavbarComponent implements OnInit {
   }
 
   onLogout(): void {
+    this.isMobileMenuOpen = false;
+    window.location.href = '/login';
+    window.localStorage.removeItem('token');
+    
     console.log('Logout clicked');
     // Handle logout functionality
   }

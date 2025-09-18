@@ -7,6 +7,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
+import { Router } from '@angular/router';
 
 interface Post {
   id: number;
@@ -52,7 +53,8 @@ export class ExploreComponent implements OnInit {
 
   constructor(
     private http: HttpClient,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -146,6 +148,7 @@ export class ExploreComponent implements OnInit {
   }
 
   onPostClick(post: Post) {
+    this.router.navigate(['/explore', post.id]);
     console.log('Navigate to post:', post.id);
     // Navigate to a post detail page if you have routing
   }

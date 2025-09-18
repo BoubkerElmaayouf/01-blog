@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Sort;
 
 import com.cocoon._blog.dto.PostResponse;
 import com.cocoon._blog.entity.Post;
@@ -41,7 +42,7 @@ public class PostService {
     }
 
     public ResponseEntity<?> getAllPosts() {
-        List<PostResponse> posts = postRepository.findAll().stream()
+        List<PostResponse> posts = postRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt")).stream()
             .map(post -> new PostResponse(
                 post.getId(),
                 post.getTitle(),
