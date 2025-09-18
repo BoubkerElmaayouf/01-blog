@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.cocoon._blog.dto.CommentDto;
 import com.cocoon._blog.dto.CommentRequest;
 import com.cocoon._blog.entity.Comment;
 import com.cocoon._blog.entity.Post;
@@ -43,26 +44,29 @@ public class CommentService {
     }
 
     public ResponseEntity<?> getCommentsByPost(Long postId) {
+        // Fetch the post
         Post post = postRepository.findById(postId)
             .orElseThrow(() -> new RuntimeException("Post not found"));
 
+        // Fetch comments for the post, ordered by creation date descending
         List<Comment> comments = commentRepository.findAllByPostOrderByCreatedAtDesc(post);
 
-        List<Map<String, Object>> commentDtos = comments.stream()
-            .map(comment -> Map.of(
-                "id", comment.getId(),
-                "content", comment.getContent(),
-                "createdAt", comment.getCreatedAt(),
-                "user", Map.of(
-                    "id", comment.getUser().getId(),
-                    "firstName", comment.getUser().getFirstName(),
-                    "lastName", comment.getUser().getLastName(),
-                    "profilePic", comment.getUser().getProfilePic()
-                )
-            ))
+        // Map Comment entities to CommentDto
+        List<CommentDto> commentDtos = comments.stream()
+            .map(comment -> {
+                CommentDto dto = new CommentDto();
+                dto.setId(comment.getId());
+                dto.setContent(comment.getContent());
+                dto.setCreatedAt(comment.getCreatedAt());
+                dto.setFirstName(comment.getUser().getFirstName());
+                dto.setLastName(comment.getUser().getLastName());
+                dto.setProfilePic(comment.getUser().getProfilePic());
+                return dto;
+            })
             .toList();
 
         return ResponseEntity.ok(commentDtos);
-}
+    }
+
 
 }

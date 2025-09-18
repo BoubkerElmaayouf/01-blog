@@ -16,6 +16,9 @@ export interface Article {
 }
 
 export interface Comment {
+  profilePic: any;
+  lastName: any;
+  firstName: any;
   id: number;
   author: string;
   avatar: string;
