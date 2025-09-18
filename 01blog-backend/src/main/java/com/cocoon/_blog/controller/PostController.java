@@ -1,14 +1,17 @@
 package com.cocoon._blog.controller;
 
+import java.util.HashSet;
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
-// import org.springframework.security.core.Authentication;
-// import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import com.cocoon._blog.entity.Post;
+import com.cocoon._blog.dto.PostRequest;
 import com.cocoon._blog.service.JwtService;
 import com.cocoon._blog.service.PostService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -21,23 +24,36 @@ public class PostController {
     private final JwtService jwtService;
 
     @PostMapping("/create")
-    public ResponseEntity<?> createPost(@RequestBody Post request, 
+    public ResponseEntity<?> createPost(@Valid @RequestBody PostRequest request,
+                                        BindingResult bindingResult,
                                         @RequestHeader("Authorization") String authHeader) {
         try {
-            // Extract token from header
+            // Handle validation errors
+            if (bindingResult.hasErrors()) {
+                String errors = bindingResult.getAllErrors()
+                    .stream()
+                    .map(err -> err.getDefaultMessage())
+                    .reduce((m1, m2) -> m1 + ", " + m2)
+                    .orElse("Invalid input");
+                return ResponseEntity.badRequest().body(errors);
+            }
+
+            // Extract token
             String token = authHeader.replace("Bearer ", "");
-
-            // Extract userId from JWT
             Long userId = jwtService.extractId(token);
-
-            // Validate token
             String username = jwtService.extractUsername(token);
+
             if (!jwtService.validateToken(token, username)) {
                 return ResponseEntity.badRequest().body("Invalid or expired token");
             }
 
-            // Create post
+           HashSet<String> topics = new HashSet<>(List.of("tech", "gaming", "products", "education", "saas"));
+            if (!topics.contains(request.getTopic().toLowerCase())) {
+                return ResponseEntity.badRequest().body("Invalid topic. Allowed: " + topics);
+            }
+
             return postService.createPost(request, userId);
+
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Invalid token or request: " + e.getMessage());
         }

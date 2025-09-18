@@ -48,14 +48,11 @@ export class WriteComponent implements OnInit, AfterViewInit {
     isPublishing: boolean = false;
     
     categories = [
-        { value: 'technology', label: 'Technology' },
-        { value: 'lifestyle', label: 'Lifestyle' },
-        { value: 'travel', label: 'Travel' },
-        { value: 'food', label: 'Food' },
-        { value: 'business', label: 'Business' },
-        { value: 'health', label: 'Health' },
+        { value: 'tech', label: 'Technology' },
+        { value: 'gaming', label: 'Gaming' },
+        { value: 'products', label: 'Products' },
         { value: 'education', label: 'Education' },
-        { value: 'entertainment', label: 'Entertainment' }
+        { value: 'saas', label: 'SaaS' },
     ];
 
     constructor(
@@ -228,9 +225,11 @@ export class WriteComponent implements OnInit, AfterViewInit {
             const postData = {
                 title: this.postForm.get('title')?.value,
                 topic: this.postForm.get('category')?.value,
-                banner: bannerUrl,
-                description: processedContent,
-                videos: [] // empty array instead of string
+                banner: bannerUrl || "https://res.cloudinary.com/dsv24pun2/image/upload/v1758228067/cmcbxqtbsuyxbzu6ifsp.png",
+                description: processedContent && processedContent.length > 20 
+                            ? processedContent 
+                            : "<p>No description provided</p>",
+                videos: []
             };
 
 
@@ -264,14 +263,11 @@ export class WriteComponent implements OnInit, AfterViewInit {
 
         } catch (error: any) {
             console.error('Error publishing post:', error);
-            this.snackBar.open(
-                error.message || 'Failed to publish post. Please try again.',
-                'Close',
-                {
-                    duration: 5000,
-                    panelClass: ['error-snackbar']
-                }
-            );
+            const errorMsg = error.error || error.message || 'Failed to publish post. Please try again.';
+            this.snackBar.open(errorMsg, 'Close', {
+                duration: 5000,
+                panelClass: ['error-snackbar']
+            });
         } finally {
             this.isPublishing = false;
         }

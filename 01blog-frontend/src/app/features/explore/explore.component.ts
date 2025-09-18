@@ -45,8 +45,8 @@ interface Post {
   ]
 })
 export class ExploreComponent implements OnInit {
-  selectedCategory = 'Technology';
-  categories = ['Products', 'SaaS', 'Gaming', 'Tech', 'Education', 'Technology'];
+  selectedCategory = 'Tech';
+  categories = ['Products', 'SaaS', 'Gaming', 'Education', 'Tech'];
 
   posts: Post[] = [];
   filteredPosts: Post[] = [];

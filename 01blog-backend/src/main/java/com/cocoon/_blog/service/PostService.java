@@ -1,8 +1,6 @@
 package com.cocoon._blog.service;
 
 import java.time.LocalDateTime;
-
-// import org.hibernate.mapping.List;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -10,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Sort;
 
+import com.cocoon._blog.dto.PostRequest;
 import com.cocoon._blog.dto.PostResponse;
 import com.cocoon._blog.entity.Post;
 import com.cocoon._blog.entity.User;
@@ -23,23 +22,24 @@ public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
 
-    public ResponseEntity<?> createPost(Post request, Long userId) {
+    public ResponseEntity<?> createPost(PostRequest request, Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+            .orElseThrow(() -> new RuntimeException("User not found"));
 
         Post post = Post.builder()
-                .user(user) // set the author
-                .title(request.getTitle())
-                .topic(request.getTopic())
-                .banner(request.getBanner())
-                .description(request.getDescription())
-                .videos(request.getVideos())
-                .createdAt(LocalDateTime.now())
-                .build();
+            .title(request.getTitle())
+            .topic(request.getTopic())
+            .banner(request.getBanner())
+            .description(request.getDescription())
+            .videos(request.getVideos())
+            .user(user)
+            .createdAt(LocalDateTime.now())
+            .build();
 
         postRepository.save(post);
         return ResponseEntity.ok(post);
     }
+
 
     public ResponseEntity<?> getAllPosts() {
         List<PostResponse> posts = postRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt")).stream()
