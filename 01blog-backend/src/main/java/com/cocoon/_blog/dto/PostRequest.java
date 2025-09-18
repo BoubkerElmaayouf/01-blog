@@ -23,7 +23,7 @@ public class PostRequest {
     private String banner;
 
     @NotBlank(message = "Description is required")
-    @Size(min = 20, max = 5000, message = "Description must be between 20 and 5000 characters")
+    @Size(min = 20, max = 50000, message = "Description must be between 20 and 5000 characters")
     private String description;
 
     @Size(max = 5, message = "You can attach at most 5 videos")
