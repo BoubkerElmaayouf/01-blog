@@ -182,11 +182,14 @@
   background-color: rgba(26, 26, 26, 0.04);
   color: #1a1a1a;
 }
-
+.spann {
+  color: black;
+}
 .interaction-btn mat-icon {
   font-size: 18px;
   width: 18px;
   height: 18px;
+  color: black;
 }
 
 /* Active States */
@@ -233,13 +236,25 @@
 }
 
 /* Menu Styles */
+/* Menu Styles - Fixed for white background */
 .more-menu {
   margin-top: 8px;
+  background-color: white !important;
+}
+
+/* Target the actual menu panel that Angular Material creates */
+.mat-mdc-menu-panel {
+  background-color: white !important;
 }
 
 .more-menu .mat-mdc-menu-item {
   font-size: 0.875rem;
   min-height: 40px;
+  background-color: white !important;
+}
+
+.more-menu .mat-mdc-menu-item:hover {
+  background-color: #f8f9fa !important;
 }
 
 .more-menu .mat-mdc-menu-item mat-icon {
@@ -256,6 +271,15 @@
 
 .more-menu .delete-item mat-icon {
   color: #e74c3c;
+}
+
+/* Additional global override if the above doesn't work */
+::ng-deep .mat-mdc-menu-panel {
+  background-color: white !important;
+}
+
+::ng-deep .more-menu .mat-mdc-menu-panel {
+  background-color: white !important;
 }
 
 /* Article Image */
@@ -434,10 +458,10 @@
 }
 
 /* Accessibility */
-.article-card:focus-within {
+/* .article-card:focus-within {
   outline: 2px solid #1a1a1a;
   outline-offset: 2px;
-}
+} */
 
 .interaction-btn:focus-visible,
 .action-btn:focus-visible,
