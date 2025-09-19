@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { ArticleService, Article } from '../../services/article.service';
 import { ActivatedRoute } from '@angular/router';
+import { LoaderComponent } from '../../shared/components/loader/loader.component';
 
 interface CommentEntity {
   id: number;
@@ -48,7 +49,8 @@ interface UserProfile {
 
 @Component({
   selector: 'app-article',
-  imports: [NavbarComponent, CommonModule, FormsModule],
+  standalone: true,
+  imports: [NavbarComponent, CommonModule, FormsModule, LoaderComponent],
   templateUrl: './article.component.html',
   styleUrls: ['./article.component.css']
 })

@@ -13,6 +13,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { NavbarComponent } from "../../shared/components/navbar/navbar.component";
 import { ImageUploadService } from "../../utils/image-upload.service";
+import { LoaderComponent } from "../../shared/components/loader/loader.component";
 
 // Quill imports
 declare var Quill: any;
@@ -31,7 +32,8 @@ declare var Quill: any;
         MatButtonModule,
         MatIconModule,
         MatToolbarModule,
-        MatSnackBarModule
+        MatSnackBarModule,
+        LoaderComponent
     ],
     templateUrl: "./write.component.html",
     styleUrls: ['./write.component.css'], 

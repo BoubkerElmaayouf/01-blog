@@ -8,6 +8,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { Router } from '@angular/router';
+import { LoaderComponent } from '../../shared/components/loader/loader.component';
 
 interface Post {
   id: number;
@@ -41,12 +42,14 @@ interface Post {
     MatIconModule,
     MatChipsModule,
     MatMenuModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    LoaderComponent
   ]
 })
 export class ExploreComponent implements OnInit {
   selectedCategory = 'Tech';
   categories = ['Tech', 'Education', 'Products', 'SaaS', 'Gaming'];
+   isLoading: boolean = true;
 
   posts: Post[] = [];
   filteredPosts: Post[] = [];
@@ -75,6 +78,7 @@ export class ExploreComponent implements OnInit {
             isSaved: Math.random() > 0.8
           }));
           console.log('Fetched posts:', this.posts);
+          this.isLoading = false;
           this.filterPosts();
         },
         error: (err) => console.error('Error fetching posts:', err)
