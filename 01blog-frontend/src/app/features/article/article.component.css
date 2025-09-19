@@ -85,8 +85,9 @@
 
 /* Article Header */
 .article-header {
+  /* border-bottom: 1px solid #f0f0f0; */
+
   padding: 40px 0 30px;
-  border-bottom: 1px solid #f0f0f0;
   margin-bottom: 30px;
 }
 
@@ -204,6 +205,8 @@
 
 /* Content Section */
 .content-section {
+  border-top: 1px solid #f0f0f0;
+
   margin-bottom: 50px;
 }
 

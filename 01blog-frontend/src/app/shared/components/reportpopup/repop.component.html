@@ -1,0 +1,81 @@
+<!-- Overlay backdrop -->
+<div class="report-overlay" [class.visible]="isVisible" (click)="handleCancel()">
+  
+  <!-- Popup container -->
+  <div class="report-popup" [class.visible]="isVisible" (click)="$event.stopPropagation()">
+    
+    <!-- Header -->
+    <div class="popup-header">
+      <h2 class="popup-title">Report The Post</h2>
+      <button class="close-btn" (click)="handleCancel()" aria-label="Close">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <!-- Content -->
+    <div class="popup-content">
+      
+      <!-- Report Type Badge -->
+      <div class="report-type-badge" [class]="'type-' + reportType.toLowerCase()">
+        {{ reportType }} Report
+      </div>
+
+       <!-- Post ID Info (for debugging/admin) -->
+      <div  *ngIf="postId">
+        <small class="post-id-text">title: {{ title }} | Post ID: {{ postId }}</small>
+      </div>
+
+      <!-- Reason Selection -->
+      <div class="form-group">
+        <label class="form-label" for="reason-select">Reason for reporting *</label>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-select 
+            id="reason-select"
+            placeholder="Select a reason"
+            [(value)]="reason">
+            <mat-option *ngFor="let option of reasonOptions" [value]="option">
+              {{ option }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <!-- Description -->
+      <div class="form-group">
+        <label class="form-label" for="description-textarea">Additional details *</label>
+        <mat-form-field appearance="outline" class="full-width">
+          <textarea 
+            id="description-textarea"
+            matInput 
+            placeholder="Please provide more details about your report..."
+            [(ngModel)]="description"
+            rows="4"
+            maxlength="500">
+          </textarea>
+          <mat-hint align="end">{{ description.length }}/500</mat-hint>
+        </mat-form-field>
+      </div>
+
+     
+
+    </div>
+
+    <!-- Actions -->
+    <div class="popup-actions">
+      <button 
+        mat-stroked-button 
+        class="cancel-btn"
+        (click)="handleCancel()">
+        Cancel
+      </button>
+      <button 
+        mat-raised-button 
+        color="primary"
+        class="submit-btn"
+        [disabled]="!isFormValid"
+        (click)="handleSubmit()">
+        Submit Report
+      </button>
+    </div>
+  </div>
+</div>

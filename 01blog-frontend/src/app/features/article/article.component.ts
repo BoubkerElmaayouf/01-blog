@@ -5,6 +5,7 @@ import { NavbarComponent } from '../../shared/components/navbar/navbar.component
 import { ArticleService, Article } from '../../services/article.service';
 import { ActivatedRoute } from '@angular/router';
 import { LoaderComponent } from '../../shared/components/loader/loader.component';
+import { repopopComponent, ReportData } from '../../shared/components/reportpopup/repop.component';
 
 interface CommentEntity {
   id: number;
@@ -50,7 +51,7 @@ interface UserProfile {
 @Component({
   selector: 'app-article',
   standalone: true,
-  imports: [NavbarComponent, CommonModule, FormsModule, LoaderComponent],
+  imports: [NavbarComponent, CommonModule, FormsModule, LoaderComponent, repopopComponent],
   templateUrl: './article.component.html',
   styleUrls: ['./article.component.css']
 })
@@ -59,6 +60,13 @@ export class ArticleComponent implements OnInit {
   currentUser: UserProfile | null = null;
   isLoading: boolean = true;
   error: string = '';
+  isReported: boolean = false;
+  
+  // Report popup states
+  showReportPopup: boolean = false;
+  selectedPostId: string = '';
+  reportType: 'GENERAL' | 'POST'  | 'PROFILE' = 'POST';
+  postTitle: string = '';
 
   // Interactive states
   isLiked: boolean = false;
@@ -88,7 +96,6 @@ export class ArticleComponent implements OnInit {
 
       this.loadArticle(id);
   }
-
 
   loadArticle(id: number): void {
     this.isLoading = true;
@@ -275,11 +282,54 @@ export class ArticleComponent implements OnInit {
     return Math.max(1, Math.ceil(wordCount / 200));
   }
 
+  // Report functionality methods
   onReportArticle(): void {
-    if (confirm('Are you sure you want to report this article?')) {
-      console.log('Article reported:', this.article.id);
-      alert('Article has been reported. Thank you for your feedback.');
+    if (this.article && !this.isReported) {
+      this.selectedPostId = this.article.id.toString();
+      this.reportType = 'POST';
+      this.postTitle = this.article.title.toString()
+      this.showReportPopup = true;
     }
+  }
+
+  handleReportSubmit(reportData: ReportData): void {
+    console.log('Report submitted:', reportData);
+    
+    // Here you would typically send the report to your backend
+    // Example API call (uncomment when you have the backend endpoint):
+    // this.articleService.submitReport(reportData).subscribe({
+    //   next: (response) => {
+    //     console.log('Report submitted successfully:', response);
+    //     this.showReportPopup = false;
+    //     this.isReported = true;
+    //     this.showSuccessMessage('Thank you for your report. We will review it shortly.');
+    //   },
+    //   error: (err) => {
+    //     console.error('Error submitting report:', err);
+    //     this.showErrorMessage('Failed to submit report. Please try again.');
+    //   }
+    // });
+    
+    // For now, just close the popup and mark as reported
+    this.showReportPopup = false;
+    this.isReported = true;
+    
+    // Show success message
+    this.showSuccessMessage('Thank you for your report. We will review it shortly.');
+  }
+
+  handleReportCancel(): void {
+    this.showReportPopup = false;
+  }
+
+  private showSuccessMessage(message: string): void {
+    // You can replace this with a proper toast/snackbar component
+    alert(message);
+  }
+
+  private showErrorMessage(message: string): void {
+    // You can replace this with a proper toast/snackbar component
+    alert(message);
   }
 
   getFullName(): string {

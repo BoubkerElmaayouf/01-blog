@@ -48,6 +48,7 @@ export class WriteComponent implements OnInit, AfterViewInit {
     selectedFile: File | null = null;
     imagePreview: string | null = null;
     isPublishing: boolean = false;
+    isLoading: boolean = true;
     
     categories = [
         { value: 'tech', label: 'Technology' },
@@ -74,6 +75,7 @@ export class WriteComponent implements OnInit, AfterViewInit {
 
     ngOnInit(): void {
         // Load Quill.js if not already loaded
+        this.isLoading = true;
         if (typeof Quill === 'undefined') {
             const script = document.createElement('script');
             script.src = 'https://cdn.quilljs.com/1.3.6/quill.min.js';
@@ -129,6 +131,8 @@ export class WriteComponent implements OnInit, AfterViewInit {
                 });
             }
         }, 100);
+
+        this.isLoading = false;
     }
 
     onFileSelected(event: Event, fileInput: HTMLInputElement): void {
