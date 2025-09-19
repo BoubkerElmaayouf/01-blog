@@ -47,5 +47,19 @@ public class AuthService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
+    public User updateUser(Long id, UserDto userDto) {
+        User existingUser = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Update fields if provided
+        if (userDto.getFirstName() != null) existingUser.setFirstName(userDto.getFirstName());
+        if (userDto.getLastName() != null) existingUser.setLastName(userDto.getLastName());
+        if (userDto.getEmail() != null) existingUser.setEmail(userDto.getEmail());
+        if (userDto.getBio() != null) existingUser.setBio(userDto.getBio());
+        if (userDto.getProfilePic() != null) existingUser.setProfilePic(userDto.getProfilePic());
+        if (userDto.getRole() != null) existingUser.setRole(userDto.getRole());
+
+        return userRepository.save(existingUser);
+    }
 
 }

@@ -22,6 +22,8 @@ export const routes: Routes = [
   {path: 'explore/:id', component: ArticleComponent, canActivate: [authGuard]},
   { path: 'write', component: WriteComponent, canActivate: [authGuard] },
   { path: 'profile', component: ProfileComponent, canActivate: [authGuard] },
+  { path: 'profile/:id', component: ProfileComponent, canActivate: [authGuard] },
+
   { path: 'admin', component: AdminComponent, canActivate: [authGuard] },
   
   // {path: 'explore', component: ExploreComponent},

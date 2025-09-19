@@ -60,4 +60,47 @@ public class AuthController {
         }
     }
 
+
+    // user update
+    @PatchMapping("/user")
+    public ResponseEntity<UserDto> updateUser(
+            @PathVariable Long id,
+            @RequestBody UserDto userDto,
+            @RequestHeader("Authorization") String authHeader) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            Long userIdFromToken = jwtService.extractId(token);
+            String username = jwtService.extractUsername(token);
+
+            // Validate token
+            if (!jwtService.validateToken(token, username)) {
+                return ResponseEntity.status(401).build(); // Unauthorized
+            }
+
+            // Ensure user can only update their own profile
+            if (!userIdFromToken.equals(id)) {
+                return ResponseEntity.status(403).build(); // Forbidden
+            }
+
+            // Update user
+            User updatedUser = authService.updateUser(id, userDto);
+
+            // Map to DTO
+            UserDto updatedUserDto = new UserDto(
+                    updatedUser.getId(),
+                    updatedUser.getFirstName(),
+                    updatedUser.getLastName(),
+                    updatedUser.getEmail(),
+                    updatedUser.getBio(),
+                    updatedUser.getProfilePic(),
+                    updatedUser.getRole()
+            );
+
+            return ResponseEntity.ok(updatedUserDto);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
+
+
 }

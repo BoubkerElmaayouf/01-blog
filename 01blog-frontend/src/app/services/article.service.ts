@@ -26,9 +26,12 @@ export interface Comment {
 }
 
 export interface UserProfile {
+  id: number;
   firstName: string;
   lastName: string;
   profilePic: string;
+  bio: string;
+  email: string;
 }
 
 
@@ -45,6 +48,12 @@ export class ArticleService {
     return this.http.get<Article>(`${this.apiUrl}/${id}`);
   }
 
+  getPostByUserId(userId: number): Observable<Article[]> {
+    const token = localStorage.getItem('token') || '';
+    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
+    return this.http.get<Article[]>(`${this.apiUrl}/user/${userId}`, { headers });
+  }
+
   getComments(postId: number): Observable<Comment[]> {
     return this.http.get<Comment[]>(`${this.apiUrl}/${postId}/comments`);
   }
@@ -59,6 +68,12 @@ export class ArticleService {
     const token = localStorage.getItem('token') || '';
     const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
     return this.http.get<UserProfile>(`${this.UserUrl}user`, { headers });
+  }
+
+  updateUserInfo(user: UserProfile): Observable<UserProfile> {
+    const token = localStorage.getItem('token') || '';
+    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
+    return this.http.patch<UserProfile>(`${this.UserUrl}user`, user, { headers });
   }
 
 }
