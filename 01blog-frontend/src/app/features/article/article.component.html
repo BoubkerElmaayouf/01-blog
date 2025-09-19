@@ -1,6 +1,27 @@
 <app-navbar></app-navbar>
 
-<main class="article-container">
+<!-- Loading State -->
+<div *ngIf="isLoading" class="loading-container">
+  <div class="loading-spinner"></div>
+  <p>Loading article...</p>
+</div>
+
+<!-- Error State -->
+<div *ngIf="error && !isLoading" class="error-container">
+  <div class="error-content">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="12" y1="8" x2="12" y2="12"/>
+      <line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
+    <h2>Error Loading Article</h2>
+    <p>{{ error }}</p>
+    <button class="retry-btn" (click)="ngOnInit()">Try Again</button>
+  </div>
+</div>
+
+<!-- Main Article Content -->
+<main class="article-container" *ngIf="!isLoading && !error && article">
   <article class="article-content">
     <!-- Article Header -->
     <header class="article-header">
@@ -13,7 +34,11 @@
       <!-- Author Info -->
       <div class="author-section">
         <div class="author-info">
-          <img [src]="article.profilePic" [alt]="getFullName()" class="author-avatar">
+          <img 
+            [src]="article.profilePic || getDefaultAvatar()" 
+            [alt]="getFullName()" 
+            class="author-avatar"
+            (error)="$event.target.src = getDefaultAvatar()">
           <div class="author-details">
             <span class="author-name">{{ getFullName() }}</span>
             <div class="article-meta">
@@ -35,8 +60,12 @@
     </header>
 
     <!-- Banner Image -->
-    <section class="banner-section">
-      <img [src]="article.banner" [alt]="article.title" class="banner-image">
+    <section class="banner-section" *ngIf="article.banner">
+      <img 
+        [src]="article.banner" 
+        [alt]="article.title" 
+        class="banner-image"
+        (error)="$event.target.style.display = 'none'">
     </section>
 
     <!-- Article Content -->
@@ -52,7 +81,7 @@
           [class.liked]="isLiked"
           (click)="onLikeArticle()" 
           type="button">
-          <svg width="20" height="20" viewBox="0 0 24 24" [attr.fill]="isLiked ? '#ef4444' : 'none'" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="20" height="20" viewBox="0 0 24 24" [attr.fill]="isLiked ? '#000000' : 'none'" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
           </svg>
           <span>{{ likesCount }}</span>
@@ -64,77 +93,108 @@
           </svg>
           <span>{{ comments.length }}</span>
         </button>
-        
-        <button class="engagement-btn" (click)="onShareArticle()" type="button">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="18" cy="5" r="3"></circle>
-            <circle cx="6" cy="12" r="3"></circle>
-            <circle cx="18" cy="19" r="3"></circle>
-            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-          </svg>
-          Share
-        </button>
       </div>
     </footer>
 
     <!-- Comments Section -->
     <section class="comments-section" [class.show]="showComments">
-      <div class="comments-header">
-        <h3>Comments ({{ comments.length }})</h3>
-      </div>
+      <div class="comments-divider"></div>
+      
+      <div class="comments-container">
+        <div class="comments-header">
+          <h3>Responses ({{ comments.length }})</h3>
+        </div>
 
-      <!-- Add Comment Form -->
-      <div class="add-comment-form">
-        <div class="comment-input-container">
-          <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=50&h=50&fit=crop&crop=face" alt="Your avatar" class="comment-avatar">
-          <div class="comment-input-wrapper">
-            <textarea 
-              [(ngModel)]="newComment" 
-              placeholder="What are your thoughts?"
-              class="comment-input"
-              rows="3"
-              maxlength="500"></textarea>
-            <div class="comment-actions">
-              <span class="char-count">{{ newComment.length }}/500</span>
+        <!-- Add Comment Form -->
+        <div class="add-comment-form">
+          <div class="comment-input-container">
+            <img 
+              [src]="getCurrentUserAvatar()" 
+              [alt]="getCurrentUserName()" 
+              class="comment-avatar"
+              (error)="$event.target.src = getDefaultAvatar()">
+            <div class="comment-input-wrapper">
+              <textarea 
+                [(ngModel)]="newComment" 
+                placeholder="Write a response..."
+                class="comment-input"
+                maxlength="200"
+                [disabled]="isSubmittingComment"
+                (input)="onCommentInputChange($event)"></textarea>
+              <div class="character-count" [class.over-limit]="newComment.length > 200">
+                {{ getCharacterCount() }}/200
+              </div>
+            </div>
+          </div>
+          
+          <div class="comment-actions" *ngIf="newComment.trim().length > 0">
+            <div class="comment-action-buttons">
               <button 
-                class="comment-submit-btn" 
-                (click)="onAddComment()" 
-                [disabled]="!newComment.trim()"
+                class="cancel-btn" 
+                (click)="onCancelComment()"
+                [disabled]="isSubmittingComment"
                 type="button">
-                Post Comment
+                Cancel
+              </button>
+              <button 
+                class="respond-btn" 
+                (click)="onAddComment()" 
+                [disabled]="!isCommentValid() || isSubmittingComment"
+                type="button">
+                <span *ngIf="!isSubmittingComment">Respond</span>
+                <span *ngIf="isSubmittingComment">Posting...</span>
               </button>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Comments List -->
-      <div class="comments-list">
-        <div class="comment" *ngFor="let comment of comments">
-          <div class="comment-header">
-            <img [src]="comment.avatar" [alt]="comment.author" class="comment-avatar">
-            <div class="comment-info">
-              <span class="comment-author">{{ comment.author }}</span>
-              <span class="comment-time">{{ getTimeAgo(comment.createdAt) }}</span>
+        <!-- Comments List -->
+        <div class="comments-list" *ngIf="comments.length > 0">
+          <div class="comment" *ngFor="let comment of comments; trackBy: trackByCommentId">
+            <div class="comment-header">
+              <img 
+                [src]="comment.avatar" 
+                [alt]="comment.author" 
+                class="comment-avatar"
+                (error)="$event.target.src = getDefaultAvatar()">
+              <div class="comment-info">
+                <span class="comment-author">{{ comment.author }}</span>
+                <span class="comment-time">{{ getTimeAgo(comment.createdAt) }}</span>
+              </div>
+            </div>
+            <div class="comment-content">
+              <p>{{ comment.content }}</p>
+            </div>
+            <div class="comment-actions-row">
+              <button 
+                class="comment-action-btn" 
+                [class.liked]="comment.isLiked"
+                (click)="onLikeComment(comment)"
+                type="button">
+                <svg width="20" height="20" viewBox="0 0 24 24" [attr.fill]="comment.isLiked ? '#000000' : 'none'" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+                <span>{{ comment.likes }}</span>
+              </button>
+              <button class="comment-action-btn" type="button">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+                Reply
+              </button>
             </div>
           </div>
-          <div class="comment-content">
-            <p>{{ comment.content }}</p>
+        </div>
+
+        <!-- No Comments State -->
+        <div class="no-comments" *ngIf="comments.length === 0 && showComments">
+          <div class="no-comments-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
           </div>
-          <div class="comment-actions-row">
-            <button 
-              class="comment-like-btn" 
-              [class.liked]="comment.isLiked"
-              (click)="onLikeComment(comment)"
-              type="button">
-              <svg width="16" height="16" viewBox="0 0 24 24" [attr.fill]="comment.isLiked ? '#ef4444' : 'none'" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-              </svg>
-              <span>{{ comment.likes }}</span>
-            </button>
-            <button class="comment-reply-btn" type="button">Reply</button>
-          </div>
+          <p>No responses yet</p>
+          <small>Be the first to respond</small>
         </div>
       </div>
     </section>

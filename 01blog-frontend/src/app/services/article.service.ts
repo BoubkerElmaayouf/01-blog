@@ -16,23 +16,28 @@ export interface Article {
 }
 
 export interface Comment {
-  profilePic: any;
-  lastName: any;
-  firstName: any;
+  user: any;
   id: number;
-  author: string;
-  avatar: string;
   content: string;
   createdAt: string;
-  likes: number;
-  isLiked: boolean;
+  firstName: string;
+  lastName: string;
+  profilePic: string;
 }
+
+export interface UserProfile {
+  firstName: string;
+  lastName: string;
+  profilePic: string;
+}
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class ArticleService {
   private apiUrl = 'http://localhost:8080/api/post';
+  private UserUrl = 'http://localhost:8080/api/auth/';
 
   constructor(private http: HttpClient) {}
 
@@ -49,4 +54,11 @@ export class ArticleService {
     const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
     return this.http.post<Comment>(`${this.apiUrl}/${postId}/comment`, { content }, { headers });
   }
+
+  getUserInfo(): Observable<UserProfile> {
+    const token = localStorage.getItem('token') || '';
+    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
+    return this.http.get<UserProfile>(`${this.UserUrl}user`, { headers });
+  }
+
 }

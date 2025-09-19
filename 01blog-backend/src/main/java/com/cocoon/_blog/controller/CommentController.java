@@ -28,6 +28,7 @@ public class CommentController {
             BindingResult bindingResult,
             @RequestHeader("Authorization") String authHeader) {
 
+        // Validate input
         if (bindingResult.hasErrors()) {
             String errors = bindingResult.getAllErrors()
                     .stream()
@@ -37,25 +38,38 @@ public class CommentController {
             return ResponseEntity.badRequest().body(errors);
         }
 
+        // Validate authorization header
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.badRequest().body("Authorization header missing or invalid");
+            return ResponseEntity.status(401).body("Authorization header missing or invalid");
         }
 
-        String token = authHeader.replace("Bearer ", "");
-        Long userId = jwtService.extractId(token);
-        String username = jwtService.extractUsername(token);
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            Long userId = jwtService.extractId(token);
+            String username = jwtService.extractUsername(token);
 
-        if (!jwtService.validateToken(token, username)) {
-            return ResponseEntity.badRequest().body("Invalid or expired token");
+            // Validate token
+            if (!jwtService.validateToken(token, username)) {
+                return ResponseEntity.status(401).body("Invalid or expired token");
+            }
+
+            // Set postId from URL parameter
+            commentRequest.setPostId(postId);
+            
+            return commentService.createComment(commentRequest, userId);
+            
+        } catch (Exception e) {
+            return ResponseEntity.status(403).body("Authentication failed: " + e.getMessage());
         }
-
-        commentRequest.setPostId(postId); // assign postId from URL
-        return commentService.createComment(commentRequest, userId);
     }
 
     // Get all comments for a specific post
     @GetMapping("/{postId}/comments")
     public ResponseEntity<?> getComments(@PathVariable Long postId) {
-        return commentService.getCommentsByPost(postId);
+        try {
+            return commentService.getCommentsByPost(postId);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error fetching comments: " + e.getMessage());
+        }
     }
 }

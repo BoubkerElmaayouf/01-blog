@@ -2,6 +2,7 @@ package com.cocoon._blog.service;
 
 import com.cocoon._blog.dto.LoginRequest;
 import com.cocoon._blog.dto.RegisterRequest;
+import com.cocoon._blog.dto.UserDto;
 import com.cocoon._blog.entity.User;
 import com.cocoon._blog.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -40,4 +41,11 @@ public class AuthService {
         // ✅ Return JWT token
         return jwtService.generateToken(user.getEmail(), user.getId(), user.getRole());
     }
+
+    public User getUserById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+
 }

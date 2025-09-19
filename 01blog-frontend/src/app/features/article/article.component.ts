@@ -2,8 +2,49 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
-import { ArticleService, Article, Comment } from '../../services/article.service';
+import { ArticleService, Article } from '../../services/article.service';
 import { ActivatedRoute } from '@angular/router';
+
+interface CommentEntity {
+  id: number;
+  content: string;
+  createdAt: string;
+  user: {
+    firstName: string;
+    lastName: string;
+    profilePic: string;
+  };
+}
+
+interface CommentDto {
+  id: number;
+  content: string;
+  createdAt: string;
+  firstName: string;
+  lastName: string;
+  profilePic: string;
+}
+
+type CommentResponse = CommentEntity | CommentDto;
+
+interface CommentDisplay {
+  id: number;
+  content: string;
+  createdAt: string;
+  firstName: string;
+  lastName: string;
+  profilePic: string;
+  author: string;
+  avatar: string;
+  isLiked: boolean;
+  likes: number;
+}
+
+interface UserProfile {
+  firstName: string;
+  lastName: string;
+  profilePic: string;
+}
 
 @Component({
   selector: 'app-article',
@@ -13,42 +54,126 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class ArticleComponent implements OnInit {
   article!: Article;
+  currentUser: UserProfile | null = null;
+  isLoading: boolean = true;
+  error: string = '';
 
   // Interactive states
   isLiked: boolean = false;
   likesCount: number = 0;
   showComments: boolean = false;
   newComment: string = '';
-  comments: Comment[] = [];
+  comments: CommentDisplay[] = [];
+  isSubmittingComment: boolean = false;
 
   constructor(
     private articleService: ArticleService,
     private route: ActivatedRoute
-  ) {}
+  ) {
+    this.loadCurrentUser();
+  }
 
   ngOnInit(): void {
-    const id = Number(this.route.snapshot.paramMap.get('id')) || 1;
+      // ✅ fetch user first
+      this.loadCurrentUser();
 
-    // Fetch article
+      const id = Number(this.route.snapshot.paramMap.get('id'));
+      if (!id || isNaN(id)) {
+        this.error = 'Invalid article ID';
+        this.isLoading = false;
+        return;
+      }
+
+      this.loadArticle(id);
+  }
+
+
+  loadArticle(id: number): void {
+    this.isLoading = true;
+    this.error = '';
+
     this.articleService.getArticleById(id).subscribe({
       next: (data) => {
         this.article = data;
-        this.likesCount = 42; // set initial likes or fetch from API
+        this.likesCount = Math.floor(Math.random() * 100) + 10; // Random likes for demo
         this.loadComments();
+        this.isLoading = false;
       },
       error: (err) => {
         console.error('❌ Error fetching article:', err);
+        this.error = 'Failed to load article. Please try again.';
+        this.isLoading = false;
       }
     });
   }
 
+  loadCurrentUser(): void {
+    this.articleService.getUserInfo().subscribe({
+      next: (data) => {
+        console.log('✅ User info:', data);
+        this.currentUser = data;
+      },
+      error: (err) => {
+        console.error('❌ Error fetching user info:', err);
+        this.setDefaultUser();
+      }
+    });
+  }
+
+  setDefaultUser(): void {
+    this.currentUser = {
+      firstName: 'Anonymous',
+      lastName: 'User',
+      profilePic: this.getDefaultAvatar()
+    };
+  }
+
+  getDefaultAvatar(): string {
+    return 'https://i.pinimg.com/736x/e0/13/85/e0138502767289df0381f58f8de5aed9.jpg';
+  }
+
+  private normalizeComment(comment: CommentResponse): CommentDisplay {
+    if ('user' in comment) {
+      // CommentEntity
+      return {
+        id: comment.id,
+        content: comment.content,
+        createdAt: comment.createdAt,
+        firstName: comment.user.firstName,
+        lastName: comment.user.lastName,
+        profilePic: comment.user.profilePic || this.getDefaultAvatar(),
+        author: `${comment.user.firstName} ${comment.user.lastName}`.trim(),
+        avatar: comment.user.profilePic || this.getDefaultAvatar(),
+        isLiked: false,
+        likes: Math.floor(Math.random() * 15) + 1
+      };
+    } else {
+      // CommentDto
+      return {
+        id: comment.id,
+        content: comment.content,
+        createdAt: comment.createdAt,
+        firstName: comment.firstName,
+        lastName: comment.lastName,
+        profilePic: comment.profilePic || this.getDefaultAvatar(),
+        author: `${comment.firstName} ${comment.lastName}`.trim(),
+        avatar: comment.profilePic || this.getDefaultAvatar(),
+        isLiked: false,
+        likes: Math.floor(Math.random() * 15) + 1
+      };
+    }
+  }
+
   loadComments(): void {
     if (!this.article) return;
+    
     this.articleService.getComments(this.article.id).subscribe({
-      next: (data) => {
-        this.comments = data;
+      next: (data: CommentResponse[]) => {
+        this.comments = data.map(c => this.normalizeComment(c));
       },
-      error: (err) => console.error('❌ Error fetching comments:', err)
+      error: (err) => {
+        console.error('❌ Error fetching comments:', err);
+      }
     });
   }
 
@@ -57,144 +182,150 @@ export class ArticleComponent implements OnInit {
   }
 
   onAddComment(): void {
-    if (!this.newComment.trim() || !this.article) return;
+    if (!this.newComment.trim() || !this.article || this.isSubmittingComment) return;
+    
+    // Validate comment length
+    const trimmedComment = this.newComment.trim();
+    if (trimmedComment.length < 5 || trimmedComment.length > 200) {
+      alert('Comment must be between 5 and 200 characters');
+      return;
+    }
 
-    this.articleService.addComment(this.article.id, this.newComment.trim()).subscribe({
-      next: (comment) => {
-        this.comments.unshift(comment); // add new comment on top
+    this.isSubmittingComment = true;
+
+    this.articleService.addComment(this.article.id, trimmedComment).subscribe({
+      next: (response: CommentResponse) => {
+        const newCommentDisplay = this.normalizeComment(response);
+        this.comments.unshift(newCommentDisplay);
         this.newComment = '';
+        this.isSubmittingComment = false;
+        
+        // Reset textarea height
+        const textarea = document.querySelector('.comment-input') as HTMLTextAreaElement;
+        if (textarea) {
+          textarea.style.height = 'auto';
+        }
       },
-      error: (err) => console.error('❌ Error adding comment:', err)
+      error: (err) => {
+        console.error('❌ Error adding comment:', err);
+        
+        // Handle different error cases
+        let errorMessage = 'Failed to add comment. Please try again.';
+        if (err.status === 403) {
+          errorMessage = 'You are not authorized to add comments. Please log in again.';
+        } else if (err.status === 400) {
+          errorMessage = err.error || 'Invalid comment data.';
+        } else if (err.status === 401) {
+          errorMessage = 'Your session has expired. Please log in again.';
+        }
+        
+        alert(errorMessage);
+        this.isSubmittingComment = false;
+      }
     });
   }
 
-  onLikeComment(comment: Comment): void {
+  onLikeComment(comment: CommentDisplay): void {
     comment.isLiked = !comment.isLiked;
     comment.likes += comment.isLiked ? 1 : -1;
+    comment.likes = Math.max(0, comment.likes); // Prevent negative likes
+  }
+
+  onCommentInputChange(event: Event): void {
+    const textarea = event.target as HTMLTextAreaElement;
+    // Auto-resize textarea
+    textarea.style.height = 'auto';
+    textarea.style.height = Math.min(textarea.scrollHeight, 200) + 'px';
   }
 
   onLikeArticle(): void {
     this.isLiked = !this.isLiked;
     this.likesCount += this.isLiked ? 1 : -1;
+    this.likesCount = Math.max(0, this.likesCount); // Prevent negative likes
+  }
+
+  onCancelComment(): void {
+    this.newComment = '';
+    const textarea = document.querySelector('.comment-input') as HTMLTextAreaElement;
+    if (textarea) {
+      textarea.style.height = 'auto';
+    }
   }
 
   getFormattedDate(dateString: string): string {
-    const date = new Date(dateString);
-    const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
-    return date.toLocaleDateString('en-US', options);
+    try {
+      const date = new Date(dateString);
+      const options: Intl.DateTimeFormatOptions = { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      };
+      return date.toLocaleDateString('en-US', options);
+    } catch (error) {
+      return 'Unknown date';
+    }
   }
 
   getReadingTime(description: string): number {
+    if (!description) return 1;
     const text = description.replace(/<[^>]*>/g, '');
-    const wordCount = text.split(' ').filter(Boolean).length;
-    return Math.ceil(wordCount / 200);
+    const wordCount = text.split(' ').filter(word => word.length > 0).length;
+    return Math.max(1, Math.ceil(wordCount / 200));
   }
 
   onReportArticle(): void {
-    console.log('Article reported:', this.article.id);
-    alert('Article has been reported. Thank you for your feedback.');
+    if (confirm('Are you sure you want to report this article?')) {
+      console.log('Article reported:', this.article.id);
+      alert('Article has been reported. Thank you for your feedback.');
+    }
   }
 
   getFullName(): string {
-    return `${this.article.firstName} ${this.article.lastName}`;
+    if (!this.article) return 'Unknown Author';
+    return `${this.article.firstName} ${this.article.lastName}`.trim() || 'Unknown Author';
   }
 
   capitalizeFirstLetter(str: string): string {
+    if (!str) return '';
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
 
-  onShareArticle(): void {
-    if (navigator.share && this.canUseWebShare()) {
-      navigator.share({
-        title: this.article.title,
-        text: 'Check out this interesting article!',
-        url: window.location.href
-      }).catch(err => {
-        console.log('Web Share API failed:', err);
-        this.fallbackShare();
-      });
-    } else {
-      this.fallbackShare();
-    }
+  getCurrentUserAvatar(): string {
+    return this.currentUser?.profilePic || this.getDefaultAvatar();
   }
 
-  private canUseWebShare(): boolean {
-    return window.location.protocol === 'https:' || 
-           window.location.hostname === 'localhost' ||
-           window.location.hostname === '127.0.0.1';
-  }
-
-  private fallbackShare(): void {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(window.location.href)
-        .then(() => console.log('✅ Article link copied to clipboard!'))
-        .catch(() => this.showShareModal());
-    } else {
-      this.showShareModal();
-    }
-  }
-
-  private showShareModal(): void {
-    const currentUrl = window.location.href;
-    const articleTitle = encodeURIComponent(this.article.title);
-    const shareText = encodeURIComponent('Check out this article: ' + this.article.title);
-
-    const shareOptions = [
-      { name: '🐦 Twitter', url: `https://twitter.com/intent/tweet?text=${shareText}&url=${encodeURIComponent(currentUrl)}` },
-      { name: '📘 Facebook', url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}` },
-      { name: '💼 LinkedIn', url: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(currentUrl)}` },
-      { name: '📧 Email', url: `mailto:?subject=${articleTitle}&body=I thought you might find this article interesting: ${encodeURIComponent(currentUrl)}` }
-    ];
-
-    const choice = confirm(`Share this article!\n\nClick OK to copy the link to clipboard, or Cancel to see sharing options.`);
-
-    if (choice) {
-      this.copyToClipboardFallback(currentUrl);
-    } else {
-      let message = 'Choose how to share:\n\n';
-      shareOptions.forEach((option, index) => message += `${index + 1}. ${option.name}\n`);
-      
-      const selection = prompt(message + '\nEnter the number of your choice (1-4):');
-      const selectedIndex = parseInt(selection || '0') - 1;
-
-      if (selectedIndex >= 0 && selectedIndex < shareOptions.length) {
-        window.open(shareOptions[selectedIndex].url, '_blank', 'width=600,height=400');
-      }
-    }
-  }
-
-  private copyToClipboardFallback(text: string): void {
-    const textArea = document.createElement('textarea');
-    textArea.value = text;
-    textArea.style.position = 'fixed';
-    textArea.style.left = '-999999px';
-    textArea.style.top = '-999999px';
-    document.body.appendChild(textArea);
-    textArea.focus();
-    textArea.select();
-
-    try {
-      const successful = document.execCommand('copy');
-      if (successful) alert('✅ Article link copied to clipboard!');
-      else alert(`📋 Copy this link manually:\n\n${text}`);
-    } catch (err) {
-      console.error('Fallback copy failed:', err);
-      alert(`📋 Copy this link manually:\n\n${text}`);
-    } finally {
-      document.body.removeChild(textArea);
-    }
+  getCurrentUserName(): string {
+    if (!this.currentUser) return 'Anonymous User';
+    return `${this.currentUser.firstName} ${this.currentUser.lastName}`.trim() || 'Anonymous User';
   }
 
   getTimeAgo(dateString: string): string {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    try {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
-    if (diffInSeconds < 60) return 'Just now';
-    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
-    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
-    if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+      if (diffInSeconds < 60) return 'Just now';
+      if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+      if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+      if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)}d ago`;
 
-    return this.getFormattedDate(dateString);
+      return this.getFormattedDate(dateString);
+    } catch (error) {
+      return 'Unknown time';
+    }
+  }
+
+  getCharacterCount(): number {
+    return this.newComment.length;
+  }
+
+  isCommentValid(): boolean {
+    const trimmed = this.newComment.trim();
+    return trimmed.length >= 5 && trimmed.length <= 200;
+  }
+
+  trackByCommentId(index: number, comment: CommentDisplay): number {
+    return comment.id;
   }
 }
