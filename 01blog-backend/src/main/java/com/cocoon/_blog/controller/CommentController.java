@@ -63,6 +63,25 @@ public class CommentController {
         }
     }
 
+    @PostMapping("/comment/{commentId}/like")
+    public ResponseEntity<?> likeComment(@PathVariable Long commentId,
+                                        @RequestHeader("Authorization") String authHeader) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            Long userId = jwtService.extractId(token);
+            String username = jwtService.extractUsername(token);
+
+            if (!jwtService.validateToken(token, username)) {
+                return ResponseEntity.badRequest().body("Invalid or expired token");
+            }
+
+            return commentService.likeComment(commentId, userId);
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error liking comment: " + e.getMessage());
+        }
+    }
+
     // Get all comments for a specific post
     @GetMapping("/{postId}/comments")
     public ResponseEntity<?> getComments(@PathVariable Long postId) {

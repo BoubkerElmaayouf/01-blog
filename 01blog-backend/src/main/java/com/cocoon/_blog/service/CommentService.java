@@ -9,8 +9,10 @@ import org.springframework.stereotype.Service;
 import com.cocoon._blog.dto.CommentDto;
 import com.cocoon._blog.dto.CommentRequest;
 import com.cocoon._blog.entity.Comment;
+import com.cocoon._blog.entity.CommentReaction;
 import com.cocoon._blog.entity.Post;
 import com.cocoon._blog.entity.User;
+import com.cocoon._blog.repository.CommentReactionRepository;
 import com.cocoon._blog.repository.CommentRepository;
 import com.cocoon._blog.repository.PostRepository;
 import com.cocoon._blog.repository.UserRepository;
@@ -23,6 +25,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final PostRepository postRepository;
+    private final CommentReactionRepository commentReactionRepository;
 
     public ResponseEntity<?> createComment(CommentRequest request, Long userId) {
         try {
@@ -86,4 +89,30 @@ public class CommentService {
             return ResponseEntity.badRequest().body("Error fetching comments: " + e.getMessage());
         }
     }
+
+    public ResponseEntity<?> likeComment(Long commentId, Long userId) {
+        Comment comment = commentRepository.findById(commentId)
+            .orElseThrow(() -> new RuntimeException("Comment not found with id: " + commentId));
+
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+
+        return commentReactionRepository.findByUserAndComment(user, comment)
+            .map(existingReaction -> {
+                // Already liked → remove
+                commentReactionRepository.delete(existingReaction);
+                return ResponseEntity.ok("Like removed");
+            })
+            .orElseGet(() -> {
+                // Not liked yet → add
+                CommentReaction reaction = CommentReaction.builder()
+                    .user(user)
+                    .comment(comment)
+                    .createdAt(LocalDateTime.now())
+                    .build();
+                commentReactionRepository.save(reaction);
+                return ResponseEntity.ok("Like added");
+            });
+    }
+
 }

@@ -4,6 +4,9 @@ import com.cocoon._blog.dto.LoginRequest;
 import com.cocoon._blog.dto.RegisterRequest;
 import com.cocoon._blog.dto.UserDto;
 import com.cocoon._blog.entity.User;
+import com.cocoon._blog.repository.CommentRepository;
+import com.cocoon._blog.repository.PostReactionRepository;
+import com.cocoon._blog.repository.PostRepository;
 import com.cocoon._blog.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,6 +19,10 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+
+    private final PostRepository postRepository;
+    private final CommentRepository commentRepository;
+    private final PostReactionRepository postReactionRepository;
 
     public User register(RegisterRequest request) {
         User user = User.builder()
@@ -44,7 +51,26 @@ public class AuthService {
 
     public User getUserById(Long id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+            .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    public UserDto toUserDto(User user) {
+        int postCount = (int) postRepository.countByUser(user);
+        int commentCount = (int) commentRepository.countByUser(user);
+        int likeCount = (int) postReactionRepository.countByUser(user);
+
+        return new UserDto(
+            user.getId(),
+            user.getFirstName(),
+            user.getLastName(),
+            user.getEmail(),
+            user.getBio(),
+            user.getProfilePic(),
+            user.getRole(),
+            postCount,
+            commentCount,
+            likeCount
+        );
     }
 
     public User updateUser(Long id, UserDto userDto) {

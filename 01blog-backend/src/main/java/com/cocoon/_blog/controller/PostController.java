@@ -59,6 +59,24 @@ public class PostController {
         }
     }
 
+    @PostMapping("/like/{id}")
+    public ResponseEntity<?> likePost(@PathVariable Long id, @RequestHeader("Authorization") String authHeader) {
+
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            Long userId = jwtService.extractId(token);
+            String username = jwtService.extractUsername(token);
+
+            if (!jwtService.validateToken(token, username)) {
+                return ResponseEntity.badRequest().body("Invalid or expired token");
+            }
+
+            return postService.likePost(id, userId);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Invalid token or request: " + e.getMessage());
+        }
+    }
+
     @GetMapping("/all")
     public ResponseEntity<?> getAllPosts() {
         return postService.getAllPosts();

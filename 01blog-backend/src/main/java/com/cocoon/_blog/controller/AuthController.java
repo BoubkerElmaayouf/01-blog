@@ -20,6 +20,7 @@ public class AuthController {
 
     private final AuthService authService;
     private final JwtService jwtService;
+    
     @PostMapping("/register")
     public ResponseEntity<User> register(@RequestBody RegisterRequest request) {
         User user = authService.register(request);
@@ -36,23 +37,10 @@ public class AuthController {
     public ResponseEntity<UserDto> getUser(@RequestHeader("Authorization") String authHeader) {
         try {
             String token = authHeader.substring("Bearer ".length());
-
-            // Extract userId from token
             Long userId = jwtService.extractId(token);
 
-            // Fetch user from DB
             User user = authService.getUserById(userId);
-
-            // Map entity -> DTO
-            UserDto userDto = new UserDto(
-                    user.getId(),
-                    user.getFirstName(),
-                    user.getLastName(),
-                    user.getEmail(),
-                    user.getBio(),
-                    user.getProfilePic(),
-                    user.getRole()
-            );
+            UserDto userDto = authService.toUserDto(user);
 
             return ResponseEntity.ok(userDto);
         } catch (Exception e) {
@@ -60,47 +48,32 @@ public class AuthController {
         }
     }
 
-
-    // user update
-    @PatchMapping("/user")
+    @PatchMapping("/user/{id}")
     public ResponseEntity<UserDto> updateUser(
             @PathVariable Long id,
             @RequestBody UserDto userDto,
-            @RequestHeader("Authorization") String authHeader) {
+            @RequestHeader("Authorization") String authHeader) 
+    {
+
         try {
             String token = authHeader.replace("Bearer ", "");
             Long userIdFromToken = jwtService.extractId(token);
             String username = jwtService.extractUsername(token);
 
-            // Validate token
             if (!jwtService.validateToken(token, username)) {
-                return ResponseEntity.status(401).build(); // Unauthorized
+                return ResponseEntity.status(401).build();
             }
 
-            // Ensure user can only update their own profile
             if (!userIdFromToken.equals(id)) {
-                return ResponseEntity.status(403).build(); // Forbidden
+                return ResponseEntity.status(403).build();
             }
 
-            // Update user
             User updatedUser = authService.updateUser(id, userDto);
-
-            // Map to DTO
-            UserDto updatedUserDto = new UserDto(
-                    updatedUser.getId(),
-                    updatedUser.getFirstName(),
-                    updatedUser.getLastName(),
-                    updatedUser.getEmail(),
-                    updatedUser.getBio(),
-                    updatedUser.getProfilePic(),
-                    updatedUser.getRole()
-            );
+            UserDto updatedUserDto = authService.toUserDto(updatedUser);
 
             return ResponseEntity.ok(updatedUserDto);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(null);
         }
     }
-
-
 }

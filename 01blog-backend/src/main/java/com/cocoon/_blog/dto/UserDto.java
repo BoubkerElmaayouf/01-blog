@@ -14,4 +14,7 @@ public class UserDto {
     private String bio;
     private String profilePic;
     private Role role;
+    private int postCount;
+    private int commentCount;
+    private int likeCount;
 }
