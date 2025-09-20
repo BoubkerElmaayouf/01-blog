@@ -28,7 +28,6 @@ public class PostController {
                                         BindingResult bindingResult,
                                         @RequestHeader("Authorization") String authHeader) {
         try {
-            // Handle validation errors
             if (bindingResult.hasErrors()) {
                 String errors = bindingResult.getAllErrors()
                     .stream()
@@ -38,7 +37,6 @@ public class PostController {
                 return ResponseEntity.badRequest().body(errors);
             }
 
-            // Extract token
             String token = authHeader.replace("Bearer ", "");
             Long userId = jwtService.extractId(token);
             String username = jwtService.extractUsername(token);
@@ -47,7 +45,7 @@ public class PostController {
                 return ResponseEntity.badRequest().body("Invalid or expired token");
             }
 
-           HashSet<String> topics = new HashSet<>(List.of("tech", "gaming", "products", "education", "saas"));
+            HashSet<String> topics = new HashSet<>(List.of("tech", "gaming", "products", "education", "saas"));
             if (!topics.contains(request.getTopic().toLowerCase())) {
                 return ResponseEntity.badRequest().body("Invalid topic. Allowed: " + topics);
             }
@@ -61,7 +59,6 @@ public class PostController {
 
     @PostMapping("/like/{id}")
     public ResponseEntity<?> likePost(@PathVariable Long id, @RequestHeader("Authorization") String authHeader) {
-
         try {
             String token = authHeader.replace("Bearer ", "");
             Long userId = jwtService.extractId(token);
@@ -78,23 +75,48 @@ public class PostController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<?> getAllPosts() {
-        return postService.getAllPosts();
+    public ResponseEntity<?> getAllPosts(@RequestHeader("Authorization") String authHeader) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            Long userId = jwtService.extractId(token);
+            return postService.getAllPosts(userId);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error fetching posts: " + e.getMessage());
+        }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getPostById(@PathVariable Long id) {
-        return postService.getPostsById(id);
+    public ResponseEntity<?> getPostById(@PathVariable Long id, @RequestHeader("Authorization") String authHeader) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            Long userId = jwtService.extractId(token);
+            return postService.getPostsById(id, userId);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error fetching post: " + e.getMessage());
+        }
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<?> getPostByUserId(@PathVariable Long userId) {
-        return postService.getPostByUserId(userId);
+    public ResponseEntity<?> getPostByUserId(@PathVariable Long userId,
+                                             @RequestHeader("Authorization") String authHeader) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            Long currentUserId = jwtService.extractId(token);
+            return postService.getPostByUserId(userId, currentUserId);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error fetching posts: " + e.getMessage());
+        }
     }
 
     @GetMapping("/mine")
-    public ResponseEntity<?> getMyPosts(Long id) {
-        return postService.getMyPosts(id);
+    public ResponseEntity<?> getMyPosts(@RequestHeader("Authorization") String authHeader) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            Long userId = jwtService.extractId(token);
+            return postService.getMyPosts(userId);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error fetching posts: " + e.getMessage());
+        }
     }
 
 }

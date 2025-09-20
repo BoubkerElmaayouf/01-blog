@@ -21,4 +21,5 @@ public class PostResponse {
     private String profilePic;
     private int likeCount;
     private int commentCount;
+    private boolean isLiked;
 }

@@ -9,23 +9,13 @@ import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { Router } from '@angular/router';
 import { LoaderComponent } from '../../shared/components/loader/loader.component';
+import { ArticleService, Article } from '../../services/article.service'; // Import your service
 
-interface Post {
-  id: number;
-  title: string;
-  topic: string;
-  banner: string;
-  description: string;
-  videos: string[];
-  createdAt: string;
-  firstName: string;
-  lastName: string;
-  profilePic: string;
-  // Added interaction counts
-  likes?: number;
-  comments?: number;
+interface Post extends Article {
+  // Add any additional properties you need for the UI that aren't in Article
+  likes?: number;  // For backward compatibility
+  comments?: number;  // For backward compatibility
   saves?: number;
-  isLiked?: boolean;
   isSaved?: boolean;
 }
 
@@ -49,13 +39,13 @@ interface Post {
 export class ExploreComponent implements OnInit {
   selectedCategory = 'Tech';
   categories = ['Tech', 'Education', 'Products', 'SaaS', 'Gaming'];
-   isLoading: boolean = true;
+  isLoading: boolean = true;
 
   posts: Post[] = [];
   filteredPosts: Post[] = [];
 
   constructor(
-    private http: HttpClient,
+    private articleService: ArticleService, // Use the service instead of HttpClient directly
     private snackBar: MatSnackBar,
     private router: Router
   ) {}
@@ -65,23 +55,27 @@ export class ExploreComponent implements OnInit {
   }
 
   fetchPosts() {
-    this.http.get<Post[]>('http://localhost:8080/api/post/all')
+    this.articleService.getAllPosts()
       .subscribe({
         next: (data) => {
-          // Mock interaction data since it's not in your API
-          this.posts = data.map(post => ({
-            ...post,
-            likes: Math.floor(Math.random() * 500) + 10,
-            comments: Math.floor(Math.random() * 50) + 1,
-            saves: Math.floor(Math.random() * 100) + 5,
-            isLiked: Math.random() > 0.7,
-            isSaved: Math.random() > 0.8
+          // Map Article to Post interface and add UI-specific properties
+          this.posts = data.map(article => ({
+            ...article,
+            // Keep the original API fields and add UI-specific properties
+            likes: article.likeCount, // For backward compatibility with template
+            comments: article.commentCount, // For backward compatibility with template
+            saves: Math.floor(Math.random() * 100) + 5, // Mock saves data
+            isSaved: Math.random() > 0.8 // Mock saved status
           }));
           console.log('Fetched posts:', this.posts);
           this.isLoading = false;
           this.filterPosts();
         },
-        error: (err) => console.error('Error fetching posts:', err)
+        error: (err) => {
+          console.error('Error fetching posts:', err);
+          this.isLoading = false;
+          this.snackBar.open('Error loading posts', 'Close', { duration: 3000 });
+        }
       });
   }
 
@@ -100,21 +94,36 @@ export class ExploreComponent implements OnInit {
     event.preventDefault();
     event.stopPropagation();
     
-    if (post.isLiked) {
-      post.likes = (post.likes || 0) - 1;
-      post.isLiked = false;
-    } else {
-      post.likes = (post.likes || 0) + 1;
-      post.isLiked = true;
-    }
-    
-    console.log('Liked post:', post.title, 'Total likes:', post.likes);
+    // Call the service to like/unlike the post
+    this.articleService.likePost(post.id).subscribe({
+      next: (response) => {
+        // Toggle the like status
+        post.isLiked = !post.isLiked;
+        
+        // Update the like count based on the new status
+        if (post.isLiked) {
+          post.likeCount = (post.likeCount || 0) + 1;
+        } else {
+          post.likeCount = Math.max((post.likeCount || 0) - 1, 0);
+        }
+        
+        // Also update the likes property for display
+        post.likes = post.likeCount;
+        
+        console.log('Liked post:', post.title, 'Total likes:', post.likeCount);
+      },
+      error: (err) => {
+        console.error('Error liking post:', err);
+        this.snackBar.open('Error updating like', 'Close', { duration: 2000 });
+      }
+    });
   }
 
   onSave(post: Post, event: Event) {
     event.preventDefault();
     event.stopPropagation();
     
+    // Since there's no save endpoint in your service, keep the mock behavior
     if (post.isSaved) {
       post.saves = (post.saves || 0) - 1;
       post.isSaved = false;
@@ -133,6 +142,7 @@ export class ExploreComponent implements OnInit {
     event.stopPropagation();
     console.log('Navigate to comments for post:', post.title);
     // Navigate to post detail page with comments section
+    this.router.navigate(['/explore', post.id]);
   }
 
   onReport(post: Post) {
@@ -143,18 +153,19 @@ export class ExploreComponent implements OnInit {
   onUpdate(post: Post) {
     console.log('Update post:', post.title);
     // Navigate to edit post page
+    this.router.navigate(['/edit-post', post.id]);
   }
 
   onDelete(post: Post) {
     console.log('Delete post:', post.title);
     // Show confirmation dialog and delete
+    // You'll need to add a delete method to your ArticleService
     this.snackBar.open('Post deleted', '', { duration: 2000 });
   }
 
   onPostClick(post: Post) {
     this.router.navigate(['/explore', post.id]);
     console.log('Navigate to post:', post.id);
-    // Navigate to a post detail page if you have routing
   }
 
   formatCount(count: number = 0): string {

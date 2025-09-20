@@ -4,7 +4,7 @@
   <app-loader></app-loader>
 </div>
 
-<div class="explore-container">
+<div class="explore-container" *ngIf="!isLoading">
   <div class="explore-header">
     <h1>Explore</h1>
   </div>
@@ -33,10 +33,14 @@
       <div class="article-content">
         <div class="publication-info">
           <div class="publication-badge">
-            <img class="author-avatar" [src]="post.profilePic" [alt]="post.firstName + ' ' + post.lastName">
+            <img 
+              class="author-avatar" 
+              [src]="post.profilePic || 'assets/default-avatar.png'" 
+              [alt]="post.firstName + ' ' + post.lastName"
+              onerror="this.src='assets/default-avatar.png'">
             <span class="author-text">{{ post.firstName }} {{ post.lastName }}</span>
             <span class="publication-dot">·</span>
-            <span class="publish-date">{{ post.createdAt | date:'MMM d yyyy' }}</span>
+            <span class="publish-date">{{ post.createdAt | date:'MMM d, yyyy' }}</span>
           </div>
         </div>
         
@@ -54,7 +58,7 @@
               <mat-icon [class.liked]="post.isLiked">
                 {{ post.isLiked ? 'favorite' : 'favorite_border' }}
               </mat-icon>
-              <span class="spann">{{ formatCount(post.likes) }}</span>
+              <span class="spann">{{ formatCount(post.likeCount || 0) }}</span>
             </button>
 
             <!-- Comment Button -->
@@ -64,7 +68,7 @@
               (click)="onComment(post, $event)"
               aria-label="View comments">
               <mat-icon>chat_bubble_outline</mat-icon>
-              <span class="spann">{{ formatCount(post.comments) }}</span>
+              <span class="spann">{{ formatCount(post.commentCount || 0) }}</span>
             </button>
 
             <!-- Save Button -->
@@ -77,7 +81,7 @@
               <mat-icon [class.saved]="post.isSaved">
                 {{ post.isSaved ? 'bookmark' : 'bookmark_border' }}
               </mat-icon>
-              <span class="spann">{{ formatCount(post.saves) }}</span>
+              <span class="spann">{{ formatCount(post.saves || 0) }}</span>
             </button>
           </div>
           
@@ -110,16 +114,34 @@
         </div>
       </div>
       
-      <div class="article-image">
-        <img [src]="post.banner" [alt]="post.title" loading="lazy">
+      <div class="article-image" *ngIf="post.banner">
+        <img 
+          [src]="post.banner" 
+          [alt]="post.title" 
+          loading="lazy"
+          onerror="this.style.display='none'">
       </div>
     </article>
 
     <!-- Empty state -->
-    <div *ngIf="filteredPosts.length === 0" class="empty-state">
+    <div *ngIf="filteredPosts.length === 0 && !isLoading" class="empty-state">
       <mat-icon class="empty-icon">article</mat-icon>
       <h3>No posts found</h3>
       <p>Try selecting a different category to discover more content.</p>
+      <p *ngIf="selectedCategory" class="category-info">
+        Currently viewing: <strong>{{ selectedCategory }}</strong>
+      </p>
     </div>
   </div>
 </div>
+
+<!-- Error state
+<div *ngIf="!isLoading && posts.length === 0 && filteredPosts.length === 0" class="error-state">
+   <mat-icon class="error-icon">error_outline</mat-icon>
+  <h3>Unable to load posts</h3>
+  <p>Please check your connection and try again.</p>
+  <button mat-raised-button color="primary" (click)="fetchPosts()">
+    Retry
+  </button> -->
+  <!-- <app-loader></app-loader>
+</div> -->
