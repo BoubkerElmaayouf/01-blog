@@ -76,4 +76,30 @@ public class AuthController {
             return ResponseEntity.badRequest().body(null);
         }
     }
+
+    @GetMapping("/user/{id}")
+    public ResponseEntity<UserDto> getUserById(
+            @PathVariable Long id,
+            @RequestHeader("Authorization") String authHeader) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            String username = jwtService.extractUsername(token);
+
+            if (!jwtService.validateToken(token, username)) {
+                return ResponseEntity.status(401).build();
+            }
+
+            User user = authService.getUserById(id);
+            if (user == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            UserDto userDto = authService.toUserDto(user);
+            return ResponseEntity.ok(userDto);
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
+
 }
