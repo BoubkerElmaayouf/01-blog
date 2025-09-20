@@ -16,7 +16,7 @@ export interface Article {
   profilePic: string;
   likeCount: number;
   commentCount: number;
-  isLiked: boolean; // whether the current user liked this post
+  isLiked: boolean;
 }
 
 export interface Comment {
@@ -26,7 +26,8 @@ export interface Comment {
   firstName: string;
   lastName: string;
   profilePic: string;
-  isLiked: boolean; // whether the current user liked this comment
+  likeCount: number;
+  isLiked: boolean;
 }
 
 export interface UserProfile {
@@ -66,7 +67,7 @@ export class ArticleService {
     }).pipe(
       map(posts => posts.map(post => ({
         ...post,
-        isLiked: post.liked || false // Map 'liked' to 'isLiked'
+        isLiked: post.liked || false
       })))
     );
   }
@@ -123,8 +124,8 @@ export class ArticleService {
 
   // --- Comments ---
   getComments(postId: number): Observable<Comment[]> {
-    return this.http.get<Comment[]>(`${this.apiUrl}/${postId}/comments`, { 
-      headers: this.getAuthHeaders() 
+    return this.http.get<Comment[]>(`${this.apiUrl}/${postId}/comments`, {
+      headers: this.getAuthHeaders()
     });
   }
 
@@ -135,9 +136,9 @@ export class ArticleService {
     );
   }
 
-  likeComment(commentId: number): Observable<any> {
-    return this.http.post(`${this.apiUrl}/comment/like/${commentId}`, {}, { 
-      headers: this.getAuthHeaders() 
+  likeComment(commentId: number): Observable<Comment> {
+    return this.http.post<Comment>(`${this.apiUrl}/comment/${commentId}/like`, {}, {
+      headers: this.getAuthHeaders()
     });
   }
 

@@ -22,97 +22,93 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class CommentService {
+
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final PostRepository postRepository;
     private final CommentReactionRepository commentReactionRepository;
 
-    public ResponseEntity<?> createComment(CommentRequest request, Long userId) {
-        try {
-            User user = userRepository.findById(userId)
+    // Create a new comment (authorization already handled in controller)
+    public ResponseEntity<CommentDto> createComment(Long postId, CommentRequest request, Long userId) {
+        // User and authorization already validated in controller
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-            Post post = postRepository.findById(request.getPostId())
+        Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
 
-            Comment comment = Comment.builder()
-                .content(request.getContent())
+        Comment comment = Comment.builder()
+                .content(request.getContent().trim())
                 .createdAt(LocalDateTime.now())
                 .user(user)
                 .post(post)
                 .build();
 
-            Comment savedComment = commentRepository.save(comment);
-            
-            // Convert to DTO before returning
-            CommentDto commentDto = new CommentDto();
-            commentDto.setId(savedComment.getId());
-            commentDto.setContent(savedComment.getContent());
-            commentDto.setCreatedAt(savedComment.getCreatedAt());
-            commentDto.setFirstName(savedComment.getUser().getFirstName());
-            commentDto.setLastName(savedComment.getUser().getLastName());
-            commentDto.setProfilePic(savedComment.getUser().getProfilePic());
-            
-            return ResponseEntity.ok(commentDto);
-            
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error creating comment: " + e.getMessage());
-        }
+        Comment savedComment = commentRepository.save(comment);
+
+        CommentDto dto = mapToDto(savedComment, userId);
+        return ResponseEntity.ok(dto);
     }
 
-    public ResponseEntity<?> getCommentsByPost(Long postId) {
-        try {
-            // Fetch the post
-            Post post = postRepository.findById(postId)
+    // Get comments for a post (authorization handled in controller)
+    public ResponseEntity<List<CommentDto>> getCommentsByPost(Long postId, Long currentUserId) {
+        Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
 
-            // Fetch comments for the post, ordered by creation date descending
-            List<Comment> comments = commentRepository.findAllByPostOrderByCreatedAtDesc(post);
+        List<Comment> comments = commentRepository.findAllByPostOrderByCreatedAtDesc(post);
 
-            // Map Comment entities to CommentDto
-            List<CommentDto> commentDtos = comments.stream()
-                .map(comment -> {
-                    CommentDto dto = new CommentDto();
-                    dto.setId(comment.getId());
-                    dto.setContent(comment.getContent());
-                    dto.setCreatedAt(comment.getCreatedAt());
-                    dto.setFirstName(comment.getUser().getFirstName());
-                    dto.setLastName(comment.getUser().getLastName());
-                    dto.setProfilePic(comment.getUser().getProfilePic());
-                    return dto;
-                })
+        List<CommentDto> dtos = comments.stream()
+                .map(comment -> mapToDto(comment, currentUserId))
                 .toList();
 
-            return ResponseEntity.ok(commentDtos);
-            
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error fetching comments: " + e.getMessage());
-        }
+        return ResponseEntity.ok(dtos);
     }
 
-    public ResponseEntity<?> likeComment(Long commentId, Long userId) {
+    // Like or unlike a comment (authorization handled in controller)
+    public ResponseEntity<CommentDto> likeComment(Long commentId, Long userId) {
         Comment comment = commentRepository.findById(commentId)
-            .orElseThrow(() -> new RuntimeException("Comment not found with id: " + commentId));
-
+                .orElseThrow(() -> new RuntimeException("Comment not found"));
+        
         User user = userRepository.findById(userId)
-            .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        return commentReactionRepository.findByUserAndComment(user, comment)
-            .map(existingReaction -> {
-                // Already liked → remove
-                commentReactionRepository.delete(existingReaction);
-                return ResponseEntity.ok("Like removed");
-            })
-            .orElseGet(() -> {
-                // Not liked yet → add
-                CommentReaction reaction = CommentReaction.builder()
-                    .user(user)
-                    .comment(comment)
-                    .createdAt(LocalDateTime.now())
-                    .build();
-                commentReactionRepository.save(reaction);
-                return ResponseEntity.ok("Like added");
-            });
+        boolean isLiked = commentReactionRepository.findByUserAndComment(user, comment)
+                .map(existingReaction -> {
+                    commentReactionRepository.delete(existingReaction);
+                    return false; // removed like
+                })
+                .orElseGet(() -> {
+                    CommentReaction reaction = CommentReaction.builder()
+                            .user(user)
+                            .comment(comment)
+                            .createdAt(LocalDateTime.now())
+                            .build();
+                    commentReactionRepository.save(reaction);
+                    return true; // added like
+                });
+
+        CommentDto dto = mapToDto(comment, userId);
+        dto.setLiked(isLiked);
+        return ResponseEntity.ok(dto);
     }
 
+    // Helper to map Comment entity to CommentDto
+    private CommentDto mapToDto(Comment comment, Long currentUserId) {
+        CommentDto dto = new CommentDto();
+        dto.setId(comment.getId());
+        dto.setContent(comment.getContent());
+        dto.setCreatedAt(comment.getCreatedAt());
+        dto.setFirstName(comment.getUser().getFirstName());
+        dto.setLastName(comment.getUser().getLastName());
+        dto.setProfilePic(comment.getUser().getProfilePic());
+
+        int likeCount = commentReactionRepository.countByComment(comment);
+        boolean isLiked = currentUserId != null && 
+                commentReactionRepository.findByUserAndComment(
+                    userRepository.findById(currentUserId).orElse(null), comment).isPresent();
+
+        dto.setLikeCount(likeCount);
+        dto.setLiked(isLiked);
+        return dto;
+    }
 }

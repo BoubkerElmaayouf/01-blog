@@ -10,4 +10,6 @@ public class CommentDto {
     private String firstName;
     private String lastName;
     private String profilePic;
+    private int likeCount;
+    private boolean isLiked;
 }

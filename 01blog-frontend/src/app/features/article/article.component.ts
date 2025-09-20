@@ -2,51 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
-import { ArticleService, Article } from '../../services/article.service';
+import { ArticleService, Article, Comment, UserProfile } from '../../services/article.service';
 import { ActivatedRoute } from '@angular/router';
 import { LoaderComponent } from '../../shared/components/loader/loader.component';
 import { repopopComponent, ReportData } from '../../shared/components/reportpopup/repop.component';
-
-interface CommentEntity {
-  id: number;
-  content: string;
-  createdAt: string;
-  user: {
-    firstName: string;
-    lastName: string;
-    profilePic: string;
-  };
-}
-
-interface CommentDto {
-  id: number;
-  content: string;
-  createdAt: string;
-  firstName: string;
-  lastName: string;
-  profilePic: string;
-}
-
-type CommentResponse = CommentEntity | CommentDto;
-
-interface CommentDisplay {
-  id: number;
-  content: string;
-  createdAt: string;
-  firstName: string;
-  lastName: string;
-  profilePic: string;
-  author: string;
-  avatar: string;
-  isLiked: boolean;
-  likes: number;
-}
-
-interface UserProfile {
-  firstName: string;
-  lastName: string;
-  profilePic: string;
-}
 
 @Component({
   selector: 'app-article',
@@ -65,7 +24,7 @@ export class ArticleComponent implements OnInit {
   // Report popup states
   showReportPopup: boolean = false;
   selectedPostId: string = '';
-  reportType: 'GENERAL' | 'POST'  | 'PROFILE' = 'POST';
+  reportType: 'GENERAL' | 'POST' | 'PROFILE' = 'POST';
   postTitle: string = '';
 
   // Interactive states
@@ -73,28 +32,26 @@ export class ArticleComponent implements OnInit {
   likesCount: number = 0;
   showComments: boolean = false;
   newComment: string = '';
-  comments: CommentDisplay[] = [];
+  comments: Comment[] = [];
   isSubmittingComment: boolean = false;
 
   constructor(
     private articleService: ArticleService,
     private route: ActivatedRoute
-  ) {
-    this.loadCurrentUser();
-  }
+  ) {}
 
   ngOnInit(): void {
-      // ✅ fetch user first
-      this.loadCurrentUser();
+    // Load user first
+    this.loadCurrentUser();
 
-      const id = Number(this.route.snapshot.paramMap.get('id'));
-      if (!id || isNaN(id)) {
-        this.error = 'Invalid article ID';
-        this.isLoading = false;
-        return;
-      }
+    const id = Number(this.route.snapshot.paramMap.get('id'));
+    if (!id || isNaN(id)) {
+      this.error = 'Invalid article ID';
+      this.isLoading = false;
+      return;
+    }
 
-      this.loadArticle(id);
+    this.loadArticle(id);
   }
 
   loadArticle(id: number): void {
@@ -104,7 +61,8 @@ export class ArticleComponent implements OnInit {
     this.articleService.getArticleById(id).subscribe({
       next: (data) => {
         this.article = data;
-        this.likesCount = Math.floor(Math.random() * 100) + 10; // Random likes for demo
+        this.isLiked = data.isLiked;
+        this.likesCount = data.likeCount;
         this.loadComments();
         this.isLoading = false;
       },
@@ -131,9 +89,16 @@ export class ArticleComponent implements OnInit {
 
   setDefaultUser(): void {
     this.currentUser = {
+      id: 0,
       firstName: 'Anonymous',
       lastName: 'User',
-      profilePic: this.getDefaultAvatar()
+      profilePic: this.getDefaultAvatar(),
+      bio: '',
+      email: '',
+      role: 'USER',
+      postCount: 0,
+      commentCount: 0,
+      likeCount: 0
     };
   }
 
@@ -141,44 +106,12 @@ export class ArticleComponent implements OnInit {
     return 'https://i.pinimg.com/736x/e0/13/85/e0138502767289df0381f58f8de5aed9.jpg';
   }
 
-  private normalizeComment(comment: CommentResponse): CommentDisplay {
-    if ('user' in comment) {
-      // CommentEntity
-      return {
-        id: comment.id,
-        content: comment.content,
-        createdAt: comment.createdAt,
-        firstName: comment.user.firstName,
-        lastName: comment.user.lastName,
-        profilePic: comment.user.profilePic || this.getDefaultAvatar(),
-        author: `${comment.user.firstName} ${comment.user.lastName}`.trim(),
-        avatar: comment.user.profilePic || this.getDefaultAvatar(),
-        isLiked: false,
-        likes: Math.floor(Math.random() * 15) + 1
-      };
-    } else {
-      // CommentDto
-      return {
-        id: comment.id,
-        content: comment.content,
-        createdAt: comment.createdAt,
-        firstName: comment.firstName,
-        lastName: comment.lastName,
-        profilePic: comment.profilePic || this.getDefaultAvatar(),
-        author: `${comment.firstName} ${comment.lastName}`.trim(),
-        avatar: comment.profilePic || this.getDefaultAvatar(),
-        isLiked: false,
-        likes: Math.floor(Math.random() * 15) + 1
-      };
-    }
-  }
-
   loadComments(): void {
     if (!this.article) return;
     
     this.articleService.getComments(this.article.id).subscribe({
-      next: (data: CommentResponse[]) => {
-        this.comments = data.map(c => this.normalizeComment(c));
+      next: (data: Comment[]) => {
+        this.comments = data;
       },
       error: (err) => {
         console.error('❌ Error fetching comments:', err);
@@ -203,9 +136,8 @@ export class ArticleComponent implements OnInit {
     this.isSubmittingComment = true;
 
     this.articleService.addComment(this.article.id, trimmedComment).subscribe({
-      next: (response: CommentResponse) => {
-        const newCommentDisplay = this.normalizeComment(response);
-        this.comments.unshift(newCommentDisplay);
+      next: (response: Comment) => {
+        this.comments.unshift(response);
         this.newComment = '';
         this.isSubmittingComment = false;
         
@@ -234,10 +166,20 @@ export class ArticleComponent implements OnInit {
     });
   }
 
-  onLikeComment(comment: CommentDisplay): void {
-    comment.isLiked = !comment.isLiked;
-    comment.likes += comment.isLiked ? 1 : -1;
-    comment.likes = Math.max(0, comment.likes); // Prevent negative likes
+  onLikeComment(comment: Comment): void {
+    this.articleService.likeComment(comment.id).subscribe({
+      next: (updatedComment: Comment) => {
+        // Find and update the comment in the array
+        const index = this.comments.findIndex(c => c.id === comment.id);
+        if (index !== -1) {
+          this.comments[index] = updatedComment;
+        }
+      },
+      error: (err) => {
+        console.error('❌ Error liking comment:', err);
+        alert('Failed to like comment. Please try again.');
+      }
+    });
   }
 
   onCommentInputChange(event: Event): void {
@@ -248,9 +190,24 @@ export class ArticleComponent implements OnInit {
   }
 
   onLikeArticle(): void {
-    this.isLiked = !this.isLiked;
-    this.likesCount += this.isLiked ? 1 : -1;
-    this.likesCount = Math.max(0, this.likesCount); // Prevent negative likes
+    if (!this.article) return;
+
+    this.articleService.likePost(this.article.id).subscribe({
+      next: () => {
+        // Toggle the like state
+        this.isLiked = !this.isLiked;
+        this.likesCount += this.isLiked ? 1 : -1;
+        this.likesCount = Math.max(0, this.likesCount);
+        
+        // Update the article object
+        this.article.isLiked = this.isLiked;
+        this.article.likeCount = this.likesCount;
+      },
+      error: (err) => {
+        console.error('❌ Error liking article:', err);
+        alert('Failed to like article. Please try again.');
+      }
+    });
   }
 
   onCancelComment(): void {
@@ -287,7 +244,7 @@ export class ArticleComponent implements OnInit {
     if (this.article && !this.isReported) {
       this.selectedPostId = this.article.id.toString();
       this.reportType = 'POST';
-      this.postTitle = this.article.title.toString()
+      this.postTitle = this.article.title.toString();
       this.showReportPopup = true;
     }
   }
@@ -377,7 +334,7 @@ export class ArticleComponent implements OnInit {
     return trimmed.length >= 5 && trimmed.length <= 200;
   }
 
-  trackByCommentId(index: number, comment: CommentDisplay): number {
+  trackByCommentId(index: number, comment: Comment): number {
     return comment.id;
   }
 }

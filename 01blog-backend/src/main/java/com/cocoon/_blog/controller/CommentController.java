@@ -1,5 +1,6 @@
 package com.cocoon._blog.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -20,75 +21,153 @@ public class CommentController {
     private final CommentService commentService;
     private final JwtService jwtService;
 
-    // Create comment for a specific post
     @PostMapping("/{postId}/comment")
-    public ResponseEntity<?> createComment(
-            @PathVariable Long postId,
-            @Valid @RequestBody CommentRequest commentRequest,
-            BindingResult bindingResult,
-            @RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<?> createComment(@PathVariable Long postId,
+                                           @Valid @RequestBody CommentRequest commentRequest,
+                                           BindingResult bindingResult,
+                                           @RequestHeader("Authorization") String authHeader) {
 
-        // Validate input
         if (bindingResult.hasErrors()) {
             String errors = bindingResult.getAllErrors()
                     .stream()
                     .map(err -> err.getDefaultMessage())
                     .reduce((m1, m2) -> m1 + ", " + m2)
                     .orElse("Invalid input");
-            return ResponseEntity.badRequest().body(errors);
-        }
-
-        // Validate authorization header
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(401).body("Authorization header missing or invalid");
+            return ResponseEntity.badRequest().body("Validation failed: " + errors);
         }
 
         try {
-            String token = authHeader.replace("Bearer ", "");
-            Long userId = jwtService.extractId(token);
-            String username = jwtService.extractUsername(token);
-
-            // Validate token
-            if (!jwtService.validateToken(token, username)) {
-                return ResponseEntity.status(401).body("Invalid or expired token");
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("Missing or invalid Authorization header");
             }
 
-            // Set postId from URL parameter
-            commentRequest.setPostId(postId);
+            String token = authHeader.replace("Bearer ", "").trim();
             
-            return commentService.createComment(commentRequest, userId);
+            if (token.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("Empty token provided");
+            }
+
+            Long userId;
+            String username;
+            
+            try {
+                userId = jwtService.extractId(token);
+                username = jwtService.extractUsername(token);
+                
+                if (userId == null) {
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                            .body("Invalid token: user ID not found");
+                }
+                
+            } catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("Invalid or expired token: " + e.getMessage());
+            }
+
+            if (!jwtService.validateToken(token, username)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("Token validation failed");
+            }
+
+            return commentService.createComment(postId, commentRequest, userId);
             
         } catch (Exception e) {
-            return ResponseEntity.status(403).body("Authentication failed: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Internal server error occurred");
+        }
+    }
+
+    @GetMapping("/{postId}/comments")
+    public ResponseEntity<?> getComments(@PathVariable Long postId,
+                                         @RequestHeader("Authorization") String authHeader) {
+        try {
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("Missing or invalid Authorization header");
+            }
+
+            String token = authHeader.replace("Bearer ", "").trim();
+            
+            if (token.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("Empty token provided");
+            }
+
+            Long userId;
+            String username;
+            
+            try {
+                userId = jwtService.extractId(token);
+                username = jwtService.extractUsername(token);
+                
+                if (userId == null) {
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                            .body("Invalid token: user ID not found");
+                }
+                
+            } catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("Invalid or expired token: " + e.getMessage());
+            }
+
+            if (!jwtService.validateToken(token, username)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("Token validation failed");
+            }
+
+            return commentService.getCommentsByPost(postId, userId);
+            
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Internal server error occurred");
         }
     }
 
     @PostMapping("/comment/{commentId}/like")
     public ResponseEntity<?> likeComment(@PathVariable Long commentId,
-                                        @RequestHeader("Authorization") String authHeader) {
+                                         @RequestHeader("Authorization") String authHeader) {
         try {
-            String token = authHeader.replace("Bearer ", "");
-            Long userId = jwtService.extractId(token);
-            String username = jwtService.extractUsername(token);
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("Missing or invalid Authorization header");
+            }
+
+            String token = authHeader.replace("Bearer ", "").trim();
+            
+            if (token.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("Empty token provided");
+            }
+
+            Long userId;
+            String username;
+            
+            try {
+                userId = jwtService.extractId(token);
+                username = jwtService.extractUsername(token);
+                
+                if (userId == null) {
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                            .body("Invalid token: user ID not found");
+                }
+                
+            } catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("Invalid or expired token: " + e.getMessage());
+            }
 
             if (!jwtService.validateToken(token, username)) {
-                return ResponseEntity.badRequest().body("Invalid or expired token");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("Token validation failed");
             }
 
             return commentService.likeComment(commentId, userId);
-
+            
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error liking comment: " + e.getMessage());
-        }
-    }
-
-    // Get all comments for a specific post
-    @GetMapping("/{postId}/comments")
-    public ResponseEntity<?> getComments(@PathVariable Long postId) {
-        try {
-            return commentService.getCommentsByPost(postId);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error fetching comments: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Internal server error occurred");
         }
     }
 }

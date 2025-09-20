@@ -9,4 +9,5 @@ import java.util.Optional;
 
 public interface CommentReactionRepository extends JpaRepository<CommentReaction, Long> {
     Optional<CommentReaction> findByUserAndComment(User user, Comment comment);
+    int countByComment(Comment comment);
 }
