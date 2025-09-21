@@ -8,6 +8,37 @@
   margin-top: 100px;
 }
 
+/* Loading State */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  color: #666666;
+}
+
+.loading-spinner {
+  font-size: 48px !important;
+  width: 48px !important;
+  height: 48px !important;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-icon {
+  animation: spin 1s linear infinite;
+  font-size: 18px !important;
+  width: 18px !important;
+  height: 18px !important;
+  margin-right: 8px;
+}
+
 /* Profile Header */
 .profile-header {
   display: flex;
@@ -76,7 +107,16 @@
 .profile-email {
   font-size: 16px;
   color: #666666;
+  margin: 0 0 8px 0;
+}
+
+.profile-role {
+  font-size: 14px;
+  color: #888888;
   margin: 0 0 16px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 500;
 }
 
 .profile-bio {
@@ -90,6 +130,26 @@
 .edit-btn {
   border-color: #1a1a1a !important;
   color: #1a1a1a !important;
+}
+
+/* Profile Actions for Other Users */
+.profile-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.follow-btn {
+  min-width: 120px;
+}
+
+.follow-btn.mat-accent {
+  background-color: #f44336;
+  color: white;
+}
+
+.more-options-btn {
+  color: #666666;
 }
 
 /* Profile Edit Form */
@@ -134,6 +194,11 @@
   border-radius: 8px;
   background-color: #fafafa;
   min-width: 120px;
+  transition: background-color 0.3s ease;
+}
+
+.stat-card:hover {
+  background-color: #f0f0f0;
 }
 
 .stat-number {
@@ -234,11 +299,26 @@
   font-size: 14px;
   color: #666666;
   line-height: 1.6;
-  margin: 0 0 16px 0;
+  margin: 0 0 12px 0;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.blog-topic {
+  margin-bottom: 16px;
+}
+
+.topic-tag {
+  display: inline-block;
+  background-color: #e3f2fd;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .blog-meta {
@@ -269,6 +349,10 @@
   font-size: 16px !important;
   width: 16px !important;
   height: 16px !important;
+}
+
+.stat-icon.liked {
+  color: #1a1a1a;
 }
 
 /* Empty State */
@@ -350,6 +434,11 @@
   .form-actions button {
     flex: 1;
   }
+
+  .profile-actions {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
 }
 
 @media (max-width: 480px) {
@@ -380,6 +469,10 @@
     border-radius: 0;
     border-left: none;
     border-right: none;
+  }
+
+  .follow-btn {
+    min-width: 100px;
   }
 }
 
@@ -416,8 +509,95 @@
   --mdc-snackbar-container-color: #333333;
 }
 
+::ng-deep .success-snackbar {
+  --mdc-snackbar-container-color: #4caf50;
+}
+
+::ng-deep .error-snackbar {
+  --mdc-snackbar-container-color: #f44336;
+}
+
+::ng-deep .mat-mdc-menu-content {
+  padding: 8px 0;
+}
+
+::ng-deep .mat-mdc-menu-item {
+  min-height: 40px;
+}
+
+::ng-deep .mat-mdc-menu-item .mat-icon {
+  margin-right: 12px;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
 /* Loading States */
 .loading {
   opacity: 0.6;
   pointer-events: none;
+}
+
+/* Follow Button States */
+.follow-btn:disabled {
+  opacity: 0.6;
+}
+
+/* Hover Effects */
+.blog-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.blog-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transition: left 0.5s;
+}
+
+.blog-card:hover::before {
+  left: 100%;
+}
+
+/* Profile Actions Animation */
+.profile-actions button {
+  transition: all 0.3s ease;
+}
+
+.profile-actions button:hover {
+  transform: translateY(-1px);
+}
+
+/* Statistics Animation */
+.stat-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, #1a1a1a, #666666);
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+}
+
+.stat-card:hover::after {
+  transform: translateX(0);
+}
+
+/* Focus States */
+.blog-card:focus,
+.stat-card:focus {
+  outline: 2px solid #1a1a1a;
+  outline-offset: 2px;
 }

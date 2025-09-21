@@ -142,15 +142,74 @@ export class ArticleService {
     });
   }
 
-  // --- User ---
+  // --- User Profile ---
   getUserInfo(): Observable<UserProfile> {
     return this.http.get<UserProfile>(`${this.userUrl}/user`, { 
       headers: this.getAuthHeaders() 
     });
   }
 
+  getUserById(userId: number): Observable<UserProfile> {
+    return this.http.get<UserProfile>(`${this.userUrl}/user/${userId}`, { 
+      headers: this.getAuthHeaders() 
+    });
+  }
+
   updateUserInfo(user: Partial<UserProfile>): Observable<UserProfile> {
     return this.http.patch<UserProfile>(`${this.userUrl}/user`, user, { 
+      headers: this.getAuthHeaders() 
+    });
+  }
+
+  changePassword(passwordData: { currentPassword: string; newPassword: string }): Observable<any> {
+    return this.http.patch(`${this.userUrl}/change-password`, passwordData, { 
+      headers: this.getAuthHeaders() 
+    });
+  }
+
+  uploadProfilePicture(file: File): Observable<{ profilePic: string }> {
+    const formData = new FormData();
+    formData.append('profilePic', file);
+    
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+    });
+    
+    return this.http.post<{ profilePic: string }>(`${this.userUrl}/upload-profile-pic`, formData, {
+      headers
+    });
+  }
+
+  // --- Follow/Unfollow ---
+  followUser(userId: number): Observable<any> {
+    return this.http.post(`${this.userUrl}/follow/${userId}`, {}, { 
+      headers: this.getAuthHeaders() 
+    });
+  }
+
+  unfollowUser(userId: number): Observable<any> {
+    return this.http.delete(`${this.userUrl}/follow/${userId}`, { 
+      headers: this.getAuthHeaders() 
+    });
+  }
+
+  isFollowing(userId: number): Observable<{ isFollowing: boolean }> {
+    return this.http.get<{ isFollowing: boolean }>(`${this.userUrl}/follow/status/${userId}`, { 
+      headers: this.getAuthHeaders() 
+    });
+  }
+
+  // --- Report User ---
+  reportUser(userId: number, reason: string): Observable<any> {
+    return this.http.post(`${this.userUrl}/report/${userId}`, { reason }, { 
+      headers: this.getAuthHeaders() 
+    });
+  }
+
+  // --- User Statistics ---
+  getUserStatistics(userId?: number): Observable<{ postCount: number; commentCount: number; likeCount: number }> {
+    const url = userId ? `${this.userUrl}/stats/${userId}` : `${this.userUrl}/stats`;
+    return this.http.get<{ postCount: number; commentCount: number; likeCount: number }>(url, { 
       headers: this.getAuthHeaders() 
     });
   }

@@ -1,11 +1,11 @@
 <app-navbar></app-navbar>
-<div class="profile-container">
+<div class="profile-container" *ngIf="userProfile">
   <!-- Profile Header -->
   <div class="profile-header">
     <div class="profile-avatar-section">
       <div class="avatar-container">
         <img [src]="getCurrentProfilePicture()" [alt]="getFullName()" class="profile-avatar">
-        <div *ngIf="isEditingProfile" class="avatar-overlay">
+        <div *ngIf="isEditingProfile && isCurrentUserProfile" class="avatar-overlay">
           <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" style="display: none;">
           <button mat-icon-button (click)="fileInput.click()" class="change-photo-btn">
             <mat-icon>camera_alt</mat-icon>
@@ -15,59 +15,95 @@
     </div>
     
     <div class="profile-info">
-      <div *ngIf="!isEditingProfile" class="profile-display">
-        <h1 class="profile-name">{{ getFullName() }}</h1>
-        <p class="profile-email">{{ userProfile.email }}</p>
-        <p class="profile-bio">{{ userProfile.bio }}</p>
-        <button mat-stroked-button (click)="toggleEditProfile()" class="edit-btn">
-          <mat-icon>edit</mat-icon>
-          Edit Profile
-        </button>
-      </div>
-      
-      <div *ngIf="isEditingProfile" class="profile-edit">
-        <form [formGroup]="profileForm">
-          <div class="name-fields">
-            <mat-form-field appearance="outline" class="half-width">
-              <mat-label>First Name</mat-label>
-              <input matInput formControlName="firstName">
-              <mat-error *ngIf="profileForm.get('firstName')?.hasError('required')">
-                First name is required
-              </mat-error>
-              <mat-error *ngIf="profileForm.get('firstName')?.hasError('minlength')">
-                First name must be at least 2 characters
+      <!-- Current User Profile Display/Edit -->
+      <div *ngIf="isCurrentUserProfile">
+        <div *ngIf="!isEditingProfile" class="profile-display">
+          <h1 class="profile-name">{{ getFullName() }}</h1>
+          <p class="profile-email">{{ userProfile.email }}</p>
+          <p class="profile-bio">{{ userProfile.bio || 'No bio available.' }}</p>
+          <button mat-stroked-button (click)="toggleEditProfile()" class="edit-btn">
+            <mat-icon>edit</mat-icon>
+            Edit Profile
+          </button>
+        </div>
+        
+        <div *ngIf="isEditingProfile" class="profile-edit">
+          <form [formGroup]="profileForm">
+            <div class="name-fields">
+              <mat-form-field appearance="outline" class="half-width">
+                <mat-label>First Name</mat-label>
+                <input matInput formControlName="firstName">
+                <mat-error *ngIf="profileForm.get('firstName')?.hasError('required')">
+                  First name is required
+                </mat-error>
+                <mat-error *ngIf="profileForm.get('firstName')?.hasError('minlength')">
+                  First name must be at least 2 characters
+                </mat-error>
+              </mat-form-field>
+              
+              <mat-form-field appearance="outline" class="half-width">
+                <mat-label>Last Name</mat-label>
+                <input matInput formControlName="lastName">
+                <mat-error *ngIf="profileForm.get('lastName')?.hasError('required')">
+                  Last name is required
+                </mat-error>
+                <mat-error *ngIf="profileForm.get('lastName')?.hasError('minlength')">
+                  Last name must be at least 2 characters
+                </mat-error>
+              </mat-form-field>
+            </div>
+            
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Bio</mat-label>
+              <textarea matInput formControlName="bio" rows="4" maxlength="500"></textarea>
+              <mat-hint align="end">{{ profileForm.get('bio')?.value?.length || 0 }}/500</mat-hint>
+              <mat-error *ngIf="profileForm.get('bio')?.hasError('maxlength')">
+                Bio cannot exceed 500 characters
               </mat-error>
             </mat-form-field>
             
-            <mat-form-field appearance="outline" class="half-width">
-              <mat-label>Last Name</mat-label>
-              <input matInput formControlName="lastName">
-              <mat-error *ngIf="profileForm.get('lastName')?.hasError('required')">
-                Last name is required
-              </mat-error>
-              <mat-error *ngIf="profileForm.get('lastName')?.hasError('minlength')">
-                Last name must be at least 2 characters
-              </mat-error>
-            </mat-form-field>
-          </div>
+            <div class="form-actions">
+              <button mat-button (click)="toggleEditProfile()" type="button" [disabled]="isLoading">
+                Cancel
+              </button>
+              <button mat-raised-button color="primary" (click)="saveProfile()" 
+                      [disabled]="profileForm.invalid || isLoading" type="button">
+                <mat-icon *ngIf="isLoading" class="loading-icon">autorenew</mat-icon>
+                Save Changes
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Other User Profile Display -->
+      <div *ngIf="!isCurrentUserProfile" class="profile-display">
+        <h1 class="profile-name">{{ getFullName() }}</h1>
+        <p class="profile-role" *ngIf="userProfile.role">{{ userProfile.role }}</p>
+        <p class="profile-bio">{{ userProfile.bio || 'No bio available.' }}</p>
+        
+        <div class="profile-actions">
+          <button mat-raised-button 
+                  [color]="isFollowing ? 'accent' : 'primary'"
+                  (click)="toggleFollow()" 
+                  [disabled]="isLoading"
+                  class="follow-btn">
+            <mat-icon *ngIf="isLoading" class="loading-icon">autorenew</mat-icon>
+            <mat-icon *ngIf="!isLoading">{{ isFollowing ? 'person_remove' : 'person_add' }}</mat-icon>
+            {{ isFollowing ? 'Unfollow' : 'Follow' }}
+          </button>
           
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Bio</mat-label>
-            <textarea matInput formControlName="bio" rows="4" maxlength="500"></textarea>
-            <mat-hint align="end">{{ profileForm.get('bio')?.value?.length || 0 }}/500</mat-hint>
-            <mat-error *ngIf="profileForm.get('bio')?.hasError('maxlength')">
-              Bio cannot exceed 500 characters
-            </mat-error>
-          </mat-form-field>
+          <button mat-icon-button [matMenuTriggerFor]="userMenu" class="more-options-btn">
+            <mat-icon>more_vert</mat-icon>
+          </button>
           
-          <div class="form-actions">
-            <button mat-button (click)="toggleEditProfile()" type="button">Cancel</button>
-            <button mat-raised-button color="primary" (click)="saveProfile()" 
-                    [disabled]="profileForm.invalid" type="button">
-              Save Changes
+          <mat-menu #userMenu="matMenu">
+            <button mat-menu-item (click)="reportUser()">
+              <mat-icon>flag</mat-icon>
+              <span>Report User</span>
             </button>
-          </div>
-        </form>
+          </mat-menu>
+        </div>
       </div>
     </div>
   </div>
@@ -75,21 +111,21 @@
   <!-- Statistics -->
   <div class="statistics-section">
     <div class="stat-card">
-      <span class="stat-number">{{ userProfile.statistics.blogsCount }}</span>
-      <span class="stat-label">Blogs</span>
+      <span class="stat-number">{{ getStatistics().blogsCount }}</span>
+      <span class="stat-label">Posts</span>
     </div>
     <div class="stat-card">
-      <span class="stat-number">{{ userProfile.statistics.totalLikes }}</span>
+      <span class="stat-number">{{ getStatistics().totalLikes }}</span>
       <span class="stat-label">Likes</span>
     </div>
     <div class="stat-card">
-      <span class="stat-number">{{ userProfile.statistics.totalComments }}</span>
+      <span class="stat-number">{{ getStatistics().totalComments }}</span>
       <span class="stat-label">Comments</span>
     </div>
   </div>
 
-  <!-- Password Change Section -->
-  <div class="password-section">
+  <!-- Password Change Section (Only for current user) -->
+  <div *ngIf="isCurrentUserProfile" class="password-section">
     <div class="section-header">
       <h2>Password</h2>
       <button *ngIf="!isEditingPassword" mat-stroked-button (click)="toggleEditPassword()">
@@ -131,9 +167,12 @@
         </mat-form-field>
         
         <div class="form-actions">
-          <button mat-button (click)="toggleEditPassword()" type="button">Cancel</button>
+          <button mat-button (click)="toggleEditPassword()" type="button" [disabled]="isLoading">
+            Cancel
+          </button>
           <button mat-raised-button color="primary" (click)="savePassword()" 
-                  [disabled]="passwordForm.invalid" type="button">
+                  [disabled]="passwordForm.invalid || isLoading" type="button">
+            <mat-icon *ngIf="isLoading" class="loading-icon">autorenew</mat-icon>
             Update Password
           </button>
         </div>
@@ -141,33 +180,37 @@
     </div>
   </div>
 
-  <!-- User Blogs Section -->
+  <!-- User Articles Section -->
   <div class="blogs-section">
     <div class="section-header">
-      <h2>My Blogs</h2>
-      <span class="blog-count">{{ userBlogs.length }} articles</span>
+      <h2>{{ isCurrentUserProfile ? 'My Posts' : 'Posts' }}</h2>
+      <span class="blog-count">{{ userArticles.length }} articles</span>
     </div>
     
-    <div class="blogs-grid">
-      <div *ngFor="let blog of userBlogs" class="blog-card">
-        <div class="blog-image" *ngIf="blog.imageUrl">
-          <img [src]="blog.imageUrl" [alt]="blog.title">
+    <div class="blogs-grid" *ngIf="userArticles.length > 0">
+      <div *ngFor="let article of userArticles" class="blog-card" (click)="navigateToArticle(article.id)">
+        <div class="blog-image" *ngIf="article.banner">
+          <img [src]="article.banner" [alt]="article.title">
         </div>
         
         <div class="blog-content">
-          <h3 class="blog-title">{{ blog.title }}</h3>
-          <p class="blog-excerpt">{{ blog.excerpt }}</p>
+          <h3 class="blog-title">{{ article.title }}</h3>
+          <div class="blog-topic" *ngIf="article.topic">
+            <span class="topic-tag">{{ article.topic }}</span>
+          </div>
           
           <div class="blog-meta">
-            <span class="blog-date">{{ formatDate(blog.publishedDate) }}</span>
+            <span class="blog-date">{{ formatDate(article.createdAt) }}</span>
             <div class="blog-stats">
               <span class="blog-stat">
-                <mat-icon class="stat-icon">favorite_border</mat-icon>
-                {{ blog.likes }}
+                <mat-icon class="stat-icon" [class.liked]="article.isLiked">
+                  {{ article.isLiked ? 'favorite' : 'favorite_border' }}
+                </mat-icon>
+                {{ article.likeCount }}
               </span>
               <span class="blog-stat">
                 <mat-icon class="stat-icon">comment</mat-icon>
-                {{ blog.comments }}
+                {{ article.commentCount }}
               </span>
             </div>
           </div>
@@ -175,10 +218,17 @@
       </div>
     </div>
     
-    <div *ngIf="userBlogs.length === 0" class="empty-state">
+    <div *ngIf="userArticles.length === 0" class="empty-state">
       <mat-icon class="empty-icon">article</mat-icon>
-      <h3>No blogs yet</h3>
-      <p>Start writing your first blog post to see it here.</p>
+      <h3>No posts yet</h3>
+      <p *ngIf="isCurrentUserProfile">Start writing your first blog post to see it here.</p>
+      <p *ngIf="!isCurrentUserProfile">This user hasn't published any posts yet.</p>
     </div>
   </div>
+</div>
+
+<!-- Loading State -->
+<div *ngIf="!userProfile" class="loading-container">
+  <mat-icon class="loading-spinner">autorenew</mat-icon>
+  <p>Loading profile...</p>
 </div>

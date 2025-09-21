@@ -1,8 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
+import { ArticleService, UserProfile, Article } from '../../services/article.service';
 
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
 
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -11,30 +14,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
-
-interface UserProfile {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  bio: string;
-  profilePicture: string;
-  statistics: {
-    blogsCount: number;
-    totalLikes: number;
-    totalComments: number;
-  };
-}
-
-interface UserBlog {
-  id: string;
-  title: string;
-  excerpt: string;
-  publishedDate: Date;
-  likes: number;
-  comments: number;
-  imageUrl?: string;
-}
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatMenuModule } from '@angular/material/menu';
 
 @Component({
   selector: 'app-profile',
@@ -47,6 +28,8 @@ interface UserBlog {
     MatButtonModule,
     MatIconModule,
     MatSnackBarModule,
+    MatDialogModule,
+    MatMenuModule,
     NavbarComponent
   ],
   templateUrl: './profile.component.html',
@@ -59,61 +42,32 @@ export class ProfileComponent implements OnInit {
   isEditingPassword = false;
   selectedFile: File | null = null;
   previewUrl: string | null = null;
-
-  // Mock user profile data
-  userProfile: UserProfile = {
-    id: '1',
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@example.com',
-    bio: 'Passionate blogger writing about technology, life, and everything in between. Always eager to share knowledge and connect with like-minded individuals.',
-    profilePicture: 'https://i.pinimg.com/736x/a6/db/73/a6db736c419380d2c6102fa8dc2d2d35.jpg',
-    statistics: {
-      blogsCount: 25,
-      totalLikes: 342,
-      totalComments: 128
-    }
-  };
-
-  // Mock user blogs data
-  userBlogs: UserBlog[] = [
-    {
-      id: '1',
-      title: 'Getting Started with Angular 17',
-      excerpt: 'A comprehensive guide to building modern web applications with the latest Angular features and best practices.',
-      publishedDate: new Date('2024-01-15'),
-      likes: 45,
-      comments: 12,
-      imageUrl: 'https://i.pinimg.com/1200x/7e/05/8d/7e058d01d8ee1303f1eeb7d92a7b3c0c.jpg'
-    },
-    {
-      id: '2',
-      title: 'The Future of Web Development',
-      excerpt: 'Exploring emerging trends and technologies that will shape the future of web development in the coming years.',
-      publishedDate: new Date('2024-01-10'),
-      likes: 32,
-      comments: 8,
-      imageUrl: 'https://i.pinimg.com/1200x/7e/05/8d/7e058d01d8ee1303f1eeb7d92a7b3c0c.jpg'
-    },
-    {
-      id: '3',
-      title: 'CSS Grid vs Flexbox: When to Use What',
-      excerpt: 'Understanding the differences between CSS Grid and Flexbox, and knowing when to use each for optimal layouts.',
-      publishedDate: new Date('2024-01-05'),
-      likes: 28,
-      comments: 15,
-      imageUrl: 'https://i.pinimg.com/1200x/7e/05/8d/7e058d01d8ee1303f1eeb7d92a7b3c0c.jpg'
-    }
-  ];
+  
+  // Profile data
+  userProfile: UserProfile | null = null;
+  currentUserProfile: UserProfile | null = null;
+  userArticles: Article[] = [];
+  
+  // Route state
+  isCurrentUserProfile = true;
+  profileUserId: number | null = null;
+  
+  // Follow state
+  isFollowing = false;
+  isLoading = false;
 
   constructor(
     private fb: FormBuilder,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private dialog: MatDialog,
+    private route: ActivatedRoute,
+    private router: Router,
+    private articleService: ArticleService
   ) {
     this.profileForm = this.fb.group({
-      firstName: [this.userProfile.firstName, [Validators.required, Validators.minLength(2)]],
-      lastName: [this.userProfile.lastName, [Validators.required, Validators.minLength(2)]],
-      bio: [this.userProfile.bio, [Validators.maxLength(500)]]
+      firstName: ['', [Validators.required, Validators.minLength(2)]],
+      lastName: ['', [Validators.required, Validators.minLength(2)]],
+      bio: ['', [Validators.maxLength(500)]]
     });
 
     this.passwordForm = this.fb.group({
@@ -124,7 +78,108 @@ export class ProfileComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Initialize component
+    // Get current user info first
+    this.getCurrentUserInfo();
+    
+    // Listen to route changes
+    this.route.params.subscribe(params => {
+      const userId = params['id'];
+      if (userId) {
+        this.profileUserId = parseInt(userId);
+        this.isCurrentUserProfile = false;
+        this.loadUserProfile(this.profileUserId);
+        this.loadUserArticles(this.profileUserId);
+      } else {
+        this.isCurrentUserProfile = true;
+        this.profileUserId = null;
+        this.loadCurrentUserProfile();
+        this.loadMyArticles();
+      }
+    });
+  }
+
+  private getCurrentUserInfo(): void {
+    this.articleService.getUserInfo().subscribe({
+      next: (profile) => {
+        this.currentUserProfile = profile;
+        if (this.isCurrentUserProfile) {
+          this.userProfile = profile;
+          this.updateFormWithProfile(profile);
+        }
+      },
+      error: (error) => {
+        console.error('Error loading current user info:', error);
+        this.showError('Failed to load user information');
+      }
+    });
+  }
+
+  private loadCurrentUserProfile(): void {
+    if (this.currentUserProfile) {
+      this.userProfile = this.currentUserProfile;
+      this.updateFormWithProfile(this.currentUserProfile);
+    } else {
+      this.getCurrentUserInfo();
+    }
+  }
+
+  private loadUserProfile(userId: number): void {
+    this.articleService.getUserById(userId).subscribe({
+      next: (profile) => {
+        this.userProfile = profile;
+        this.checkIfFollowing(userId);
+      },
+      error: (error) => {
+        console.error('Error loading user profile:', error);
+        this.showError('Failed to load user profile');
+        // Fallback to current user route if user not found
+        this.router.navigate(['/profile']);
+      }
+    });
+  }
+
+  private loadMyArticles(): void {
+    this.articleService.getMyPosts().subscribe({
+      next: (articles) => {
+        this.userArticles = articles;
+      },
+      error: (error) => {
+        console.error('Error loading articles:', error);
+        this.showError('Failed to load articles');
+      }
+    });
+  }
+
+  private loadUserArticles(userId: number): void {
+    this.articleService.getPostsByUserId(userId).subscribe({
+      next: (articles) => {
+        this.userArticles = articles;
+      },
+      error: (error) => {
+        console.error('Error loading user articles:', error);
+        this.showError('Failed to load user articles');
+      }
+    });
+  }
+
+  private updateFormWithProfile(profile: UserProfile): void {
+    this.profileForm.patchValue({
+      firstName: profile.firstName,
+      lastName: profile.lastName,
+      bio: profile.bio
+    });
+  }
+
+  private checkIfFollowing(userId: number): void {
+    this.articleService.isFollowing(userId).subscribe({
+      next: (response) => {
+        this.isFollowing = response.isFollowing;
+      },
+      error: (error) => {
+        console.error('Error checking follow status:', error);
+        this.isFollowing = false;
+      }
+    });
   }
 
   passwordMatchValidator(form: FormGroup) {
@@ -142,13 +197,9 @@ export class ProfileComponent implements OnInit {
 
   toggleEditProfile(): void {
     this.isEditingProfile = !this.isEditingProfile;
-    if (!this.isEditingProfile) {
+    if (!this.isEditingProfile && this.userProfile) {
       // Reset form to original values if cancelled
-      this.profileForm.patchValue({
-        firstName: this.userProfile.firstName,
-        lastName: this.userProfile.lastName,
-        bio: this.userProfile.bio
-      });
+      this.updateFormWithProfile(this.userProfile);
       this.selectedFile = null;
       this.previewUrl = null;
     }
@@ -176,56 +227,173 @@ export class ProfileComponent implements OnInit {
   }
 
   saveProfile(): void {
-    if (this.profileForm.valid) {
-      // Update user profile with form data
-      this.userProfile.firstName = this.profileForm.value.firstName;
-      this.userProfile.lastName = this.profileForm.value.lastName;
-      this.userProfile.bio = this.profileForm.value.bio;
+    if (this.profileForm.valid && this.userProfile) {
+      this.isLoading = true;
       
-      // Update profile picture if new one selected
-      if (this.previewUrl) {
-        this.userProfile.profilePicture = this.previewUrl;
+      const updateData: Partial<UserProfile> = {
+        firstName: this.profileForm.value.firstName,
+        lastName: this.profileForm.value.lastName,
+        bio: this.profileForm.value.bio
+      };
+
+      // Handle profile picture upload if selected
+      if (this.selectedFile) {
+        this.articleService.uploadProfilePicture(this.selectedFile).subscribe({
+          next: (uploadResponse) => {
+            updateData.profilePic = uploadResponse.profilePic;
+            this.updateProfileData(updateData);
+          },
+          error: (error) => {
+            console.error('Error uploading profile picture:', error);
+            this.showError('Failed to upload profile picture');
+            this.isLoading = false;
+          }
+        });
+      } else {
+        this.updateProfileData(updateData);
       }
-      
-      this.isEditingProfile = false;
-      this.selectedFile = null;
-      this.previewUrl = null;
-      
-      this.snackBar.open('Profile updated successfully!', 'Close', {
-        duration: 3000,
-        horizontalPosition: 'center',
-        verticalPosition: 'top'
-      });
     }
+  }
+
+  private updateProfileData(updateData: Partial<UserProfile>): void {
+    this.articleService.updateUserInfo(updateData).subscribe({
+      next: (updatedProfile) => {
+        this.userProfile = updatedProfile;
+        this.currentUserProfile = updatedProfile;
+        this.isEditingProfile = false;
+        this.selectedFile = null;
+        this.previewUrl = null;
+        this.isLoading = false;
+        
+        this.showSuccess('Profile updated successfully!');
+      },
+      error: (error) => {
+        console.error('Error updating profile:', error);
+        this.isLoading = false;
+        this.showError('Failed to update profile');
+      }
+    });
   }
 
   savePassword(): void {
     if (this.passwordForm.valid) {
-      // In a real app, you would call an API to update the password
-      this.isEditingPassword = false;
-      this.passwordForm.reset();
+      this.isLoading = true;
       
-      this.snackBar.open('Password updated successfully!', 'Close', {
-        duration: 3000,
-        horizontalPosition: 'center',
-        verticalPosition: 'top'
+      const passwordData = {
+        currentPassword: this.passwordForm.value.currentPassword,
+        newPassword: this.passwordForm.value.newPassword
+      };
+
+      this.articleService.changePassword(passwordData).subscribe({
+        next: () => {
+          this.isEditingPassword = false;
+          this.passwordForm.reset();
+          this.isLoading = false;
+          this.showSuccess('Password updated successfully!');
+        },
+        error: (error) => {
+          console.error('Error updating password:', error);
+          this.isLoading = false;
+          
+          if (error.status === 400) {
+            this.showError('Current password is incorrect');
+          } else {
+            this.showError('Failed to update password');
+          }
+        }
       });
     }
   }
 
-  formatDate(date: Date): string {
+  toggleFollow(): void {
+    if (!this.profileUserId || this.isLoading) return;
+    
+    this.isLoading = true;
+    
+    const followAction = this.isFollowing 
+      ? this.articleService.unfollowUser(this.profileUserId)
+      : this.articleService.followUser(this.profileUserId);
+    
+    followAction.subscribe({
+      next: () => {
+        this.isFollowing = !this.isFollowing;
+        this.isLoading = false;
+        const message = this.isFollowing ? 'User followed successfully!' : 'User unfollowed successfully!';
+        this.showSuccess(message);
+      },
+      error: (error) => {
+        console.error('Error toggling follow:', error);
+        this.isLoading = false;
+        this.showError('Failed to update follow status');
+      }
+    });
+  }
+
+  reportUser(): void {
+    if (!this.profileUserId || !this.userProfile) return;
+    
+    const reason = prompt(`Why are you reporting ${this.getFullName()}?\n\nPlease provide a reason:`);
+    if (reason && reason.trim()) {
+      this.articleService.reportUser(this.profileUserId, reason.trim()).subscribe({
+        next: () => {
+          this.showSuccess('User reported successfully. Thank you for helping keep our community safe.');
+        },
+        error: (error) => {
+          console.error('Error reporting user:', error);
+          this.showError('Failed to submit report. Please try again later.');
+        }
+      });
+    }
+  }
+
+  formatDate(date: string): string {
     return new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric'
-    }).format(date);
+    }).format(new Date(date));
   }
 
   getFullName(): string {
+    if (!this.userProfile) return '';
     return `${this.userProfile.firstName} ${this.userProfile.lastName}`;
   }
 
   getCurrentProfilePicture(): string {
-    return this.previewUrl || this.userProfile.profilePicture;
+    return this.previewUrl || this.userProfile?.profilePic || 'https://via.placeholder.com/120';
+  }
+
+  getStatistics() {
+    if (!this.userProfile) {
+      return { blogsCount: 0, totalLikes: 0, totalComments: 0 };
+    }
+    
+    return {
+      blogsCount: this.userProfile.postCount || 0,
+      totalLikes: this.userProfile.likeCount || 0,
+      totalComments: this.userProfile.commentCount || 0
+    };
+  }
+
+  navigateToArticle(articleId: number): void {
+    this.router.navigate(['/article', articleId]);
+  }
+
+  private showSuccess(message: string): void {
+    this.snackBar.open(message, 'Close', {
+      duration: 3000,
+      horizontalPosition: 'center',
+      verticalPosition: 'top',
+      panelClass: ['success-snackbar']
+    });
+  }
+
+  private showError(message: string): void {
+    this.snackBar.open(message, 'Close', {
+      duration: 5000,
+      horizontalPosition: 'center',
+      verticalPosition: 'top',
+      panelClass: ['error-snackbar']
+    });
   }
 }
