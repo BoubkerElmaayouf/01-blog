@@ -15,11 +15,11 @@
 }
 
 .explore-header h1 {
-  font-size: 2.5rem;
+  font-size: 2rem;
   color: #1a1a1a;
   margin: 0;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
 
 /* Category Navigation */
@@ -153,6 +153,7 @@
   align-items: center;
   margin-top: auto;
   padding-top: 0.5rem;
+  overflow: hidden;
 }
 
 /* Interaction Stats */
@@ -160,6 +161,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  overflow: hidden;
 }
 
 .interaction-btn {

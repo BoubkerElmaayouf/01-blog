@@ -8,7 +8,7 @@
   margin-top: 100px;
 }
 
-/* Loading State */
+/* Loading State
 .loading-container {
   display: flex;
   flex-direction: column;
@@ -37,7 +37,7 @@
   width: 18px !important;
   height: 18px !important;
   margin-right: 8px;
-}
+} */
 
 /* Profile Header */
 .profile-header {

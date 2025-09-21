@@ -16,6 +16,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatMenuModule } from '@angular/material/menu';
+// import { ReportComponent } from '../report/report.component';
+import { LoaderComponent } from '../../shared/components/loader/loader.component';
+import { Post } from '../admin/admin.component';
 
 @Component({
   selector: 'app-profile',
@@ -30,7 +33,9 @@ import { MatMenuModule } from '@angular/material/menu';
     MatSnackBarModule,
     MatDialogModule,
     MatMenuModule,
-    NavbarComponent
+    NavbarComponent,
+    // ReportComponent,
+    LoaderComponent
   ],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css']
@@ -42,6 +47,7 @@ export class ProfileComponent implements OnInit {
   isEditingPassword = false;
   selectedFile: File | null = null;
   previewUrl: string | null = null;
+  isReportSelected: boolean = false;
   
   // Profile data
   userProfile: UserProfile | null = null;
@@ -331,19 +337,20 @@ export class ProfileComponent implements OnInit {
 
   reportUser(): void {
     if (!this.profileUserId || !this.userProfile) return;
+    this.isReportSelected = true
     
-    const reason = prompt(`Why are you reporting ${this.getFullName()}?\n\nPlease provide a reason:`);
-    if (reason && reason.trim()) {
-      this.articleService.reportUser(this.profileUserId, reason.trim()).subscribe({
-        next: () => {
-          this.showSuccess('User reported successfully. Thank you for helping keep our community safe.');
-        },
-        error: (error) => {
-          console.error('Error reporting user:', error);
-          this.showError('Failed to submit report. Please try again later.');
-        }
-      });
-    }
+    // const reason = prompt(`Why are you reporting ${this.getFullName()}?\n\nPlease provide a reason:`);
+    // if (reason && reason.trim()) {
+    //   this.articleService.reportUser(this.profileUserId, reason.trim()).subscribe({
+    //     next: () => {
+    //       this.showSuccess('User reported successfully. Thank you for helping keep our community safe.');
+    //     },
+    //     error: (error) => {
+    //       console.error('Error reporting user:', error);
+    //       this.showError('Failed to submit report. Please try again later.');
+    //     }
+    //   });
+    // }
   }
 
   formatDate(date: string): string {
@@ -376,7 +383,7 @@ export class ProfileComponent implements OnInit {
   }
 
   navigateToArticle(articleId: number): void {
-    this.router.navigate(['/article', articleId]);
+    this.router.navigate(['/explore', articleId]);
   }
 
   private showSuccess(message: string): void {
