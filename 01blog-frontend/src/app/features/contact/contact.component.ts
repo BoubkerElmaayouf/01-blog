@@ -5,6 +5,7 @@ import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatInputModule } from "@angular/material/input";
 import { MatButtonModule } from "@angular/material/button";
 import { NavbarComponent } from "../../shared/components/navbar/navbar.component";
+import { LandBarComponent } from "../../shared/components/landNavbar/landBar.component";
 
 @Component({
   selector: "app-contact",
@@ -15,7 +16,7 @@ import { NavbarComponent } from "../../shared/components/navbar/navbar.component
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    NavbarComponent
+    LandBarComponent
   ],
   templateUrl: "./contact.component.html",
   styleUrls: ["./contact.component.css"],

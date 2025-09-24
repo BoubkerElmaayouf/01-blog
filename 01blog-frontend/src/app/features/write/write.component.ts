@@ -162,38 +162,39 @@ export class WriteComponent implements OnInit, AfterViewInit {
     }
 
     private async extractAndUploadImagesFromContent(content: string): Promise<string> {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(content, 'text/html');
-        const images = doc.querySelectorAll('img');
-        
-        for (const img of Array.from(images)) {
-            const src = img.getAttribute('src');
-            
-            // Skip if it's already a Cloudinary URL or external URL
-            if (!src || src.startsWith('http') || src.startsWith('https://res.cloudinary.com')) {
-                continue;
-            }
-            
-            // Handle base64 images
-            if (src.startsWith('data:image')) {
-                try {
-                    // Convert base64 to File
-                    const response = await fetch(src);
-                    const blob = await response.blob();
-                    const file = new File([blob], 'content-image.png', { type: blob.type });
-                    
-                    // Upload to Cloudinary
-                    const cloudinaryUrl = await this.imageUploadService.uploadImage(file);
-                    img.setAttribute('src', cloudinaryUrl);
-                } catch (error) {
-                    console.error('Error uploading content image:', error);
-                }
-            }
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(content, 'text/html');
+    const images = doc.querySelectorAll('img');
+
+    for (const img of Array.from(images)) {
+        const src = img.getAttribute('src');
+
+        // Skip if it's already a Cloudinary URL or an external URL
+        if (!src || src.startsWith('http') || src.startsWith('https://res.cloudinary.com')) {
+        continue;
         }
-        
-        return doc.body.innerHTML;
+
+        // Handle base64 images
+        if (src.startsWith('data:image')) {
+        try {
+            // Convert base64 to File
+            const response = await fetch(src);
+            const blob = await response.blob();
+            const file = new File([blob], 'content-image.png', { type: blob.type });
+
+            // Upload to Cloudinary (returns object now)
+            const uploaded = await this.imageUploadService.uploadImage(file);
+
+            // Use secure_url as the new src
+            img.setAttribute('src', uploaded.secure_url);
+        } catch (error) {
+            console.error('Error uploading content image:', error);
+        }
+        }
     }
 
+    return doc.documentElement.outerHTML;
+    }
     async onPublish(): Promise<void> {
         if (!this.postForm.valid) {
             this.markFormGroupTouched();
@@ -207,13 +208,19 @@ export class WriteComponent implements OnInit, AfterViewInit {
         this.isPublishing = true;
 
         try {
-            let bannerUrl = '';
+            let bannerUrl = {
+                secure_url: '',
+                public_id: '',
+                resourceType: 'image' as 'image' | 'video'
+            }
+            
             let processedContent = this.quillEditor?.root.innerHTML || '';
 
             // Upload banner image if exists
             if (this.selectedFile) {
                 this.snackBar.open('Uploading banner image...', '', { duration: 2000 });
                 bannerUrl = await this.imageUploadService.uploadImage(this.selectedFile);
+                console.log('Banner uploaded:', bannerUrl.secure_url);
             }
 
             // Process and upload images in content
@@ -231,7 +238,7 @@ export class WriteComponent implements OnInit, AfterViewInit {
             const postData = {
                 title: this.postForm.get('title')?.value,
                 topic: this.postForm.get('category')?.value,
-                banner: bannerUrl || "https://res.cloudinary.com/dsv24pun2/image/upload/v1758228067/cmcbxqtbsuyxbzu6ifsp.png",
+                banner: bannerUrl.secure_url || "https://res.cloudinary.com/dsv24pun2/image/upload/v1758228067/cmcbxqtbsuyxbzu6ifsp.png",
                 description: processedContent && processedContent.length > 20 
                             ? processedContent 
                             : "<p>No description provided</p>",

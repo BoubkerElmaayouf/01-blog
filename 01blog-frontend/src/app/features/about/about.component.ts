@@ -2,7 +2,7 @@ import { Component } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { MatCardModule } from "@angular/material/card";
 import { MatButtonModule } from "@angular/material/button";
-import { NavbarComponent } from "../../shared/components/navbar/navbar.component";
+import { LandBarComponent } from "../../shared/components/landNavbar/landBar.component";
 
 @Component({
   selector: "app-about",
@@ -11,7 +11,7 @@ import { NavbarComponent } from "../../shared/components/navbar/navbar.component
     CommonModule,
     MatCardModule,
     MatButtonModule,
-    NavbarComponent
+    LandBarComponent
   ],
   templateUrl: "./about.component.html",
   styleUrls: ["./about.component.css"],
