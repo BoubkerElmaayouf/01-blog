@@ -123,10 +123,10 @@
         <mat-icon>arrow_forward</mat-icon>
       </a>
     </mat-menu>
-
+    <!-- ************** -->
     <button mat-button [matMenuTriggerFor]="userMenu" class="user-avatar">
       <img 
-        [src]="userProfile.avatar" 
+        [src]="userProfile?.profilePic" 
         alt="User Avatar" 
         class="avatar-image"
       />
@@ -136,13 +136,13 @@
       <!-- User Profile Header -->
       <div class="profile-header" mat-menu-item disabled>
         <img 
-          [src]="userProfile.avatar" 
+          [src]="userProfile?.profilePic" 
           alt="Profile Avatar" 
           class="profile-avatar"
         />
         <div class="profile-info">
-          <div class="profile-name">{{ userProfile.name }}</div>
-          <div class="profile-email">{{ userProfile.email }}</div>
+          <div class="profile-name">{{ userProfile?.firstName }} {{ userProfile?.lastName }}</div>
+          <div class="profile-email">{{ userProfile?.email }}</div>
         </div>
       </div>
       
@@ -170,5 +170,8 @@
         <span>Logout</span>
       </button>
     </mat-menu>
+
+
+    <!-- ******** -->
   </div>
 </mat-toolbar>

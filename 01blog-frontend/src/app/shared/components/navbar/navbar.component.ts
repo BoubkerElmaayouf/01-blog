@@ -11,6 +11,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { FormsModule } from '@angular/forms';
 import { MatDividerModule } from '@angular/material/divider';
 import { Router, RouterModule } from '@angular/router';
+import { ArticleService, UserProfile } from '../../../services/article.service';
 
 export interface Notification {
   id: string;
@@ -49,11 +50,7 @@ export class NavbarComponent implements OnInit {
   isMobileMenuOpen: boolean = false;
 
   // User profile data
-  userProfile = {
-    name: 'Yassine Jouichate',
-    email: 'YassineJ210@workel.com',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
-  };
+  userProfile : UserProfile | null = null;
 
   // Sample notifications data
   notifications: Notification[] = [
@@ -111,11 +108,26 @@ export class NavbarComponent implements OnInit {
     }
   ];
 
+  constructor (private articleService: ArticleService, private router: Router) {}
+
 
   ngOnInit(): void {
     // Initialize component
     this.sortNotifications();
+    this.loadUserProfile();
   }
+
+   private loadUserProfile(): void {
+      this.articleService.getUserInfo().subscribe({
+        next: (profile) => {
+          this.userProfile = profile
+          console.log('Fetched user profile:', profile)
+        },
+        error: (err) => {
+          console.error('Error fetching user profile:', err);
+        }
+      });
+    }
 
   get unreadCount(): number {
     return this.notifications.filter(n => !n.read).length;
@@ -126,11 +138,6 @@ export class NavbarComponent implements OnInit {
       console.log('Searching for:', this.searchQuery);
       // Implement search functionality here
     }
-  }
-
-  onWriteClick(): void {
-    console.log('Write button clicked');
-    // Navigate to write page
   }
 
   onNotificationClick(): void {
@@ -245,11 +252,6 @@ export class NavbarComponent implements OnInit {
       // Then by timestamp (newest first)
       return b.timestamp.getTime() - a.timestamp.getTime();
     });
-  }
-
-  onMenuItemClick(item: string): void {
-    console.log('Menu item clicked:', item);
-    // Handle menu actions
   }
 
   toggleMobileMenu(): void {

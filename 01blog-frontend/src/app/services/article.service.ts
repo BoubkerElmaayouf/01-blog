@@ -123,6 +123,13 @@ export class ArticleService {
     });
   }
 
+  // search for users or posts
+  searchBar(title: String, firstName: String) : Observable<any> {
+    return this.http.get(`${this.apiUrl}/search?title=${title}&firstName=${firstName}`, { 
+      headers: this.getAuthHeaders() 
+    });
+  }
+
   // --- Comments ---
   getComments(postId: number): Observable<Comment[]> {
     return this.http.get<Comment[]>(`${this.apiUrl}/${postId}/comments`, {
@@ -157,11 +164,9 @@ export class ArticleService {
   }
 
   updateUserInfo(user: Partial<UserProfile>): Observable<UserProfile> {
-    
     if (!user.id) {
       throw new Error('User Id is requied to upate user info')
     }
-
     return this.http.patch<UserProfile>(`${this.userUrl}/user/${user.id}`, user, {
       headers: this.getAuthHeaders()
     })
@@ -201,11 +206,4 @@ export class ArticleService {
     });
   }
 
-  // --- User Statistics ---
-  getUserStatistics(userId?: number): Observable<{ postCount: number; commentCount: number; likeCount: number }> {
-    const url = userId ? `${this.userUrl}/stats/${userId}` : `${this.userUrl}/stats`;
-    return this.http.get<{ postCount: number; commentCount: number; likeCount: number }>(url, { 
-      headers: this.getAuthHeaders() 
-    });
-  }
 }
