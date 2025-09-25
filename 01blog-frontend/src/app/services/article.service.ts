@@ -156,9 +156,13 @@ export class ArticleService {
   }
 
   updateUserInfo(user: Partial<UserProfile>): Observable<UserProfile> {
-    return this.http.patch<UserProfile>(`${this.userUrl}/user`, user, { 
-      headers: this.getAuthHeaders() 
-    });
+    if (!user.id) {
+      throw new Error('User Id is requied to upate user info')
+    }
+
+    return this.http.patch<UserProfile>(`${this.userUrl}/user/${user.id}`, user, {
+      headers: this.getAuthHeaders()
+    })
   }
 
   changePassword(passwordData: { currentPassword: string; newPassword: string }): Observable<any> {

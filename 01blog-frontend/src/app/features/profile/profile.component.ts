@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { ArticleService, UserProfile, Article } from '../../services/article.service';
+import { ImageUploadService } from '../../utils/image-upload.service';
 
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
@@ -35,7 +36,8 @@ import { Post } from '../admin/admin.component';
     MatMenuModule,
     NavbarComponent,
     // ReportComponent,
-    LoaderComponent
+    LoaderComponent,
+    
   ],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css']
@@ -68,7 +70,8 @@ export class ProfileComponent implements OnInit {
     private dialog: MatDialog,
     private route: ActivatedRoute,
     private router: Router,
-    private articleService: ArticleService
+    private articleService: ArticleService,
+    private imageUploadService: ImageUploadService   // ✅ inject Cloudinary service
   ) {
     this.profileForm = this.fb.group({
       firstName: ['', [Validators.required, Validators.minLength(2)]],
@@ -84,30 +87,56 @@ export class ProfileComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Get current user info first
-    this.getCurrentUserInfo();
-    
-    // Listen to route changes
-    this.route.params.subscribe(params => {
-      const userId = params['id'];
-      if (userId) {
-        this.profileUserId = parseInt(userId);
-        this.isCurrentUserProfile = false;
-        this.loadUserProfile(this.profileUserId);
-        this.loadUserArticles(this.profileUserId);
-      } else {
-        this.isCurrentUserProfile = true;
-        this.profileUserId = null;
-        this.loadCurrentUserProfile();
-        this.loadMyArticles();
+    // First load current user info
+    this.articleService.getUserInfo().subscribe({
+      next: (profile) => {
+        this.currentUserProfile = profile;
+        console.log("✅ Current user loaded:", this.currentUserProfile.id);
+
+        // Now that we have current user, check route params
+        this.route.params.subscribe(params => {
+          const userId = params['id'];
+
+          if (userId) {
+            this.profileUserId = parseInt(userId);
+            console.log("Compare with logged-in user:", this.profileUserId, this.currentUserProfile?.id);
+
+            if (this.profileUserId === this.currentUserProfile?.id) {
+              // Same user → own profile
+              this.isCurrentUserProfile = true;
+              this.loadCurrentUserProfile();
+              this.loadMyArticles();
+            } else {
+              // Another user → public profile
+              this.isCurrentUserProfile = false;
+              this.loadUserProfile(this.profileUserId);
+              this.loadUserArticles(this.profileUserId);
+            }
+          } else {
+            // No id in params → current user profile
+            this.isCurrentUserProfile = true;
+            this.profileUserId = null;
+            this.loadCurrentUserProfile();
+            this.loadMyArticles();
+          }
+        });
+      },
+      error: (err) => {
+        console.error("❌ Failed to load current user", err);
+        this.showError("Failed to load user information");
       }
     });
   }
 
+
+
+  // --- Profile loading ---
   private getCurrentUserInfo(): void {
     this.articleService.getUserInfo().subscribe({
       next: (profile) => {
         this.currentUserProfile = profile;
+        
+        console.log("----------->", this.currentUserProfile.id); // getting the value with success
         if (this.isCurrentUserProfile) {
           this.userProfile = profile;
           this.updateFormWithProfile(profile);
@@ -133,12 +162,11 @@ export class ProfileComponent implements OnInit {
     this.articleService.getUserById(userId).subscribe({
       next: (profile) => {
         this.userProfile = profile;
-        this.checkIfFollowing(userId);
+        // this.checkIfFollowing(userId);
       },
       error: (error) => {
         console.error('Error loading user profile:', error);
         this.showError('Failed to load user profile');
-        // Fallback to current user route if user not found
         this.router.navigate(['/profile']);
       }
     });
@@ -176,45 +204,25 @@ export class ProfileComponent implements OnInit {
     });
   }
 
-  private checkIfFollowing(userId: number): void {
-    this.articleService.isFollowing(userId).subscribe({
-      next: (response) => {
-        this.isFollowing = response.isFollowing;
-      },
-      error: (error) => {
-        console.error('Error checking follow status:', error);
-        this.isFollowing = false;
-      }
-    });
-  }
+  // private checkIfFollowing(userId: number): void {
+  //   this.articleService.isFollowing(userId).subscribe({
+  //     next: (response) => {
+  //       this.isFollowing = response.isFollowing;
+  //     },
+  //     error: (error) => {
+  //       console.error('Error checking follow status:', error);
+  //       this.isFollowing = false;
+  //     }
+  //   });
+  // }
 
-  passwordMatchValidator(form: FormGroup) {
-    const newPassword = form.get('newPassword');
-    const confirmPassword = form.get('confirmPassword');
-    
-    if (newPassword && confirmPassword && newPassword.value !== confirmPassword.value) {
-      confirmPassword.setErrors({ mismatch: true });
-    } else {
-      confirmPassword?.setErrors(null);
-    }
-    
-    return null;
-  }
-
+  // --- Profile editing ---
   toggleEditProfile(): void {
     this.isEditingProfile = !this.isEditingProfile;
     if (!this.isEditingProfile && this.userProfile) {
-      // Reset form to original values if cancelled
       this.updateFormWithProfile(this.userProfile);
       this.selectedFile = null;
       this.previewUrl = null;
-    }
-  }
-
-  toggleEditPassword(): void {
-    this.isEditingPassword = !this.isEditingPassword;
-    if (!this.isEditingPassword) {
-      this.passwordForm.reset();
     }
   }
 
@@ -222,41 +230,37 @@ export class ProfileComponent implements OnInit {
     const file = event.target.files[0];
     if (file && file.type.startsWith('image/')) {
       this.selectedFile = file;
-      
-      // Create preview URL
       const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.previewUrl = e.target.result;
-      };
+      reader.onload = (e: any) => this.previewUrl = e.target.result;
       reader.readAsDataURL(file);
     }
   }
 
-  saveProfile(): void {
+  async saveProfile(): Promise<void> {
     if (this.profileForm.valid && this.userProfile) {
-      this.isLoading = true;
+      console.log(this.userProfile, this.profileForm.valid);
       
+      this.isLoading = true;
+
       const updateData: Partial<UserProfile> = {
+        id: this.userProfile.id,
         firstName: this.profileForm.value.firstName,
         lastName: this.profileForm.value.lastName,
         bio: this.profileForm.value.bio
       };
 
-      // Handle profile picture upload if selected
-      if (this.selectedFile) {
-        this.articleService.uploadProfilePicture(this.selectedFile).subscribe({
-          next: (uploadResponse) => {
-            updateData.profilePic = uploadResponse.profilePic;
-            this.updateProfileData(updateData);
-          },
-          error: (error) => {
-            console.error('Error uploading profile picture:', error);
-            this.showError('Failed to upload profile picture');
-            this.isLoading = false;
-          }
-        });
-      } else {
+      try {
+        if (this.selectedFile) {
+          // ✅ Upload to Cloudinary
+          const uploadRes = await this.imageUploadService.uploadImage(this.selectedFile);
+          updateData.profilePic = uploadRes.secure_url;
+        }
+
         this.updateProfileData(updateData);
+      } catch (err) {
+        console.error('Error uploading profile picture:', err);
+        this.showError('Failed to upload profile picture');
+        this.isLoading = false;
       }
     }
   }
@@ -270,7 +274,6 @@ export class ProfileComponent implements OnInit {
         this.selectedFile = null;
         this.previewUrl = null;
         this.isLoading = false;
-        
         this.showSuccess('Profile updated successfully!');
       },
       error: (error) => {
@@ -281,10 +284,28 @@ export class ProfileComponent implements OnInit {
     });
   }
 
+  // --- Password editing ---
+  passwordMatchValidator(form: FormGroup) {
+    const newPassword = form.get('newPassword');
+    const confirmPassword = form.get('confirmPassword');
+    if (newPassword && confirmPassword && newPassword.value !== confirmPassword.value) {
+      confirmPassword.setErrors({ mismatch: true });
+    } else {
+      confirmPassword?.setErrors(null);
+    }
+    return null;
+  }
+
+  toggleEditPassword(): void {
+    this.isEditingPassword = !this.isEditingPassword;
+    if (!this.isEditingPassword) {
+      this.passwordForm.reset();
+    }
+  }
+
   savePassword(): void {
     if (this.passwordForm.valid) {
       this.isLoading = true;
-      
       const passwordData = {
         currentPassword: this.passwordForm.value.currentPassword,
         newPassword: this.passwordForm.value.newPassword
@@ -300,7 +321,6 @@ export class ProfileComponent implements OnInit {
         error: (error) => {
           console.error('Error updating password:', error);
           this.isLoading = false;
-          
           if (error.status === 400) {
             this.showError('Current password is incorrect');
           } else {
@@ -311,11 +331,10 @@ export class ProfileComponent implements OnInit {
     }
   }
 
+  // --- Follow/Report/Helpers ---
   toggleFollow(): void {
     if (!this.profileUserId || this.isLoading) return;
-    
     this.isLoading = true;
-    
     const followAction = this.isFollowing 
       ? this.articleService.unfollowUser(this.profileUserId)
       : this.articleService.followUser(this.profileUserId);
@@ -337,20 +356,7 @@ export class ProfileComponent implements OnInit {
 
   reportUser(): void {
     if (!this.profileUserId || !this.userProfile) return;
-    this.isReportSelected = true
-    
-    // const reason = prompt(`Why are you reporting ${this.getFullName()}?\n\nPlease provide a reason:`);
-    // if (reason && reason.trim()) {
-    //   this.articleService.reportUser(this.profileUserId, reason.trim()).subscribe({
-    //     next: () => {
-    //       this.showSuccess('User reported successfully. Thank you for helping keep our community safe.');
-    //     },
-    //     error: (error) => {
-    //       console.error('Error reporting user:', error);
-    //       this.showError('Failed to submit report. Please try again later.');
-    //     }
-    //   });
-    // }
+    this.isReportSelected = true;
   }
 
   formatDate(date: string): string {
@@ -362,8 +368,7 @@ export class ProfileComponent implements OnInit {
   }
 
   getFullName(): string {
-    if (!this.userProfile) return '';
-    return `${this.userProfile.firstName} ${this.userProfile.lastName}`;
+    return this.userProfile ? `${this.userProfile.firstName} ${this.userProfile.lastName}` : '';
   }
 
   getCurrentProfilePicture(): string {
@@ -371,21 +376,16 @@ export class ProfileComponent implements OnInit {
   }
 
   getStatistics() {
-    if (!this.userProfile) {
-      return { blogsCount: 0, totalLikes: 0, totalComments: 0 };
-    }
-    
-    return {
-      blogsCount: this.userProfile.postCount || 0,
-      totalLikes: this.userProfile.likeCount || 0,
-      totalComments: this.userProfile.commentCount || 0
-    };
+    return this.userProfile
+      ? { blogsCount: this.userProfile.postCount || 0, totalLikes: this.userProfile.likeCount || 0, totalComments: this.userProfile.commentCount || 0 }
+      : { blogsCount: 0, totalLikes: 0, totalComments: 0 };
   }
 
   navigateToArticle(articleId: number): void {
     this.router.navigate(['/explore', articleId]);
   }
 
+  // --- UI feedback ---
   private showSuccess(message: string): void {
     this.snackBar.open(message, 'Close', {
       duration: 3000,

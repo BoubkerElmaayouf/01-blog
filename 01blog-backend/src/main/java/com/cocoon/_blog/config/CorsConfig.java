@@ -15,17 +15,14 @@ public class CorsConfig {
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
 
-        // Allow Angular dev server
         config.setAllowedOrigins(List.of("http://localhost:4200"));
-
-        // Allow credentials (cookies, headers, auth)
         config.setAllowCredentials(true);
 
-        // Allow headers
-        config.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));
+        // safer: allow all headers
+        config.addAllowedHeader("*");
 
-        // Allow HTTP methods
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        // include PATCH
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);

@@ -52,8 +52,7 @@ public class AuthController {
     public ResponseEntity<UserDto> updateUser(
             @PathVariable Long id,
             @RequestBody UserDto userDto,
-            @RequestHeader("Authorization") String authHeader) 
-    {
+            @RequestHeader("Authorization") String authHeader) {
 
         try {
             String token = authHeader.replace("Bearer ", "");
@@ -61,12 +60,16 @@ public class AuthController {
             String username = jwtService.extractUsername(token);
 
             if (!jwtService.validateToken(token, username)) {
-                return ResponseEntity.status(401).build();
+                return ResponseEntity.status(401).build(); // Unauthorized
             }
 
             if (!userIdFromToken.equals(id)) {
-                return ResponseEntity.status(403).build();
+                return ResponseEntity.status(403).build(); // Forbidden
             }
+
+            // Prevent privilege escalation
+            userDto.setRole(null);
+            userDto.setEmail(null);
 
             User updatedUser = authService.updateUser(id, userDto);
             UserDto updatedUserDto = authService.toUserDto(updatedUser);
@@ -76,6 +79,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body(null);
         }
     }
+
 
     @GetMapping("/user/{id}")
     public ResponseEntity<UserDto> getUserById(
