@@ -1,5 +1,6 @@
 package com.cocoon._blog.controller;
 
+import com.cocoon._blog.dto.ChangePasswordRequest;
 import com.cocoon._blog.dto.LoginRequest;
 import com.cocoon._blog.dto.RegisterRequest;
 import com.cocoon._blog.dto.UserDto;
@@ -7,6 +8,7 @@ import com.cocoon._blog.entity.User;
 import com.cocoon._blog.service.AuthService;
 import com.cocoon._blog.service.JwtService;
 
+import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -105,5 +107,30 @@ public class AuthController {
             return ResponseEntity.badRequest().body(null);
         }
     }
+
+
+    // changing the user password
+    @PatchMapping("/user/change-password")
+    public ResponseEntity<?> changePassword(
+            @RequestBody ChangePasswordRequest request,
+            @RequestHeader("Authorization") String authHeader) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            Long userId = jwtService.extractId(token);
+            String username = jwtService.extractUsername(token);
+
+            if (!jwtService.validateToken(token, username)) {
+                return ResponseEntity.status(401).body("Unauthorized");
+            }
+
+            authService.changePassword(userId, request);
+            return ResponseEntity.ok(Map.of("message", "password changed with success"));
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+
 
 }

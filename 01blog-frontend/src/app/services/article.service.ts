@@ -54,6 +54,7 @@ export class ArticleService {
 
   private getAuthHeaders(): HttpHeaders {
     const token = localStorage.getItem('token') || '';
+
     return new HttpHeaders({ 
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
@@ -156,6 +157,7 @@ export class ArticleService {
   }
 
   updateUserInfo(user: Partial<UserProfile>): Observable<UserProfile> {
+    
     if (!user.id) {
       throw new Error('User Id is requied to upate user info')
     }
@@ -165,24 +167,13 @@ export class ArticleService {
     })
   }
 
-  changePassword(passwordData: { currentPassword: string; newPassword: string }): Observable<any> {
-    return this.http.patch(`${this.userUrl}/change-password`, passwordData, { 
-      headers: this.getAuthHeaders() 
-    });
+  // change password (no userId in path, backend uses JWT)
+  changePassword(passwordData: { oldPassword: string; newPassword: string }): Observable<any> {
+    const url = `${this.userUrl}/user/change-password`;
+    const headers = this.getAuthHeaders();
+    return this.http.patch(url, passwordData, { headers });
   }
 
-  uploadProfilePicture(file: File): Observable<{ profilePic: string }> {
-    const formData = new FormData();
-    formData.append('profilePic', file);
-    
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
-    });
-    
-    return this.http.post<{ profilePic: string }>(`${this.userUrl}/upload-profile-pic`, formData, {
-      headers
-    });
-  }
 
   // --- Follow/Unfollow ---
   followUser(userId: number): Observable<any> {

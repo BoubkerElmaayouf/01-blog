@@ -19,7 +19,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatMenuModule } from '@angular/material/menu';
 // import { ReportComponent } from '../report/report.component';
 import { LoaderComponent } from '../../shared/components/loader/loader.component';
-import { Post } from '../admin/admin.component';
+// import { Post } from '../admin/admin.component';
 
 @Component({
   selector: 'app-profile',
@@ -37,7 +37,6 @@ import { Post } from '../admin/admin.component';
     NavbarComponent,
     // ReportComponent,
     LoaderComponent,
-    
   ],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css']
@@ -71,7 +70,7 @@ export class ProfileComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private articleService: ArticleService,
-    private imageUploadService: ImageUploadService   // ✅ inject Cloudinary service
+    private imageUploadService: ImageUploadService
   ) {
     this.profileForm = this.fb.group({
       firstName: ['', [Validators.required, Validators.minLength(2)]],
@@ -87,33 +86,26 @@ export class ProfileComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // First load current user info
     this.articleService.getUserInfo().subscribe({
       next: (profile) => {
         this.currentUserProfile = profile;
-        console.log("✅ Current user loaded:", this.currentUserProfile.id);
+        
 
-        // Now that we have current user, check route params
         this.route.params.subscribe(params => {
           const userId = params['id'];
 
           if (userId) {
             this.profileUserId = parseInt(userId);
-            console.log("Compare with logged-in user:", this.profileUserId, this.currentUserProfile?.id);
-
             if (this.profileUserId === this.currentUserProfile?.id) {
-              // Same user → own profile
               this.isCurrentUserProfile = true;
               this.loadCurrentUserProfile();
               this.loadMyArticles();
             } else {
-              // Another user → public profile
               this.isCurrentUserProfile = false;
               this.loadUserProfile(this.profileUserId);
               this.loadUserArticles(this.profileUserId);
             }
           } else {
-            // No id in params → current user profile
             this.isCurrentUserProfile = true;
             this.profileUserId = null;
             this.loadCurrentUserProfile();
@@ -128,15 +120,11 @@ export class ProfileComponent implements OnInit {
     });
   }
 
-
-
   // --- Profile loading ---
   private getCurrentUserInfo(): void {
     this.articleService.getUserInfo().subscribe({
       next: (profile) => {
         this.currentUserProfile = profile;
-        
-        console.log("----------->", this.currentUserProfile.id); // getting the value with success
         if (this.isCurrentUserProfile) {
           this.userProfile = profile;
           this.updateFormWithProfile(profile);
@@ -162,7 +150,6 @@ export class ProfileComponent implements OnInit {
     this.articleService.getUserById(userId).subscribe({
       next: (profile) => {
         this.userProfile = profile;
-        // this.checkIfFollowing(userId);
       },
       error: (error) => {
         console.error('Error loading user profile:', error);
@@ -204,18 +191,6 @@ export class ProfileComponent implements OnInit {
     });
   }
 
-  // private checkIfFollowing(userId: number): void {
-  //   this.articleService.isFollowing(userId).subscribe({
-  //     next: (response) => {
-  //       this.isFollowing = response.isFollowing;
-  //     },
-  //     error: (error) => {
-  //       console.error('Error checking follow status:', error);
-  //       this.isFollowing = false;
-  //     }
-  //   });
-  // }
-
   // --- Profile editing ---
   toggleEditProfile(): void {
     this.isEditingProfile = !this.isEditingProfile;
@@ -238,8 +213,6 @@ export class ProfileComponent implements OnInit {
 
   async saveProfile(): Promise<void> {
     if (this.profileForm.valid && this.userProfile) {
-      console.log(this.userProfile, this.profileForm.valid);
-      
       this.isLoading = true;
 
       const updateData: Partial<UserProfile> = {
@@ -251,7 +224,6 @@ export class ProfileComponent implements OnInit {
 
       try {
         if (this.selectedFile) {
-          // ✅ Upload to Cloudinary
           const uploadRes = await this.imageUploadService.uploadImage(this.selectedFile);
           updateData.profilePic = uploadRes.secure_url;
         }
@@ -262,6 +234,8 @@ export class ProfileComponent implements OnInit {
         this.showError('Failed to upload profile picture');
         this.isLoading = false;
       }
+    } else {
+      this.showError('Please fix form errors before saving.');
     }
   }
 
@@ -304,12 +278,13 @@ export class ProfileComponent implements OnInit {
   }
 
   savePassword(): void {
-    if (this.passwordForm.valid) {
+    if (this.passwordForm.valid && this.currentUserProfile?.id != null) {
       this.isLoading = true;
+
       const passwordData = {
-        currentPassword: this.passwordForm.value.currentPassword,
+        oldPassword: this.passwordForm.value.currentPassword,
         newPassword: this.passwordForm.value.newPassword
-      };
+      }
 
       this.articleService.changePassword(passwordData).subscribe({
         next: () => {
@@ -321,13 +296,20 @@ export class ProfileComponent implements OnInit {
         error: (error) => {
           console.error('Error updating password:', error);
           this.isLoading = false;
+
           if (error.status === 400) {
             this.showError('Current password is incorrect');
+          } else if (error.status === 422) {
+            this.showError('New password does not meet requirements');
           } else {
             this.showError('Failed to update password');
           }
         }
       });
+    } else if (!this.currentUserProfile?.id) {
+      this.showError('User ID not found. Cannot update password.');
+    } else {
+      this.showError('Please fix form errors before saving.');
     }
   }
 

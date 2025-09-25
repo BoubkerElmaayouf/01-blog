@@ -1,5 +1,6 @@
 package com.cocoon._blog.service;
 
+import com.cocoon._blog.dto.ChangePasswordRequest;
 import com.cocoon._blog.dto.LoginRequest;
 import com.cocoon._blog.dto.RegisterRequest;
 import com.cocoon._blog.dto.UserDto;
@@ -9,6 +10,8 @@ import com.cocoon._blog.repository.PostReactionRepository;
 import com.cocoon._blog.repository.PostRepository;
 import com.cocoon._blog.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -84,6 +87,33 @@ public class AuthService {
         if (userDto.getProfilePic() != null) existingUser.setProfilePic(userDto.getProfilePic());
 
         return userRepository.save(existingUser);
+    }
+
+    public void changePassword(Long id, ChangePasswordRequest request) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        
+                
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword()))  {
+            throw new RuntimeException("Old password is incorrect");
+        }
+
+        // validatePassword(request.getNewPassword());
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+
+        userRepository.save(user);
+    }
+
+
+    private void validatePassword(String password) {
+        String regex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!]).{8,}$";
+
+        if (!password.matches(regex)) {
+            throw new RuntimeException(
+                "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character"
+            );
+        }
     }
 
 }
