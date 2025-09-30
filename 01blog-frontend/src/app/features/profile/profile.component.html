@@ -227,6 +227,15 @@
   </div>
 </div>
 
+  <app-reportpopup 
+    [title]="profileUserName"
+    [reportType]="reportType"
+    [isVisible]="showReportPopup"
+    (onSubmit)="handleReportSubmit($event)"
+    (onCancel)="handleReportCancel()">
+  </app-reportpopup>
+
+
 <!-- Loading State -->
 <div *ngIf="!userProfile" class="loading-container">
   <app-loader></app-loader>

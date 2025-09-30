@@ -18,6 +18,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatMenuModule } from '@angular/material/menu';
 import { LoaderComponent } from '../../shared/components/loader/loader.component';
+import { repopopComponent, ReportData } from '../../shared/components/reportpopup/repop.component';
 
 @Component({
   selector: 'app-profile',
@@ -34,6 +35,7 @@ import { LoaderComponent } from '../../shared/components/loader/loader.component
     MatMenuModule,
     NavbarComponent,
     LoaderComponent,
+    repopopComponent
   ],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css']
@@ -47,6 +49,12 @@ export class ProfileComponent implements OnInit {
   previewUrl: string | null = null;
   isReportSelected: boolean = false;
   
+  // Report popup states
+  showReportPopup: boolean = false;
+  selectedUserId: string = '';
+  reportType: 'GENERAL' | 'POST' | 'PROFILE' = 'PROFILE';
+  profileUserName: string = '';
+
   // Profile data
   userProfile: UserProfile | null = null;
   currentUserProfile: UserProfile | null = null;
@@ -87,7 +95,6 @@ export class ProfileComponent implements OnInit {
       next: (profile) => {
         this.currentUserProfile = profile;
         
-
         this.route.params.subscribe(params => {
           const userId = params['id'];
 
@@ -101,7 +108,7 @@ export class ProfileComponent implements OnInit {
               this.isCurrentUserProfile = false;
               this.loadUserProfile(this.profileUserId);
               this.loadUserArticles(this.profileUserId);
-              this.checkFollowStatus(this.profileUserId); // Check follow status
+              this.checkFollowStatus(this.profileUserId);
             }
           } else {
             this.isCurrentUserProfile = true;
@@ -197,7 +204,6 @@ export class ProfileComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error checking follow status:', error);
-        // Don't show error to user, just log it
       }
     });
   }
@@ -350,6 +356,45 @@ export class ProfileComponent implements OnInit {
   reportUser(): void {
     if (!this.profileUserId || !this.userProfile) return;
     this.isReportSelected = true;
+    this.selectedUserId = this.profileUserId.toString();
+    this.reportType = 'PROFILE';
+    this.profileUserName = this.getFullName();
+    this.showReportPopup = true;
+  }
+
+  // --- Report Handlers ---
+  handleReportSubmit(reportData: ReportData): void {
+    if (!this.profileUserId || !this.userProfile) return;
+    
+    this.isLoading = true;
+    
+    // Prepare the report data with user ID
+    const fullReportData = {
+      ...reportData,
+      userId: this.profileUserId.toString(),
+      username: this.getFullName()
+    };
+    
+    // Call your article service to submit the report
+    // Make sure you have a submitReport method in your ArticleService
+    this.articleService.submitReport(fullReportData).subscribe({
+      next: () => {
+        this.showReportPopup = false;
+        this.isReportSelected = false;
+        this.isLoading = false;
+        this.showSuccess('Report submitted successfully. Thank you for helping keep our community safe.');
+      },
+      error: (error) => {
+        console.error('Error submitting report:', error);
+        this.isLoading = false;
+        this.showError('Failed to submit report. Please try again.');
+      }
+    });
+  }
+
+  handleReportCancel(): void {
+    this.showReportPopup = false;
+    this.isReportSelected = false;
   }
 
   formatDate(date: string): string {

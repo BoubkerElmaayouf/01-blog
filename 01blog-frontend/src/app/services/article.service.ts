@@ -206,4 +206,9 @@ export class ArticleService {
     });
   }
 
+  // In your ArticleService
+  submitReport(reportData: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/reports`, reportData);
+  }
+
 }
