@@ -1,12 +1,14 @@
 package com.cocoon._blog.controller;
 
 import com.cocoon._blog.dto.ChangePasswordRequest;
+import com.cocoon._blog.dto.FollowResponse;
 import com.cocoon._blog.dto.LoginRequest;
 import com.cocoon._blog.dto.RegisterRequest;
 import com.cocoon._blog.dto.UserDto;
 import com.cocoon._blog.entity.User;
 import com.cocoon._blog.service.AuthService;
 import com.cocoon._blog.service.JwtService;
+import com.cocoon._blog.service.FollowService;
 
 import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,7 @@ public class AuthController {
 
     private final AuthService authService;
     private final JwtService jwtService;
+    private final FollowService followService;
     
     @PostMapping("/register")
     public ResponseEntity<User> register(@RequestBody RegisterRequest request) {
@@ -133,4 +136,38 @@ public class AuthController {
 
 
 
+    // follow 
+    @PostMapping("/follow/{userId}")
+    public ResponseEntity<FollowResponse> followUser(
+            @PathVariable Long userId,
+            @RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.replace("Bearer ", "");
+        Long followerId = jwtService.extractId(token);
+
+        FollowResponse response = followService.follow(followerId, userId);
+        return ResponseEntity.ok(response);
+    }
+    // unfollow
+    @DeleteMapping("/follow/{userId}")
+    public ResponseEntity<FollowResponse> unfollowUser(
+            @PathVariable Long userId,
+            @RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.replace("Bearer ", "");
+        Long followerId = jwtService.extractId(token);
+
+        FollowResponse response = followService.unfollow(followerId, userId);
+        return ResponseEntity.ok(response);
+    }
+
+    //followers state
+    @GetMapping("/follow/status/{userId}")
+    public ResponseEntity<Map<String, Boolean>> isFollowing(
+            @PathVariable Long userId,
+            @RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.replace("Bearer ", "");
+        Long followerId = jwtService.extractId(token);
+
+        boolean status = followService.isFollowing(followerId, userId);
+        return ResponseEntity.ok(Map.of("isFollowing", status));
+    }
 }

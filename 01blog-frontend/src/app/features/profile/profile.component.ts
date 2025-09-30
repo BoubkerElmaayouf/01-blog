@@ -17,9 +17,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatMenuModule } from '@angular/material/menu';
-// import { ReportComponent } from '../report/report.component';
 import { LoaderComponent } from '../../shared/components/loader/loader.component';
-// import { Post } from '../admin/admin.component';
 
 @Component({
   selector: 'app-profile',
@@ -35,7 +33,6 @@ import { LoaderComponent } from '../../shared/components/loader/loader.component
     MatDialogModule,
     MatMenuModule,
     NavbarComponent,
-    // ReportComponent,
     LoaderComponent,
   ],
   templateUrl: './profile.component.html',
@@ -104,6 +101,7 @@ export class ProfileComponent implements OnInit {
               this.isCurrentUserProfile = false;
               this.loadUserProfile(this.profileUserId);
               this.loadUserArticles(this.profileUserId);
+              this.checkFollowStatus(this.profileUserId); // Check follow status
             }
           } else {
             this.isCurrentUserProfile = true;
@@ -188,6 +186,19 @@ export class ProfileComponent implements OnInit {
       firstName: profile.firstName,
       lastName: profile.lastName,
       bio: profile.bio
+    });
+  }
+
+  // --- Follow Status Check ---
+  private checkFollowStatus(userId: number): void {
+    this.articleService.isFollowing(userId).subscribe({
+      next: (response) => {
+        this.isFollowing = response.isFollowing;
+      },
+      error: (error) => {
+        console.error('Error checking follow status:', error);
+        // Don't show error to user, just log it
+      }
     });
   }
 

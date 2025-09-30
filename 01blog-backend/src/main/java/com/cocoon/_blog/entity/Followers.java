@@ -12,8 +12,10 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class Followers {
+
     @EmbeddedId
     private FollowersId id;
 
+    @Column(nullable = false)
     private LocalDateTime followedAt = LocalDateTime.now();
 }
