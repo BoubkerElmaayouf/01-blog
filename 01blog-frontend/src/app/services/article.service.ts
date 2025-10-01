@@ -41,6 +41,8 @@ export interface UserProfile {
   postCount: number;
   commentCount: number;
   likeCount: number;
+  followersCount: number;
+  followingCount: number;
 }
 
 @Injectable({

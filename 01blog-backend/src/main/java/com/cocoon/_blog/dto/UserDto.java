@@ -17,4 +17,6 @@ public class UserDto {
     private int postCount;
     private int commentCount;
     private int likeCount;
+    private int followersCount;  // ✅ how many follow me
+    private int followingCount;  // ✅ how many I follow
 }

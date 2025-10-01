@@ -10,7 +10,7 @@ import com.cocoon._blog.service.AuthService;
 import com.cocoon._blog.service.JwtService;
 import com.cocoon._blog.service.FollowService;
 
-import jakarta.websocket.server.PathParam;
+// import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -134,8 +134,6 @@ public class AuthController {
         }
     }
 
-
-
     // follow 
     @PostMapping("/follow/{userId}")
     public ResponseEntity<FollowResponse> followUser(
@@ -147,6 +145,8 @@ public class AuthController {
         FollowResponse response = followService.follow(followerId, userId);
         return ResponseEntity.ok(response);
     }
+
+
     // unfollow
     @DeleteMapping("/follow/{userId}")
     public ResponseEntity<FollowResponse> unfollowUser(

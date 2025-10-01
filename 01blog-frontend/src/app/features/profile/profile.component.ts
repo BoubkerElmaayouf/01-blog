@@ -415,8 +415,8 @@ export class ProfileComponent implements OnInit {
 
   getStatistics() {
     return this.userProfile
-      ? { blogsCount: this.userProfile.postCount || 0, totalLikes: this.userProfile.likeCount || 0, totalComments: this.userProfile.commentCount || 0 }
-      : { blogsCount: 0, totalLikes: 0, totalComments: 0 };
+      ? { blogsCount: this.userProfile.postCount || 0, totalLikes: this.userProfile.likeCount || 0, totalComments: this.userProfile.commentCount || 0, followersCount: this.userProfile.followersCount || 0, followingCount: this.userProfile.followingCount || 0 }
+      : { blogsCount: 0, totalLikes: 0, totalComments: 0, followersCount: 0, followingCount: 0 };
   }
 
   navigateToArticle(articleId: number): void {

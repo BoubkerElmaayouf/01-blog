@@ -98,7 +98,9 @@ export class ArticleComponent implements OnInit {
       role: 'USER',
       postCount: 0,
       commentCount: 0,
-      likeCount: 0
+      likeCount: 0,
+      followersCount: 0,
+      followingCount: 0
     };
   }
 

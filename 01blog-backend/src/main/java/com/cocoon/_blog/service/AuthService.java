@@ -6,6 +6,7 @@ import com.cocoon._blog.dto.RegisterRequest;
 import com.cocoon._blog.dto.UserDto;
 import com.cocoon._blog.entity.User;
 import com.cocoon._blog.repository.CommentRepository;
+import com.cocoon._blog.repository.FollowersRepository;
 import com.cocoon._blog.repository.PostReactionRepository;
 import com.cocoon._blog.repository.PostRepository;
 import com.cocoon._blog.repository.UserRepository;
@@ -19,13 +20,14 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AuthService {
 
-    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
     private final PostReactionRepository postReactionRepository;
+    private final FollowersRepository followersRepository;
+    private final UserRepository userRepository;
 
     public User register(RegisterRequest request) {
         String profilePicture = request.getProfilePic();
@@ -66,6 +68,8 @@ public class AuthService {
         int postCount = (int) postRepository.countByUser(user);
         int commentCount = (int) commentRepository.countByUser(user);
         int likeCount = (int) postReactionRepository.countByUser(user);
+        int followersCount = followersRepository.countById_FollowingId(user.getId());
+        int followingCount = followersRepository.countById_FollowerId(user.getId());
 
         return new UserDto(
             user.getId(),
@@ -77,9 +81,12 @@ public class AuthService {
             user.getRole(),
             postCount,
             commentCount,
-            likeCount
+            likeCount,
+            followersCount,
+            followingCount
         );
     }
+
 
     public User updateUser(Long id, UserDto userDto) {
         User existingUser = userRepository.findById(id)
