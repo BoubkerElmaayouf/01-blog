@@ -112,6 +112,10 @@ export class ArticleComponent implements OnInit {
     return 'https://i.pinimg.com/736x/e0/13/85/e0138502767289df0381f58f8de5aed9.jpg';
   }
 
+  getDefaultBanner(): string {
+    return '/assets/default-banner.jpg';
+  }
+
   loadComments(): void {
     if (!this.article) return;
     

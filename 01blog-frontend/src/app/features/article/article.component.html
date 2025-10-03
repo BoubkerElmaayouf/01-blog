@@ -71,7 +71,7 @@
         [src]="article.banner" 
         [alt]="article.title" 
         class="banner-image"
-        (error)="$event.target.style.display = 'none'">
+        (error)="$event.target.src = getDefaultBanner()">
   </section>
 
 

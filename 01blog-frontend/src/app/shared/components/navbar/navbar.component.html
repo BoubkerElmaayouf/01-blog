@@ -10,21 +10,91 @@
 
   <!-- Center section with search -->
   <div class="navbar-center">
-    <div class="search-container">
-      <mat-icon class="search-icon">search</mat-icon>
-      <input 
-        type="text" 
-        class="search-input" 
-        placeholder="Search"
-        [(ngModel)]="searchQuery"
-        (keyup.enter)="onSearch()"
-      />
+    <div class="search-wrapper">
+      <div class="search-container">
+        <mat-icon class="search-icon">search</mat-icon>
+        <input 
+          type="text" 
+          class="search-input" 
+          placeholder="Search articles and users..."
+          [(ngModel)]="searchQuery"
+          (input)="onSearchInput()"
+          (focus)="onSearchFocus()"
+          (blur)="onSearchBlur()"
+          (keyup.enter)="onSearch()"
+        />
+        <button 
+          *ngIf="searchQuery.length > 0"
+          mat-icon-button 
+          class="clear-search-btn"
+          (click)="clearSearch()"
+          type="button"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+        <mat-spinner 
+          *ngIf="isSearching" 
+          diameter="20" 
+          class="search-spinner"
+        ></mat-spinner>
+      </div>
+
+      <!-- Search Results Dropdown -->
+      <div class="search-results-dropdown" *ngIf="showSearchResults">
+        <div class="search-results-container">
+          <!-- No Results -->
+          <div *ngIf="!isSearching && searchResults.length === 0" class="search-no-results">
+            <mat-icon class="no-results-icon">search_off</mat-icon>
+            <span class="no-results-text">No results found for "{{ searchQuery }}"</span>
+          </div>
+
+          <!-- Search Results -->
+          <div 
+            *ngFor="let result of searchResults; trackBy: trackBySearchResult" 
+            class="search-result-item"
+            (click)="onSearchResultClick(result)"
+          >
+            <div class="search-result-content">
+              <!-- User Avatar -->
+              <div 
+                class="search-result-avatar"
+                (click)="onUserClick(result, $event)"
+              >
+                <img [src]="result.profilePic" [alt]="result.firstName + ' ' + result.lastName" />
+              </div>
+
+              <!-- Result Details -->
+              <div class="search-result-details">
+                <!-- User Info -->
+                <div class="search-result-user" (click)="onUserClick(result, $event)">
+                  <span class="user-name">{{ result.firstName }} {{ result.lastName }}</span>
+                  <span class="user-bio" *ngIf="result.bio">{{ result.bio }}</span>
+                </div>
+
+                <!-- Post Info -->
+                <div class="search-result-post">
+                  <h4 class="post-title">{{ result.title }}</h4>
+                  <div class="post-meta">
+                    <span class="post-topic" *ngIf="result.topic">{{ result.topic }}</span>
+                    <span class="post-date">{{ getTimeAgo(result.createdAt) }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Post Banner Thumbnail -->
+              <div class="search-result-thumbnail" *ngIf="result.banner">
+                <img [src]="result.banner" [alt]="result.title" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
   <!-- Right section with actions -->
   <div class="navbar-right">
-      <a
+    <a
       mat-icon-button
       class="write-button"
       aria-label="Write"
@@ -33,7 +103,6 @@
       <mat-icon class="icons">post_add</mat-icon>
     </a>
 
-    
     <span class="write-text desktop-only">Write</span>
     
     <!-- Notification Button with Menu -->
@@ -99,7 +168,7 @@
               </div>
               
               <div class="notification-meta">
-                <span class="notification-time">{{ getTimeAgo(notification.timestamp) }}</span>
+                <span class="notification-time">{{ getNotificationTimeAgo(notification.timestamp) }}</span>
                 <button 
                   mat-icon-button 
                   class="toggle-read-btn"
@@ -123,7 +192,8 @@
         <mat-icon>arrow_forward</mat-icon>
       </a>
     </mat-menu>
-    <!-- ************** -->
+
+    <!-- User Menu -->
     <button mat-button [matMenuTriggerFor]="userMenu" class="user-avatar">
       <img 
         [src]="userProfile?.profilePic" 
@@ -170,8 +240,5 @@
         <span>Logout</span>
       </button>
     </mat-menu>
-
-
-    <!-- ******** -->
   </div>
 </mat-toolbar>
