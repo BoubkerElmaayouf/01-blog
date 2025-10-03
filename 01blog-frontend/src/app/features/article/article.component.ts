@@ -3,14 +3,14 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { ArticleService, Article, Comment, UserProfile } from '../../services/article.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { LoaderComponent } from '../../shared/components/loader/loader.component';
 import { repopopComponent, ReportData } from '../../shared/components/reportpopup/repop.component';
 import { ReportService } from '../../services/report.service';
 @Component({
   selector: 'app-article',
   standalone: true,
-  imports: [NavbarComponent, CommonModule, FormsModule, LoaderComponent, repopopComponent],
+  imports: [NavbarComponent, CommonModule, FormsModule, LoaderComponent, repopopComponent, RouterModule],
   templateUrl: './article.component.html',
   styleUrls: ['./article.component.css']
 })
@@ -66,6 +66,9 @@ export class ArticleComponent implements OnInit {
         this.likesCount = data.likeCount;
         this.loadComments();
         this.isLoading = false;
+
+        console.log("------------->>",this.article);
+        
       },
       error: (err) => {
         console.error('❌ Error fetching article:', err);

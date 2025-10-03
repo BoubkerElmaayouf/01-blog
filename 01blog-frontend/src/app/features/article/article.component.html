@@ -33,13 +33,15 @@
       <!-- Author Info -->
       <div class="author-section">
         <div class="author-info">
+          <a [routerLink]="['/profile', article.id]">
           <img 
             [src]="article.profilePic || getDefaultAvatar()" 
             [alt]="getFullName()" 
             class="author-avatar"
             (error)="$event.target.src = getDefaultAvatar()">
-          <div class="author-details">
-            <span class="author-name">{{ getFullName() }}</span>
+          </a>
+            <div class="author-details">
+              <a [routerLink]="['/profile', article.id]" class="author-name">{{ getFullName() }}</a>
             <div class="article-meta">
               <span class="publish-date">{{ getFormattedDate(article.createdAt) }}</span>
               <span class="meta-separator">·</span>
@@ -64,13 +66,14 @@
     </header>
 
     <!-- Banner Image -->
-    <section class="banner-section" *ngIf="article.banner">
+  <section class="banner-section" *ngIf="article.banner">
       <img 
         [src]="article.banner" 
         [alt]="article.title" 
         class="banner-image"
         (error)="$event.target.style.display = 'none'">
-    </section>
+  </section>
+
 
     <!-- Article Content -->
     <section class="content-section">

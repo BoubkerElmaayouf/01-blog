@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ReportData } from '../shared/components/reportpopup/repop.component';
 
 export interface Report {
   id: number;
@@ -16,6 +15,15 @@ export interface Report {
     profilePic: string;
   };
 }
+
+export interface ReportData {
+  postId?: string;     // <-- make optional
+  title: string;
+  reason: string;
+  description: string;
+  type: 'POST' | 'GENERAL' | 'PROFILE';
+}
+
 
 @Injectable({
   providedIn: 'root'
