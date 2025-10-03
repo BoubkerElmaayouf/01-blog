@@ -19,6 +19,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatMenuModule } from '@angular/material/menu';
 import { LoaderComponent } from '../../shared/components/loader/loader.component';
 import { repopopComponent, ReportData } from '../../shared/components/reportpopup/repop.component';
+import { ReportService } from '../../services/report.service';
 
 @Component({
   selector: 'app-profile',
@@ -75,7 +76,8 @@ export class ProfileComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private articleService: ArticleService,
-    private imageUploadService: ImageUploadService
+    private imageUploadService: ImageUploadService,
+    private ReportService : ReportService
   ) {
     this.profileForm = this.fb.group({
       firstName: ['', [Validators.required, Validators.minLength(2)]],
@@ -375,9 +377,8 @@ export class ProfileComponent implements OnInit {
       username: this.getFullName()
     };
     
-    // Call your article service to submit the report
-    // Make sure you have a submitReport method in your ArticleService
-    this.articleService.submitReport(fullReportData).subscribe({
+
+    this.ReportService.submitReport(fullReportData).subscribe({
       next: () => {
         this.showReportPopup = false;
         this.isReportSelected = false;

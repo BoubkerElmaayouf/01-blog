@@ -6,7 +6,7 @@ import { ArticleService, Article, Comment, UserProfile } from '../../services/ar
 import { ActivatedRoute } from '@angular/router';
 import { LoaderComponent } from '../../shared/components/loader/loader.component';
 import { repopopComponent, ReportData } from '../../shared/components/reportpopup/repop.component';
-
+import { ReportService } from '../../services/report.service';
 @Component({
   selector: 'app-article',
   standalone: true,
@@ -37,7 +37,8 @@ export class ArticleComponent implements OnInit {
 
   constructor(
     private articleService: ArticleService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private reportService: ReportService
   ) {}
 
   ngOnInit(): void {
@@ -251,31 +252,20 @@ export class ArticleComponent implements OnInit {
     }
   }
 
-  handleReportSubmit(reportData: ReportData): void {
-    console.log('Report submitted:', reportData);
-    
-    // Here you would typically send the report to your backend
-    // Example API call (uncomment when you have the backend endpoint):
-    // this.articleService.submitReport(reportData).subscribe({
-    //   next: (response) => {
-    //     console.log('Report submitted successfully:', response);
-    //     this.showReportPopup = false;
-    //     this.isReported = true;
-    //     this.showSuccessMessage('Thank you for your report. We will review it shortly.');
-    //   },
-    //   error: (err) => {
-    //     console.error('Error submitting report:', err);
-    //     this.showErrorMessage('Failed to submit report. Please try again.');
-    //   }
-    // });
-    
-    // For now, just close the popup and mark as reported
-    this.showReportPopup = false;
-    this.isReported = true;
-    
-    // Show success message
-    this.showSuccessMessage('Thank you for your report. We will review it shortly.');
-  }
+handleReportSubmit(reportData: ReportData): void {
+  this.reportService.submitReport(reportData).subscribe({
+    next: () => {
+      this.showReportPopup = false;
+      this.isReported = true;
+      this.showSuccessMessage('Thank you for your report. We will review it shortly.');
+    },
+    error: (err) => {
+      console.error('Error submitting report:', err);
+      this.showErrorMessage('Failed to submit report. Please try again.');
+    }
+  });
+}
+
 
   handleReportCancel(): void {
     this.showReportPopup = false;
