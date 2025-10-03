@@ -66,14 +66,14 @@
               <!-- Result Details -->
               <div class="search-result-details">
                 <!-- User Info -->
-                <div class="search-result-user" (click)="onUserClick(result, $event)">
+                <div class="search-result-user"  (click)="onUserClick(result, $event)">
                   <span class="user-name">{{ result.firstName }} {{ result.lastName }}</span>
                   <span class="user-bio" *ngIf="result.bio">{{ result.bio }}</span>
                 </div>
 
                 <!-- Post Info -->
-                <div class="search-result-post">
-                  <h4 class="post-title">{{ result.title }}</h4>
+                <div class="search-result-post" (click)="onSearchResultClick(result)">
+                  <h4 class="post-title" >{{ result.title }}</h4>
                   <div class="post-meta">
                     <span class="post-topic" *ngIf="result.topic">{{ result.topic }}</span>
                     <span class="post-date">{{ getTimeAgo(result.createdAt) }}</span>

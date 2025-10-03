@@ -192,9 +192,12 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.showSearchResults = false;
     this.searchQuery = '';
     this.searchResults = [];
+
+    console.log('Clicked search result:', result.postId);
+    
     
     // Navigate to the post
-    this.router.navigate(['/post', result.postId]);
+    this.router.navigate(['/explore', result.postId]);
   }
 
   onUserClick(result: SearchUserPostResponse, event: Event): void {
@@ -203,6 +206,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.searchQuery = '';
     this.searchResults = [];
     
+
+    console.log('Clicked user result:', result.userId);
+
     // Navigate to user profile
     this.router.navigate(['/profile', result.userId]);
   }
