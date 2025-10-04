@@ -50,7 +50,7 @@ export interface UserProfile {
 })
 export class ArticleService {
   private apiUrl = 'http://localhost:8080/api/post';
-  private userUrl = 'http://localhost:8080/api/auth';
+  private userUrl = 'http://localhost:8080/api/auth'
 
   constructor(private http: HttpClient) {}
 

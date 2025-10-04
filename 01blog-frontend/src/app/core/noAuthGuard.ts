@@ -13,4 +13,4 @@ export const noAuthGuard: CanActivateFn = (route, state) => {
   }
 
   return true;
-};
+}

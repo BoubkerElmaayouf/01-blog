@@ -14,20 +14,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Router, RouterModule } from '@angular/router';
 import { ArticleService, UserProfile } from '../../../services/article.service';
 import { SearchService, SearchUserPostResponse } from '../../../services/search.service';
-import { Subject, Subscription } from 'rxjs';
-import { debounceTime, distinctUntilChanged, switchMap, filter } from 'rxjs/operators';
-
-export interface Notification {
-  id: string;
-  type: 'like' | 'comment' | 'follow' | 'mention' | 'post';
-  userId: string;
-  userName: string;
-  avatar: string;
-  content?: string;
-  postTitle?: string;
-  timestamp: Date;
-  read: boolean;
-}
+import { NotificationService, Notification } from '../../../services/notification.service';
+import { Subject, Subscription, interval } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap, filter, startWith } from 'rxjs/operators';
 
 @Component({
   selector: 'app-navbar',
@@ -64,55 +53,34 @@ export class NavbarComponent implements OnInit, OnDestroy {
   // User profile data
   userProfile: UserProfile | null = null;
 
-  // Sample notifications data
-  notifications: Notification[] = [
-    {
-      id: '1',
-      type: 'like',
-      userId: 'user1',
-      userName: 'Sarah Johnson',
-      avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b789?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-      postTitle: 'My thoughts on modern web development',
-      timestamp: new Date(Date.now() - 1000 * 60 * 30),
-      read: false
-    },
-    {
-      id: '2',
-      type: 'comment',
-      userId: 'user2',
-      userName: 'Mike Chen',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-      content: 'Great insights! I completely agree with your perspective.',
-      postTitle: 'The future of AI in healthcare',
-      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2),
-      read: false
-    },
-    {
-      id: '3',
-      type: 'follow',
-      userId: 'user3',
-      userName: 'Emily Rodriguez',
-      avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 5),
-      read: true
-    },
-  ];
+  // Notifications
+  notifications: Notification[] = [];
+  private notificationSubscription?: Subscription;
+  private notificationPollingSubscription?: Subscription;
 
   constructor(
     private articleService: ArticleService,
     private searchService: SearchService,
+    private notificationService: NotificationService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
-    this.sortNotifications();
     this.loadUserProfile();
     this.initializeSearch();
+    this.loadNotifications();
+    this.startNotificationPolling();
   }
 
   ngOnDestroy(): void {
     if (this.searchSubscription) {
       this.searchSubscription.unsubscribe();
+    }
+    if (this.notificationSubscription) {
+      this.notificationSubscription.unsubscribe();
+    }
+    if (this.notificationPollingSubscription) {
+      this.notificationPollingSubscription.unsubscribe();
     }
   }
 
@@ -127,11 +95,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
       })
     ).subscribe({
       next: (results) => {
-        // Ensure results is always an array
         if (Array.isArray(results)) {
           this.searchResults = results;
         } else if (results && typeof results === 'object') {
-          // If the API returns an object with a data property containing the array
           this.searchResults = (results as any).data || [];
           console.warn('API returned object instead of array:', results);
         } else {
@@ -162,6 +128,35 @@ export class NavbarComponent implements OnInit, OnDestroy {
     });
   }
 
+  private loadNotifications(): void {
+    this.notificationSubscription = this.notificationService.getAllNotifications().subscribe({
+      next: (notifications) => {
+        this.notifications = this.sortNotifications(notifications);
+        console.log('Fetched notifications:', notifications);
+      },
+      error: (err) => {
+        console.error('Error fetching notifications:', err);
+        this.notifications = [];
+      }
+    });
+  }
+
+  private startNotificationPolling(): void {
+    // Poll for new notifications every 30 seconds
+    this.notificationPollingSubscription = interval(30000).pipe(
+      startWith(0)
+    ).subscribe(() => {
+      this.notificationService.getAllNotifications().subscribe({
+        next: (notifications) => {
+          this.notifications = this.sortNotifications(notifications);
+        },
+        error: (err) => {
+          console.error('Error polling notifications:', err);
+        }
+      });
+    });
+  }
+
   onSearchInput(): void {
     const query = this.searchQuery.trim();
     
@@ -182,7 +177,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   onSearchBlur(): void {
-    // Delay to allow click events on search results
     setTimeout(() => {
       this.showSearchResults = false;
     }, 200);
@@ -192,11 +186,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.showSearchResults = false;
     this.searchQuery = '';
     this.searchResults = [];
-
     console.log('Clicked search result:', result.postId);
-    
-    
-    // Navigate to the post
     this.router.navigate(['/explore', result.postId]);
   }
 
@@ -205,11 +195,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.showSearchResults = false;
     this.searchQuery = '';
     this.searchResults = [];
-    
-
     console.log('Clicked user result:', result.userId);
-
-    // Navigate to user profile
     this.router.navigate(['/profile', result.userId]);
   }
 
@@ -260,50 +246,69 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   onNotificationClick(): void {
     console.log('Notification button clicked');
+    // Refresh notifications when menu is opened
+    this.loadNotifications();
   }
 
   onNotificationItemClick(notification: Notification): void {
     console.log('Notification clicked:', notification);
     
     if (!notification.read) {
-      notification.read = true;
+      this.notificationService.markAsRead(notification.id).subscribe({
+        next: () => {
+          notification.read = true;
+          console.log(`Notification ${notification.id} marked as read`);
+        },
+        error: (err) => {
+          console.error('Error marking notification as read:', err);
+        }
+      });
     }
     
-    this.navigateToNotificationTarget(notification);
+    // Navigate to the follower's profile
+    this.router.navigate(['/profile', notification.senderId]);
   }
 
   toggleReadStatus(notification: Notification): void {
-    notification.read = !notification.read;
-    console.log(`Notification ${notification.id} marked as ${notification.read ? 'read' : 'unread'}`);
-  }
-
-  markAllAsRead(): void {
-    this.notifications.forEach(notification => {
-      notification.read = true;
-    });
-    console.log('All notifications marked as read');
-  }
-
-  getNotificationMessage(notification: Notification): string {
-    switch (notification.type) {
-      case 'like':
-        return `liked your post "${notification.postTitle}"`;
-      case 'comment':
-        return `commented on your post "${notification.postTitle}": "${notification.content}"`;
-      case 'follow':
-        return 'started following you';
-      case 'mention':
-        return `mentioned you in "${notification.postTitle}"`;
-      case 'post':
-        return `published a new article: "${notification.postTitle}"`;
-      default:
-        return 'interacted with your content';
+    if (notification.read) {
+      // Mark as unread (locally only - you may need an API endpoint for this)
+      notification.read = false;
+      console.log(`Notification ${notification.id} marked as unread (locally)`);
+    } else {
+      this.notificationService.markAsRead(notification.id).subscribe({
+        next: () => {
+          notification.read = true;
+          console.log(`Notification ${notification.id} marked as read`);
+        },
+        error: (err) => {
+          console.error('Error marking notification as read:', err);
+        }
+      });
     }
   }
 
-  getNotificationTimeAgo(timestamp: Date): string {
+  markAllAsRead(): void {
+    this.notificationService.markAllAsRead().subscribe({
+      next: () => {
+        this.notifications.forEach(notification => {
+          notification.read = true;
+        });
+        console.log('All notifications marked as read');
+      },
+      error: (err) => {
+        console.error('Error marking all notifications as read:', err);
+      }
+    });
+  }
+
+  getNotificationMessage(notification: Notification): string {
+    return 'started following you';
+  }
+
+  getNotificationTimeAgo(timestamp: string): string {
+    const date = new Date(timestamp);
     const now = new Date();
-    const diffInSeconds = Math.floor((now.getTime() - timestamp.getTime()) / 1000);
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
     
     if (diffInSeconds < 60) {
       return 'just now';
@@ -328,7 +333,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     return `${diffInWeeks}w ago`;
   }
 
-  trackByNotificationId(index: number, notification: Notification): string {
+  trackByNotificationId(index: number, notification: Notification): number {
     return notification.id;
   }
 
@@ -336,30 +341,14 @@ export class NavbarComponent implements OnInit, OnDestroy {
     return result.postId;
   }
 
-  private navigateToNotificationTarget(notification: Notification): void {
-    switch (notification.type) {
-      case 'like':
-      case 'comment':
-      case 'mention':
-        console.log(`Navigating to post: ${notification.postTitle}`);
-        break;
-      case 'follow':
-        console.log(`Navigating to user profile: ${notification.userName}`);
-        break;
-      case 'post':
-        console.log(`Navigating to new post: ${notification.postTitle}`);
-        break;
-      default:
-        console.log('Unknown notification type');
-    }
-  }
-
-  private sortNotifications(): void {
-    this.notifications.sort((a, b) => {
+  private sortNotifications(notifications: Notification[]): Notification[] {
+    return notifications.sort((a, b) => {
+      // Unread notifications first
       if (a.read !== b.read) {
         return a.read ? 1 : -1;
       }
-      return b.timestamp.getTime() - a.timestamp.getTime();
+      // Then sort by timestamp (newest first)
+      return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
     });
   }
 
@@ -369,9 +358,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   onLogout(): void {
     this.isMobileMenuOpen = false;
-    window.location.href = '/login';
     window.localStorage.removeItem('token');
-    
+    window.location.href = '/login';
     console.log('Logout clicked');
   }
 }

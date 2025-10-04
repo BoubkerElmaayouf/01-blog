@@ -14,6 +14,8 @@ import java.time.LocalDateTime;
 public class FollowService {
 
     private final FollowersRepository followersRepository;
+    private final NotificationService notificationService;
+
 
     public FollowResponse follow(Long followerId, Long followingId) {
         FollowersId id = new FollowersId(followerId, followingId);
@@ -27,6 +29,8 @@ public class FollowService {
                 .followedAt(LocalDateTime.now())
                 .build();
         followersRepository.save(follower);
+
+        notificationService.createFollowNotification(followerId, followingId);
 
         return makeResponse(followerId, followingId, true, "Followed successfully");
     }

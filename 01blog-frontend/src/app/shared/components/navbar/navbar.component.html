@@ -158,13 +158,13 @@
           
           <div class="notification-content">
             <div class="notification-avatar">
-              <img [src]="notification.avatar" [alt]="notification.userName" />
+              <img [src]="notification.senderProfilePic" [alt]="notification.senderName" />
             </div>
             
             <div class="notification-details">
               <div class="notification-text">
-                <strong>{{ notification.userName }}</strong>
-                <span [innerHTML]="getNotificationMessage(notification)"></span>
+                <strong>{{ notification.senderName }}</strong>
+                <span>{{ getNotificationMessage(notification) }}</span>
               </div>
               
               <div class="notification-meta">

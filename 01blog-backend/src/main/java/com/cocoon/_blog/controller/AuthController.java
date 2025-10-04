@@ -8,6 +8,7 @@ import com.cocoon._blog.dto.UserDto;
 import com.cocoon._blog.entity.User;
 import com.cocoon._blog.service.AuthService;
 import com.cocoon._blog.service.JwtService;
+import com.cocoon._blog.service.NotificationService;
 import com.cocoon._blog.service.FollowService;
 
 // import jakarta.websocket.server.PathParam;
@@ -25,6 +26,8 @@ public class AuthController {
     private final AuthService authService;
     private final JwtService jwtService;
     private final FollowService followService;
+    private final NotificationService notificationService;
+
     
     @PostMapping("/register")
     public ResponseEntity<User> register(@RequestBody RegisterRequest request) {
