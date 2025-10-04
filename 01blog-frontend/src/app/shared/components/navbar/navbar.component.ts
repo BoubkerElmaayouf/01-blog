@@ -306,31 +306,49 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   getNotificationTimeAgo(timestamp: string): string {
+    // Parse ISO timestamp format: "2025-10-04T22:10:28.163821"
     const date = new Date(timestamp);
     const now = new Date();
     const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
     
+    // Less than a minute
     if (diffInSeconds < 60) {
       return 'just now';
     }
     
+    // Less than an hour
     const diffInMinutes = Math.floor(diffInSeconds / 60);
     if (diffInMinutes < 60) {
-      return `${diffInMinutes}m ago`;
+      return diffInMinutes === 1 ? '1 minute ago' : `${diffInMinutes} minutes ago`;
     }
     
+    // Less than a day
     const diffInHours = Math.floor(diffInMinutes / 60);
     if (diffInHours < 24) {
-      return `${diffInHours}h ago`;
+      return diffInHours === 1 ? '1 hour ago' : `${diffInHours} hours ago`;
     }
     
+    // Less than a week
     const diffInDays = Math.floor(diffInHours / 24);
     if (diffInDays < 7) {
-      return `${diffInDays}d ago`;
+      return diffInDays === 1 ? '1 day ago' : `${diffInDays} days ago`;
     }
     
-    const diffInWeeks = Math.floor(diffInDays / 7);
-    return `${diffInWeeks}w ago`;
+    // Less than a month
+    if (diffInDays < 30) {
+      const diffInWeeks = Math.floor(diffInDays / 7);
+      return diffInWeeks === 1 ? '1 week ago' : `${diffInWeeks} weeks ago`;
+    }
+    
+    // Less than a year
+    const diffInMonths = Math.floor(diffInDays / 30);
+    if (diffInMonths < 12) {
+      return diffInMonths === 1 ? '1 month ago' : `${diffInMonths} months ago`;
+    }
+    
+    // Over a year
+    const diffInYears = Math.floor(diffInDays / 365);
+    return diffInYears === 1 ? '1 year ago' : `${diffInYears} years ago`;
   }
 
   trackByNotificationId(index: number, notification: Notification): number {
@@ -347,8 +365,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
       if (a.read !== b.read) {
         return a.read ? 1 : -1;
       }
-      // Then sort by timestamp (newest first)
-      return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
+      // Then sort by createdAt (newest first)
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
   }
 

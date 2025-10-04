@@ -8,8 +8,9 @@ export interface Notification {
   senderId: number;
   senderName: string;
   senderProfilePic: string;
-  timestamp: string;
+  createdAt: string;  // Changed from timestamp to createdAt
   read: boolean;
+  message: string;  // Added message field from your API
 }
 
 @Injectable({

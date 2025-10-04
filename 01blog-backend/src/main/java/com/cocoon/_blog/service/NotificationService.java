@@ -8,6 +8,8 @@ import com.cocoon._blog.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,13 +28,17 @@ public class NotificationService {
                 .orElseThrow(() -> new RuntimeException("Recipient not found"));
 
         String message = sender.getFirstName() + " " + sender.getLastName() + " started following you";
+        LocalDateTime date = LocalDateTime.now();
 
         Notification notification = Notification.builder()
                 .sender(sender)
                 .recipient(recipient)
                 .message(message)
                 .read(false)
+                .createdAt(date)
                 .build();
+
+        System.out.println("------------->" +notification);
 
         notificationRepository.save(notification);
     }
