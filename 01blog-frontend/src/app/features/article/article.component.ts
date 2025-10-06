@@ -345,11 +345,4 @@ handleReportSubmit(reportData: ReportData): void {
     })
   }
 
-
-  //   displayAlert() {
-  //   this.snackBar.open('Report submitted successfully!', 'Close', {
-  //     duration: 3000
-  //   })
-  // }
-
 }

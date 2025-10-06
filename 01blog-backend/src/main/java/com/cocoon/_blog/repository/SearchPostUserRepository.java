@@ -17,6 +17,7 @@ public interface SearchPostUserRepository extends JpaRepository<Post, Long> {
             "p.id, p.title, p.topic, p.banner, p.createdAt) " +
             "FROM Post p JOIN p.user u " +
             "WHERE (:query IS NULL OR LOWER(p.title) LIKE LOWER(CONCAT('%', :query, '%')) " +
-            "OR LOWER(u.firstName) LIKE LOWER(CONCAT('%', :query, '%')))")
+            "OR LOWER(u.firstName) LIKE LOWER(CONCAT('%', :query, '%')))" 
+            + "ORDER BY p.createdAt DESC")
     List<SearchUserPostResponse> searchPostsAndUsers(@Param("query") String query);
 }
