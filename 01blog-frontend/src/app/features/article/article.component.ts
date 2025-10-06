@@ -7,6 +7,7 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { LoaderComponent } from '../../shared/components/loader/loader.component';
 import { repopopComponent, ReportData } from '../../shared/components/reportpopup/repop.component';
 import { ReportService } from '../../services/report.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 @Component({
   selector: 'app-article',
   standalone: true,
@@ -38,7 +39,8 @@ export class ArticleComponent implements OnInit {
   constructor(
     private articleService: ArticleService,
     private route: ActivatedRoute,
-    private reportService: ReportService
+    private reportService: ReportService, 
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
@@ -139,7 +141,7 @@ export class ArticleComponent implements OnInit {
     // Validate comment length
     const trimmedComment = this.newComment.trim();
     if (trimmedComment.length < 5 || trimmedComment.length > 200) {
-      alert('Comment must be between 5 and 200 characters');
+      this.displaySnackBar('Comment must be between 5 and 200 characters');
       return;
     }
 
@@ -170,7 +172,7 @@ export class ArticleComponent implements OnInit {
           errorMessage = 'Your session has expired. Please log in again.';
         }
         
-        alert(errorMessage);
+        this.displaySnackBar(errorMessage);
         this.isSubmittingComment = false;
       }
     });
@@ -187,7 +189,7 @@ export class ArticleComponent implements OnInit {
       },
       error: (err) => {
         console.error('❌ Error liking comment:', err);
-        alert('Failed to like comment. Please try again.');
+        this.displaySnackBar('Failed to like comment. Please try again.');
       }
     });
   }
@@ -215,7 +217,7 @@ export class ArticleComponent implements OnInit {
       },
       error: (err) => {
         console.error('❌ Error liking article:', err);
-        alert('Failed to like article. Please try again.');
+        this.displaySnackBar('Failed to like article. Please try again.');
       }
     });
   }
@@ -280,12 +282,12 @@ handleReportSubmit(reportData: ReportData): void {
 
   private showSuccessMessage(message: string): void {
     // You can replace this with a proper toast/snackbar component
-    alert(message);
+    this.displaySnackBar(message);
   }
 
   private showErrorMessage(message: string): void {
     // You can replace this with a proper toast/snackbar component
-    alert(message);
+    this.displaySnackBar(message);
   }
 
   getFullName(): string {
@@ -336,4 +338,18 @@ handleReportSubmit(reportData: ReportData): void {
   trackByCommentId(index: number, comment: Comment): number {
     return comment.id;
   }
+
+  displaySnackBar(message : string) : void {
+      this.snackBar.open(message, 'Close', {
+      duration: 3000
+    })
+  }
+
+
+  //   displayAlert() {
+  //   this.snackBar.open('Report submitted successfully!', 'Close', {
+  //     duration: 3000
+  //   })
+  // }
+
 }

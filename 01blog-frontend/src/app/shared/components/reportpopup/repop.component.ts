@@ -6,6 +6,7 @@ import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatSelectModule } from "@angular/material/select";
 import { MatInputModule } from "@angular/material/input";
 import { MatButtonModule } from "@angular/material/button";
+import { MatSnackBar } from "@angular/material/snack-bar";
 
 export interface ReportData {
   postId: string;
@@ -52,6 +53,8 @@ export class repopopComponent implements OnInit {
     'Other'
   ];
 
+  constructor(private snackBar: MatSnackBar) {}
+
   ngOnInit() {
     // Initialize component
   }
@@ -83,4 +86,6 @@ export class repopopComponent implements OnInit {
   get isFormValid(): boolean {
     return this.reason.trim().length > 0 && this.description.trim().length > 0;
   }
+
+
 }
