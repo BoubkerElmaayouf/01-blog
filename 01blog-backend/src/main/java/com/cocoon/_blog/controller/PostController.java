@@ -8,7 +8,10 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import com.cocoon._blog.dto.PostRequest;
+import com.cocoon._blog.entity.NotificationType;
+import com.cocoon._blog.service.FollowService;
 import com.cocoon._blog.service.JwtService;
+import com.cocoon._blog.service.NotificationService;
 import com.cocoon._blog.service.PostService;
 
 import jakarta.validation.Valid;
@@ -22,6 +25,8 @@ public class PostController {
 
     private final PostService postService;
     private final JwtService jwtService;
+    private final NotificationService notificationService;
+    private final FollowService followService;
 
     @PostMapping("/create")
     public ResponseEntity<?> createPost(@Valid @RequestBody PostRequest request,
@@ -50,12 +55,30 @@ public class PostController {
                 return ResponseEntity.badRequest().body("Invalid topic. Allowed: " + topics);
             }
 
-            return postService.createPost(request, userId);
+            // 1️⃣ Create the post
+            var post = postService.createPost(request, userId);
+
+            // 2️⃣ Fetch followers of the user
+            var followers = followService.getFollowers(userId);
+            System.out.println("this is a List ofFollowers: " + followers.toString());
+
+            // 3️⃣ Send notification to each follower
+            for (Long followerId : followers) {
+                notificationService.createNotification(
+                    userId,                       // sender = the post creator
+                    followerId,                   // recipient = each follower
+                    NotificationType.POST,        // type
+                     " created a new post 📢" // message
+                );
+            }
+
+            return post;
 
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Invalid token or request: " + e.getMessage());
         }
     }
+
 
     @PostMapping("/like/{id}")
     public ResponseEntity<?> likePost(@PathVariable Long id, @RequestHeader("Authorization") String authHeader) {
@@ -68,11 +91,26 @@ public class PostController {
                 return ResponseEntity.badRequest().body("Invalid or expired token");
             }
 
-            return postService.likePost(id, userId);
+            var response = postService.likePost(id, userId); 
+            var postOwnerId =  postService.getPostOwnerId(id); // Long
+
+            // Only send notification if the liker is NOT the owner
+            if (!userId.equals(postOwnerId)) { 
+                notificationService.createNotification(
+                    userId,                 // sender
+                    postOwnerId,            // recipient
+                    NotificationType.POST,  // type
+                    " liked your post ❤️" // this must be a String
+                );
+            }
+
+            return response;
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Invalid token or request: " + e.getMessage());
         }
     }
+
+
 
     @GetMapping("/all")
     public ResponseEntity<?> getAllPosts(@RequestHeader("Authorization") String authHeader) {

@@ -320,7 +320,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   getNotificationMessage(notification: Notification): string {
-    return 'started following you';
+    return notification.message;
   }
 
   getNotificationTimeAgo(timestamp: string): string {

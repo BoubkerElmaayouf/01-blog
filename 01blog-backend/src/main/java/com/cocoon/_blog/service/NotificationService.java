@@ -9,11 +9,9 @@ import com.cocoon._blog.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
-
 @Service
 @RequiredArgsConstructor
 public class NotificationService {
@@ -21,26 +19,38 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
 
-    // Called when a user follows another
-    public void createFollowNotification(Long senderId, Long recipientId) {
+    /**
+     * Generic method for creating notifications.
+     * Handles PROFILE, POST, and COMMENT types.
+     */
+    public void createNotification(
+            Long senderId,
+            Long recipientId,
+            NotificationType type,
+            String postTitle // optional, only for post/comment
+    ) {
         User sender = userRepository.findById(senderId)
                 .orElseThrow(() -> new RuntimeException("Sender not found"));
         User recipient = userRepository.findById(recipientId)
                 .orElseThrow(() -> new RuntimeException("Recipient not found"));
 
-        String message = sender.getFirstName() + " " + sender.getLastName() + " started following you";
-        LocalDateTime date = LocalDateTime.now();
+        String message;
+
+        switch (type) {
+            case PROFILE -> message =  " " + "started following you";
+            case POST -> message = " "+ postTitle;
+            case COMMENT -> message = " " + postTitle;
+            default -> throw new IllegalArgumentException("Unsupported notification type");
+        }
 
         Notification notification = Notification.builder()
                 .sender(sender)
-                .type(NotificationType.PROFILE)
                 .recipient(recipient)
+                .type(type)
                 .message(message)
                 .read(false)
-                .createdAt(date)
+                .createdAt(LocalDateTime.now())
                 .build();
-
-        System.out.println("------------->" +notification);
 
         notificationRepository.save(notification);
     }

@@ -3,11 +3,14 @@ package com.cocoon._blog.service;
 import com.cocoon._blog.dto.FollowResponse;
 import com.cocoon._blog.entity.Followers;
 import com.cocoon._blog.entity.FollowersId;
+import com.cocoon._blog.entity.NotificationType;
 import com.cocoon._blog.repository.FollowersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,7 +33,8 @@ public class FollowService {
                 .build();
         followersRepository.save(follower);
 
-        notificationService.createFollowNotification(followerId, followingId);
+        notificationService.createNotification(followerId, followingId, NotificationType.PROFILE, null);
+
 
         return makeResponse(followerId, followingId, true, "Followed successfully");
     }
@@ -58,4 +62,14 @@ public class FollowService {
         res.setMessage(msg);
         return res;
     }
+
+    public List<Long> getFollowers(Long userId) {
+    // Find all followers where the user is being followed
+    return followersRepository.findByIdFollowingId(userId) // returns List<Followers>
+            .stream()
+            .map(f -> f.getId().getFollowerId()) // extract follower IDs
+            .collect(Collectors.toList());
+
+    }
 }
+

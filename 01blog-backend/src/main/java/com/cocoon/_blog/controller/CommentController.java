@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import com.cocoon._blog.dto.CommentRequest;
 import com.cocoon._blog.service.CommentService;
 import com.cocoon._blog.service.JwtService;
+import com.cocoon._blog.service.NotificationService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,8 @@ public class CommentController {
 
     private final CommentService commentService;
     private final JwtService jwtService;
+    private final NotificationService notificationService;
+
 
     @PostMapping("/{postId}/comment")
     public ResponseEntity<?> createComment(@PathVariable Long postId,

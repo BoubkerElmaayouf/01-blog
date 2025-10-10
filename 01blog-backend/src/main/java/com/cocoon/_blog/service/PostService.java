@@ -1,5 +1,6 @@
 package com.cocoon._blog.service;
 
+import java.net.ResponseCache;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -128,5 +129,12 @@ public class PostService {
 
 
     }
+
+    public Long getPostOwnerId(Long id) {
+        Post post = postRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Post not found with id: " + id));
+        return post.getUser().getId();
+    }
+
 }
 
