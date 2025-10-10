@@ -30,7 +30,7 @@ public class PostService {
     private final PostReactionRepository postReactionRepository;
     private final CommentRepository commentRepository;
 
-    public ResponseEntity<?> createPost(PostRequest request, Long userId) {
+    public Post createPost(PostRequest request, Long userId) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -45,7 +45,7 @@ public class PostService {
             .build();
 
         postRepository.save(post);
-        return ResponseEntity.ok(post);
+        return post;
     }
 
     // Build PostResponse with isLiked

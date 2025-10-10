@@ -277,12 +277,12 @@ export class NavbarComponent implements OnInit, OnDestroy {
     }
 
     if (notification.type === 'POST') {
-      this.router.navigate(['/explore', notification.senderId]);
+      this.router.navigate(['/explore', notification.postId]);
     } else if (notification.type === 'PROFILE') {
-      this.router.navigate(['/profile', notification.senderId]);
+      this.router.navigate(['/explore', notification.commentId]);
     } else if (notification.type === 'COMMENT') {
       // Example route for comment
-      this.router.navigate(['/comments', notification.id]);
+      this.router.navigate(['/explore', notification.id]);
     }
   }
 

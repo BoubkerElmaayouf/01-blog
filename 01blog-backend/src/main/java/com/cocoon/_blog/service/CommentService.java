@@ -29,7 +29,7 @@ public class CommentService {
     private final CommentReactionRepository commentReactionRepository;
 
     // Create a new comment (authorization already handled in controller)
-    public ResponseEntity<CommentDto> createComment(Long postId, CommentRequest request, Long userId) {
+    public CommentDto createComment(Long postId, CommentRequest request, Long userId) {
         // User and authorization already validated in controller
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -47,7 +47,7 @@ public class CommentService {
         Comment savedComment = commentRepository.save(comment);
 
         CommentDto dto = mapToDto(savedComment, userId);
-        return ResponseEntity.ok(dto);
+        return dto;
     }
 
     // Get comments for a post (authorization handled in controller)
@@ -111,4 +111,10 @@ public class CommentService {
         dto.setLiked(isLiked);
         return dto;
     }
+
+    public Long getPostOwnerId(Long postId) {
+    Post post = postRepository.findById(postId)
+            .orElseThrow(() -> new RuntimeException("Post not found"));
+    return post.getUser().getId(); // return the user ID of the post owner
+}
 }

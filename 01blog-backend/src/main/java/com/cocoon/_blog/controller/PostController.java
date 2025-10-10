@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.cocoon._blog.dto.PostRequest;
 import com.cocoon._blog.entity.NotificationType;
+import com.cocoon._blog.entity.Post;
 import com.cocoon._blog.service.FollowService;
 import com.cocoon._blog.service.JwtService;
 import com.cocoon._blog.service.NotificationService;
@@ -56,7 +57,8 @@ public class PostController {
             }
 
             // 1️⃣ Create the post
-            var post = postService.createPost(request, userId);
+            Post post = postService.createPost(request, userId);
+            System.out.println("this is the post: " + post);
 
             // 2️⃣ Fetch followers of the user
             var followers = followService.getFollowers(userId);
@@ -64,15 +66,17 @@ public class PostController {
 
             // 3️⃣ Send notification to each follower
             for (Long followerId : followers) {
-                notificationService.createNotification(
-                    userId,                       // sender = the post creator
-                    followerId,                   // recipient = each follower
-                    NotificationType.POST,        // type
-                     " created a new post 📢" // message
+            notificationService.createNotification(
+                    userId,                    // sender = post creator
+                    followerId,                // recipient = each follower
+                    NotificationType.POST,     // type
+                    post.getId(),              // postId
+                    null ,
+                     "Someone posted something 📢"
                 );
             }
 
-            return post;
+            return ResponseEntity.ok(post);
 
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Invalid token or request: " + e.getMessage());
@@ -97,10 +101,11 @@ public class PostController {
             // Only send notification if the liker is NOT the owner
             if (!userId.equals(postOwnerId)) { 
                 notificationService.createNotification(
-                    userId,                 // sender
-                    postOwnerId,            // recipient
-                    NotificationType.POST,  // type
-                    " liked your post ❤️" // this must be a String
+                    userId,
+                    postOwnerId,
+                    NotificationType.POST,
+                    (Long) id, null,
+                    "liked your post 🤩"
                 );
             }
 

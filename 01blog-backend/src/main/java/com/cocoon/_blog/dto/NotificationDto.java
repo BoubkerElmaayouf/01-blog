@@ -15,4 +15,8 @@ public class NotificationDto {
     private String message;
     private boolean read;
     private LocalDateTime createdAt;
+
+    // Add these IDs
+    private Long postId;
+    private Long commentId;  
 }

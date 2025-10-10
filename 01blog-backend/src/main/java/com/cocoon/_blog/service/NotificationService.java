@@ -23,37 +23,43 @@ public class NotificationService {
      * Generic method for creating notifications.
      * Handles PROFILE, POST, and COMMENT types.
      */
-    public void createNotification(
-            Long senderId,
-            Long recipientId,
-            NotificationType type,
-            String postTitle // optional, only for post/comment
-    ) {
+        public void createNotification(
+                Long senderId,
+                Long recipientId,
+                NotificationType type,
+                Long postId,       // optional
+                Long commentId,    // optional
+                String customMessage // required custom message with emojis
+        ) {
         User sender = userRepository.findById(senderId)
                 .orElseThrow(() -> new RuntimeException("Sender not found"));
         User recipient = userRepository.findById(recipientId)
                 .orElseThrow(() -> new RuntimeException("Recipient not found"));
 
-        String message;
-
-        switch (type) {
-            case PROFILE -> message =  " " + "started following you";
-            case POST -> message = " "+ postTitle;
-            case COMMENT -> message = " " + postTitle;
-            default -> throw new IllegalArgumentException("Unsupported notification type");
-        }
+        // Use only the custom message, no automatic sender name
+        String message = (customMessage != null && !customMessage.isEmpty()) ? 
+                        customMessage :
+                        switch (type) {
+                                case PROFILE -> "Someone started following you 🎉";
+                                case POST -> "Someone posted something 📢";
+                                case COMMENT -> "Someone commented on your post 💬";
+                                default -> throw new IllegalArgumentException("Unsupported notification type");
+                        };
 
         Notification notification = Notification.builder()
                 .sender(sender)
                 .recipient(recipient)
                 .type(type)
                 .message(message)
+                .postId(postId)
+                .commentId(commentId)
                 .read(false)
                 .createdAt(LocalDateTime.now())
                 .build();
 
         notificationRepository.save(notification);
-    }
+        }
+
 
     public List<NotificationDto> getUserNotifications(Long userId) {
         User recipient = userRepository.findById(userId)
@@ -72,16 +78,19 @@ public class NotificationService {
         notificationRepository.save(n);
     }
 
-    private NotificationDto toDto(Notification n) {
-        return new NotificationDto(
-                n.getId(),
-                n.getType().name(),
-                n.getSender().getId(),
-                n.getSender().getFirstName() + " " + n.getSender().getLastName(),
-                n.getSender().getProfilePic(),
-                n.getMessage(),
-                n.isRead(),
-                n.getCreatedAt()
-        );
-    }
+   private NotificationDto toDto(Notification n) {
+    return new NotificationDto(
+            n.getId(),
+            n.getType().name(),
+            n.getSender().getId(),
+            n.getSender().getFirstName() + " " + n.getSender().getLastName(),
+            n.getSender().getProfilePic(),
+            n.getMessage(),
+            n.isRead(),
+            n.getCreatedAt(),
+            n.getPostId(),
+            n.getCommentId()
+    );
+}
+
 }

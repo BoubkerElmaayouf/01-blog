@@ -11,7 +11,10 @@ export interface Notification {
   createdAt: string;
   read: boolean;
   message: string;
+  postId?: number;
+  commentId?: number; 
 }
+
 
 @Injectable({
   providedIn: 'root'

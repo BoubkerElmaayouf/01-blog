@@ -33,7 +33,7 @@ public class FollowService {
                 .build();
         followersRepository.save(follower);
 
-        notificationService.createNotification(followerId, followingId, NotificationType.PROFILE, null);
+        notificationService.createNotification(followerId, followingId, NotificationType.PROFILE, null, null, "started following you 🎉");
 
 
         return makeResponse(followerId, followingId, true, "Followed successfully");
