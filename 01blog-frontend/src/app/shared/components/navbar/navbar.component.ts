@@ -250,24 +250,42 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.loadNotifications();
   }
 
-  onNotificationItemClick(notification: Notification): void {
-    console.log('Notification clicked:', notification);
+  // onNotificationItemClick(notification: Notification): void {
+  //   console.log('Notification clicked:', notification);
     
+  //   if (!notification.read) {
+  //     this.notificationService.markAsRead(notification.id).subscribe({
+  //       next: () => {
+  //         notification.read = true;
+  //         console.log(`Notification ${notification.id} marked as read`);
+  //       },
+  //       error: (err) => {
+  //         console.error('Error marking notification as read:', err);
+  //       }
+  //     });
+  //   }
+    
+  //   // Navigate to the follower's profile
+  //   this.router.navigate(['/profile', notification.senderId]);
+  // }
+
+  onNotificationItemClick(notification: Notification): void {
     if (!notification.read) {
-      this.notificationService.markAsRead(notification.id).subscribe({
-        next: () => {
-          notification.read = true;
-          console.log(`Notification ${notification.id} marked as read`);
-        },
-        error: (err) => {
-          console.error('Error marking notification as read:', err);
-        }
+      this.notificationService.markAsRead(notification.id).subscribe(() => {
+        notification.read = true;
       });
     }
-    
-    // Navigate to the follower's profile
-    this.router.navigate(['/profile', notification.senderId]);
+
+    if (notification.type === 'POST') {
+      this.router.navigate(['/explore', notification.senderId]);
+    } else if (notification.type === 'PROFILE') {
+      this.router.navigate(['/profile', notification.senderId]);
+    } else if (notification.type === 'COMMENT') {
+      // Example route for comment
+      this.router.navigate(['/comments', notification.id]);
+    }
   }
+
 
   toggleReadStatus(notification: Notification): void {
     if (notification.read) {

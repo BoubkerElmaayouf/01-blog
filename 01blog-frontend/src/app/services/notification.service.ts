@@ -4,13 +4,13 @@ import { Observable } from 'rxjs';
 
 export interface Notification {
   id: number;
-  type: string;
+  type: 'POST' | 'PROFILE' | 'COMMENT';
   senderId: number;
   senderName: string;
   senderProfilePic: string;
-  createdAt: string;  // Changed from timestamp to createdAt
+  createdAt: string;
   read: boolean;
-  message: string;  // Added message field from your API
+  message: string;
 }
 
 @Injectable({

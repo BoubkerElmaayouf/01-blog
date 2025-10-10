@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class NotificationDto {
     private Long id;
+    private String type; 
     private Long senderId;
     private String senderName;
     private String senderProfilePic;

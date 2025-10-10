@@ -2,6 +2,7 @@ package com.cocoon._blog.service;
 
 import com.cocoon._blog.dto.NotificationDto;
 import com.cocoon._blog.entity.Notification;
+import com.cocoon._blog.entity.NotificationType;
 import com.cocoon._blog.entity.User;
 import com.cocoon._blog.repository.NotificationRepository;
 import com.cocoon._blog.repository.UserRepository;
@@ -32,6 +33,7 @@ public class NotificationService {
 
         Notification notification = Notification.builder()
                 .sender(sender)
+                .type(NotificationType.PROFILE)
                 .recipient(recipient)
                 .message(message)
                 .read(false)
@@ -63,6 +65,7 @@ public class NotificationService {
     private NotificationDto toDto(Notification n) {
         return new NotificationDto(
                 n.getId(),
+                n.getType().name(),
                 n.getSender().getId(),
                 n.getSender().getFirstName() + " " + n.getSender().getLastName(),
                 n.getSender().getProfilePic(),

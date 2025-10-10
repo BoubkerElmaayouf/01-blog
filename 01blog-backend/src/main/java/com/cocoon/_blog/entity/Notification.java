@@ -30,6 +30,10 @@ public class Notification {
     private String message;
 
     private boolean read = false;
-
+    
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private NotificationType type; 
 }
