@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 export interface Article {
+  userId: number;
   id: number;
   title: string;
   topic: string;
@@ -118,6 +119,18 @@ export class ArticleService {
       }))
     );
   }
+
+  updatePost(postId: number, post: Partial<Article>): Observable<Article> {
+  return this.http.patch<any>(`${this.apiUrl}/edit/${postId}`, post, { 
+      headers: this.getAuthHeaders() 
+      }).pipe(
+        map(updatedPost => ({
+          ...updatedPost,
+          isLiked: updatedPost.liked || false
+        }))
+      );
+  }
+
 
   likePost(postId: number): Observable<any> {
     return this.http.post(`${this.apiUrl}/like/${postId}`, {}, { 

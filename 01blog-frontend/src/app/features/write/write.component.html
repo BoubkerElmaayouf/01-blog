@@ -1,4 +1,5 @@
 <app-navbar></app-navbar>
+
 <div *ngIf="isLoading"> 
   <app-loader></app-loader>
 </div>
@@ -7,15 +8,15 @@
   <!-- Header with Actions -->
   <div class="write-header">
     <div class="header-content">
-      <h1>Create New Post</h1>
+      <h1>{{ isEditMode ? 'Edit Post' : 'Create New Post' }}</h1>
       <div class="header-actions">
         <button 
           mat-flat-button
           class="action-btn publish-btn" 
           (click)="onPublish()"
           [disabled]="isPublishing">
-          <mat-icon>{{ isPublishing ? 'hourglass_empty' : 'publish' }}</mat-icon>
-          {{ isPublishing ? 'Publishing...' : 'Publish' }}
+          <mat-icon>{{ isPublishing ? 'hourglass_empty' : (isEditMode ? 'edit' : 'publish') }}</mat-icon>
+          {{ isPublishing ? (isEditMode ? 'Updating...' : 'Publishing...') : (isEditMode ? 'Update' : 'Publish') }}
         </button>
       </div>
     </div>
@@ -122,8 +123,8 @@
         class="mobile-action-btn publish-btn" 
         (click)="onPublish()"
         [disabled]="isPublishing">
-        <mat-icon>{{ isPublishing ? 'hourglass_empty' : 'publish' }}</mat-icon>
-        {{ isPublishing ? 'Publishing...' : 'Publish' }}
+        <mat-icon>{{ isPublishing ? (isEditMode ? 'hourglass_empty' : 'hourglass_empty') : (isEditMode ? 'edit' : 'publish') }}</mat-icon>
+        {{ isPublishing ? (isEditMode ? 'Updating...' : 'Publishing...') : (isEditMode ? 'Update' : 'Publish') }}
       </button>
     </div>
   </div>

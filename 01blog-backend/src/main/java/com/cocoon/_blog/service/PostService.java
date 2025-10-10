@@ -48,6 +48,27 @@ public class PostService {
         return post;
     }
 
+    public Post updatePost(Long postId, PostRequest request, Long userId) {
+    Post post = postRepository.findById(postId)
+        .orElseThrow(() -> new RuntimeException("Post not found with id: " + postId));
+
+    // Ensure the current user is the owner
+    if (!post.getUser().getId().equals(userId)) {
+        throw new RuntimeException("You are not allowed to edit this post");
+    }
+
+        post.setTitle(request.getTitle());
+        post.setTopic(request.getTopic());
+        post.setBanner(request.getBanner());
+        post.setDescription(request.getDescription());
+        post.setVideos(request.getVideos());
+        post.setCreatedAt(LocalDateTime.now());
+
+        postRepository.save(post);
+        return post;
+    }
+
+
     // Build PostResponse with isLiked
     private PostResponse buildPostResponse(Post post, Long currentUserId) {
         int likeCount = (int) postReactionRepository.countByPost(post);
@@ -61,6 +82,7 @@ public class PostService {
         }
 
         return new PostResponse(
+            post.getUser().getId(),
             post.getId(),
             post.getTitle(),
             post.getTopic(),

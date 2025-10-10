@@ -9,6 +9,7 @@ import java.time.*;
 @Data
 @AllArgsConstructor
 public class PostResponse {
+    private Long userId;
     private Long id;
     private String title;
     private String topic;

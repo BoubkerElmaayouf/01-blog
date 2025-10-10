@@ -115,6 +115,44 @@ public class PostController {
         }
     }
 
+    @PatchMapping("/edit/{id}")
+    public ResponseEntity<?> editPost(@PathVariable Long id,
+                                    @Valid @RequestBody PostRequest request,
+                                    BindingResult bindingResult,
+                                    @RequestHeader("Authorization") String authHeader) {
+        try {
+            if (bindingResult.hasErrors()) {
+                String errors = bindingResult.getAllErrors()
+                    .stream()
+                    .map(err -> err.getDefaultMessage())
+                    .reduce((m1, m2) -> m1 + ", " + m2)
+                    .orElse("Invalid input");
+                return ResponseEntity.badRequest().body(errors);
+            }
+
+            String token = authHeader.replace("Bearer ", "");
+            Long userId = jwtService.extractId(token);
+            String username = jwtService.extractUsername(token);
+
+            if (!jwtService.validateToken(token, username)) {
+                return ResponseEntity.badRequest().body("Invalid or expired token");
+            }
+
+            // Validate topic
+            HashSet<String> topics = new HashSet<>(List.of("tech", "gaming", "products", "education", "saas"));
+            if (!topics.contains(request.getTopic().toLowerCase())) {
+                return ResponseEntity.badRequest().body("Invalid topic. Allowed: " + topics);
+            }
+
+            Post updatedPost = postService.updatePost(id, request, userId);
+            return ResponseEntity.ok(updatedPost);
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error updating post: " + e.getMessage());
+        }
+    }
+
+
 
 
     @GetMapping("/all")

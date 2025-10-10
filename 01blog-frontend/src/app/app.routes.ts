@@ -21,6 +21,7 @@ export const routes: Routes = [
   {path: 'explore', component: ExploreComponent, canActivate: [authGuard]},
   {path: 'explore/:id', component: ArticleComponent, canActivate: [authGuard]},
   { path: 'write', component: WriteComponent, canActivate: [authGuard] },
+ { path: "edit-post/:id", component: WriteComponent, canActivate: [authGuard] },
   { path: 'profile', component: ProfileComponent, canActivate: [authGuard] },
   { path: 'profile/:id', component: ProfileComponent, canActivate: [authGuard] },
 
