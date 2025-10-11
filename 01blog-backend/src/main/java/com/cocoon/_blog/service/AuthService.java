@@ -33,7 +33,11 @@ public class AuthService {
         String profilePicture = request.getProfilePic();
         if (profilePicture.trim().isEmpty() || profilePicture == null) {
             profilePicture = "https://i.pinimg.com/736x/fc/cf/36/fccf365288b90c4a0a4fb410ca24c889.jpg";
-        } 
+        }
+
+        // if (request.getRole() == null || request.getRole().trim().isEmpty() || request.getRole().equals("ADMIN")) {
+        //     return null;
+        // }
 
         User user = User.builder()
                 .firstName(request.getFirstName())
@@ -42,6 +46,7 @@ public class AuthService {
                 .bio(request.getBio())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(com.cocoon._blog.entity.Role.USER)
+                .banned(false)
                 .profilePic(profilePicture)
                 .build();
         return userRepository.save(user);
@@ -53,6 +58,10 @@ public class AuthService {
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new RuntimeException("Invalid credentials");
+        }
+
+        if (user.getBanned() == true) {
+            throw new RuntimeException("Your account has been banned Contact Support");
         }
 
         // ✅ Return JWT token

@@ -8,6 +8,7 @@ import { LoaderComponent } from '../../shared/components/loader/loader.component
 import { repopopComponent, ReportData } from '../../shared/components/reportpopup/repop.component';
 import { ReportService } from '../../services/report.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
+
 @Component({
   selector: 'app-article',
   standalone: true,
@@ -15,6 +16,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
   templateUrl: './article.component.html',
   styleUrls: ['./article.component.css']
 })
+
 export class ArticleComponent implements OnInit {
   article!: Article;
   currentUser: UserProfile | null = null;
