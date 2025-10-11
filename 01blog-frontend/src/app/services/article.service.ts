@@ -131,6 +131,11 @@ export class ArticleService {
       );
   }
 
+  deletePost(postId: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/delete/${postId}`, { 
+      headers: this.getAuthHeaders() 
+    });
+  }
 
   likePost(postId: number): Observable<any> {
     return this.http.post(`${this.apiUrl}/like/${postId}`, {}, { 

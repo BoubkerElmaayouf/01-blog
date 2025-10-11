@@ -25,7 +25,7 @@ public class JwtService {
                 .claim("id", id)
                 .claim("role", role.toString())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // 1 hour
+                .setExpiration(new Date(System.currentTimeMillis() + 3000 * 60 * 60)) // 1 hour
                 .signWith(key) // now this works
                 .compact();
     }

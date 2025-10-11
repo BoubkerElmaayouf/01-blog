@@ -9,12 +9,13 @@ import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { Router } from '@angular/router';
 import { LoaderComponent } from '../../shared/components/loader/loader.component';
-import { ArticleService, Article } from '../../services/article.service'; // Import your service
+import { ArticleService, Article } from '../../services/article.service';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-component';
 
 interface Post extends Article {
-  // Add any additional properties you need for the UI that aren't in Article
-  likes?: number;  // For backward compatibility
-  comments?: number;  // For backward compatibility
+  likes?: number;
+  comments?: number;
   saves?: number;
   isSaved?: boolean;
 }
@@ -33,7 +34,8 @@ interface Post extends Article {
     MatChipsModule,
     MatMenuModule,
     MatSnackBarModule,
-    LoaderComponent
+    LoaderComponent,
+    MatDialogModule,
   ]
 })
 export class ExploreComponent implements OnInit {
@@ -45,9 +47,10 @@ export class ExploreComponent implements OnInit {
   filteredPosts: Post[] = [];
 
   constructor(
-    private articleService: ArticleService, // Use the service instead of HttpClient directly
+    private articleService: ArticleService,
     private snackBar: MatSnackBar,
-    private router: Router
+    private router: Router,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit() {
@@ -58,14 +61,12 @@ export class ExploreComponent implements OnInit {
     this.articleService.getAllPosts()
       .subscribe({
         next: (data) => {
-          // Map Article to Post interface and add UI-specific properties
           this.posts = data.map(article => ({
             ...article,
-            // Keep the original API fields and add UI-specific properties
-            likes: article.likeCount, // For backward compatibility with template
-            comments: article.commentCount, // For backward compatibility with template
-            saves: Math.floor(Math.random() * 100) + 5, // Mock saves data
-            isSaved: Math.random() > 0.8 // Mock saved status
+            likes: article.likeCount,
+            comments: article.commentCount,
+            saves: Math.floor(Math.random() * 100) + 5,
+            isSaved: Math.random() > 0.8
           }));
           console.log('Fetched posts:', this.posts);
           this.isLoading = false;
@@ -94,20 +95,16 @@ export class ExploreComponent implements OnInit {
     event.preventDefault();
     event.stopPropagation();
     
-    // Call the service to like/unlike the post
     this.articleService.likePost(post.id).subscribe({
       next: (response) => {
-        // Toggle the like status
         post.isLiked = !post.isLiked;
         
-        // Update the like count based on the new status
         if (post.isLiked) {
           post.likeCount = (post.likeCount || 0) + 1;
         } else {
           post.likeCount = Math.max((post.likeCount || 0) - 1, 0);
         }
         
-        // Also update the likes property for display
         post.likes = post.likeCount;
         
         console.log('Liked post:', post.title, 'Total likes:', post.likeCount);
@@ -123,7 +120,6 @@ export class ExploreComponent implements OnInit {
     event.preventDefault();
     event.stopPropagation();
     
-    // Since there's no save endpoint in your service, keep the mock behavior
     if (post.isSaved) {
       post.saves = (post.saves || 0) - 1;
       post.isSaved = false;
@@ -141,7 +137,6 @@ export class ExploreComponent implements OnInit {
     event.preventDefault();
     event.stopPropagation();
     console.log('Navigate to comments for post:', post.title);
-    // Navigate to post detail page with comments section
     this.router.navigate(['/explore', post.id]);
   }
 
@@ -152,15 +147,46 @@ export class ExploreComponent implements OnInit {
 
   onUpdate(post: Post) {
     console.log('Update post:', post.title);
-    // Navigate to edit post page
     this.router.navigate(['/edit-post', post.id]);
   }
 
+  openDeleteDialog(post: Post, event: Event) {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: { message: `Are you sure you want to delete "${post.title}"?` }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.onDelete(post);
+      }
+    });
+  }
+
   onDelete(post: Post) {
-    console.log('Delete post:', post.title);
-    // Show confirmation dialog and delete
-    // You'll need to add a delete method to your ArticleService
-    this.snackBar.open('Post deleted', '', { duration: 2000 });
+    this.articleService.deletePost(post.id).subscribe({
+      next: () => {
+        this.posts = this.posts.filter(p => p.id !== post.id);
+        this.filteredPosts = this.filteredPosts.filter(p => p.id !== post.id);
+        
+        this.snackBar.open('✅ Post deleted successfully', '', { 
+          duration: 2000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top'
+        });
+      },
+      error: (err) => {
+        console.error('Error deleting post:', err);
+        this.snackBar.open('❌ Failed to delete post', '', { 
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top'
+        });
+      }
+    });
   }
 
   onPostClick(post: Post) {
@@ -173,5 +199,9 @@ export class ExploreComponent implements OnInit {
       return (count / 1000).toFixed(1) + 'k';
     }
     return count.toString();
+  }
+
+  trackByPostId(index: number, post: Post): number {
+    return post.id;
   }
 }

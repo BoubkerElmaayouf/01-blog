@@ -25,7 +25,7 @@
   <!-- Posts Grid -->
   <div class="articles-container">
     <article 
-      *ngFor="let post of filteredPosts"
+      *ngFor="let post of filteredPosts; trackBy: trackByPostId"
       class="article-card"
       (click)="onPostClick(post)">
       
@@ -105,7 +105,7 @@
                 <mat-icon>edit</mat-icon>
                 <span>Update</span>
               </button>
-              <button mat-menu-item (click)="onDelete(post)" class="delete-item">
+              <button mat-menu-item (click)="openDeleteDialog(post, $event)" class="delete-item">
                 <mat-icon>delete</mat-icon>
                 <span>Delete</span>
               </button>
@@ -134,14 +134,3 @@
     </div>
   </div>
 </div>
-
-<!-- Error state
-<div *ngIf="!isLoading && posts.length === 0 && filteredPosts.length === 0" class="error-state">
-   <mat-icon class="error-icon">error_outline</mat-icon>
-  <h3>Unable to load posts</h3>
-  <p>Please check your connection and try again.</p>
-  <button mat-raised-button color="primary" (click)="fetchPosts()">
-    Retry
-  </button> -->
-  <!-- <app-loader></app-loader>
-</div> -->

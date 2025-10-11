@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Sort;
@@ -157,6 +158,21 @@ public class PostService {
             .orElseThrow(() -> new RuntimeException("Post not found with id: " + id));
         return post.getUser().getId();
     }
+
+    public ResponseEntity<?> deletePost(Long id, Long userId) {
+        Post post = postRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Post not found with id: " + id));
+
+        if (post.getUser().getId().equals(userId)) {
+            postRepository.deleteById(id);
+            return ResponseEntity.ok(Map.of("message", "Post deleted"));
+        } else {
+            return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(Map.of("message", "You are not allowed to delete this post"));
+        }
+    }
+
 
 }
 

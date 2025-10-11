@@ -156,7 +156,16 @@ public class PostController {
         }
     }
 
-
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> deletePost(@PathVariable Long id, @RequestHeader("Authorization") String authHeader) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            Long userId = jwtService.extractId(token);
+            return postService.deletePost(id, userId);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error deleting post: " + e.getMessage());
+        }
+    }
 
 
     @GetMapping("/all")
