@@ -144,11 +144,15 @@ public class PostController {
                 return ResponseEntity.badRequest().body("Invalid topic. Allowed: " + topics);
             }
 
+            // Post updatedPost = postService.updatePost(id, request, userId);
+            // return ResponseEntity.ok(updatedPost);
+
             Post updatedPost = postService.updatePost(id, request, userId);
-            return ResponseEntity.ok(updatedPost);
+            return ResponseEntity.ok(postService.buildPostResponse(updatedPost, userId));
+
 
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error updating post: " + e.getMessage());
+            return ResponseEntity.badRequest().body("Invalid token or request: " + e.getMessage());
         }
     }
 

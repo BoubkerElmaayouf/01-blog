@@ -70,7 +70,7 @@ public class PostService {
 
 
     // Build PostResponse with isLiked
-    private PostResponse buildPostResponse(Post post, Long currentUserId) {
+    public PostResponse buildPostResponse(Post post, Long currentUserId) {
         int likeCount = (int) postReactionRepository.countByPost(post);
         int commentCount = (int) commentRepository.countByPost(post);
 
