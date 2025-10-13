@@ -13,11 +13,13 @@ import java.util.List;
 public interface SearchPostUserRepository extends JpaRepository<Post, Long> {
 
     @Query("SELECT new com.cocoon._blog.dto.SearchUserPostResponse(" +
-            "u.id, u.firstName, u.lastName, u.profilePic, u.bio, " +
-            "p.id, p.title, p.topic, p.banner, p.createdAt) " +
-            "FROM Post p JOIN p.user u " +
-            "WHERE (:query IS NULL OR LOWER(p.title) LIKE LOWER(CONCAT('%', :query, '%')) " +
-            "OR LOWER(u.firstName) LIKE LOWER(CONCAT('%', :query, '%')))" 
-            + "ORDER BY p.createdAt DESC")
+        "u.id, u.firstName, u.lastName, u.profilePic, u.bio, " +
+        "p.id, p.title, p.topic, p.banner, p.createdAt) " +
+        "FROM Post p JOIN p.user u " +
+        "WHERE (:query IS NULL OR LOWER(p.title) LIKE LOWER(CONCAT('%', :query, '%')) " +
+        "OR LOWER(u.firstName) LIKE LOWER(CONCAT('%', :query, '%')) " +
+        "OR LOWER(p.topic) LIKE LOWER(CONCAT('%', :query, '%'))) " +
+        "ORDER BY p.createdAt DESC")
     List<SearchUserPostResponse> searchPostsAndUsers(@Param("query") String query);
+
 }
