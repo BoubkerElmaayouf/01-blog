@@ -7,13 +7,11 @@ import com.cocoon._blog.dto.RegisterRequest;
 import com.cocoon._blog.dto.UserDto;
 import com.cocoon._blog.entity.User;
 import com.cocoon._blog.service.AuthService;
-import com.cocoon._blog.service.JwtService;
-import com.cocoon._blog.service.NotificationService;
 import com.cocoon._blog.service.FollowService;
-
-// import jakarta.websocket.server.PathParam;
+import com.cocoon._blog.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -24,11 +22,9 @@ import java.util.Map;
 public class AuthController {
 
     private final AuthService authService;
-    private final JwtService jwtService;
     private final FollowService followService;
     private final NotificationService notificationService;
 
-    
     @PostMapping("/register")
     public ResponseEntity<User> register(@RequestBody RegisterRequest request) {
         User user = authService.register(request);
@@ -42,17 +38,13 @@ public class AuthController {
     }
 
     @GetMapping("/user")
-    public ResponseEntity<UserDto> getUser(@RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<UserDto> getUser(@AuthenticationPrincipal User currentUser) {
         try {
-            String token = authHeader.substring("Bearer ".length());
-            Long userId = jwtService.extractId(token);
-
-            User user = authService.getUserById(userId);
-            UserDto userDto = authService.toUserDto(user);
-
+            UserDto userDto = authService.toUserDto(currentUser);
             return ResponseEntity.ok(userDto);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(null);
+            System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>" + e.getMessage());
+            return ResponseEntity.badRequest().build();
         }
     }
 
@@ -60,18 +52,10 @@ public class AuthController {
     public ResponseEntity<UserDto> updateUser(
             @PathVariable Long id,
             @RequestBody UserDto userDto,
-            @RequestHeader("Authorization") String authHeader) {
+            @AuthenticationPrincipal User currentUser) {
 
         try {
-            String token = authHeader.replace("Bearer ", "");
-            Long userIdFromToken = jwtService.extractId(token);
-            String username = jwtService.extractUsername(token);
-
-            if (!jwtService.validateToken(token, username)) {
-                return ResponseEntity.status(401).build(); // Unauthorized
-            }
-
-            if (!userIdFromToken.equals(id)) {
+            if (!currentUser.getId().equals(id)) {
                 return ResponseEntity.status(403).build(); // Forbidden
             }
 
@@ -88,19 +72,11 @@ public class AuthController {
         }
     }
 
-
     @GetMapping("/user/{id}")
     public ResponseEntity<UserDto> getUserById(
             @PathVariable Long id,
-            @RequestHeader("Authorization") String authHeader) {
+            @AuthenticationPrincipal User currentUser) {
         try {
-            String token = authHeader.replace("Bearer ", "");
-            String username = jwtService.extractUsername(token);
-
-            if (!jwtService.validateToken(token, username)) {
-                return ResponseEntity.status(401).build();
-            }
-
             User user = authService.getUserById(id);
             if (user == null) {
                 return ResponseEntity.notFound().build();
@@ -114,63 +90,42 @@ public class AuthController {
         }
     }
 
-
-    // changing the user password
     @PatchMapping("/user/change-password")
     public ResponseEntity<?> changePassword(
             @RequestBody ChangePasswordRequest request,
-            @RequestHeader("Authorization") String authHeader) {
+            @AuthenticationPrincipal User currentUser) {
         try {
-            String token = authHeader.replace("Bearer ", "");
-            Long userId = jwtService.extractId(token);
-            String username = jwtService.extractUsername(token);
-
-            if (!jwtService.validateToken(token, username)) {
-                return ResponseEntity.status(401).body("Unauthorized");
-            }
-
-            authService.changePassword(userId, request);
-            return ResponseEntity.ok(Map.of("message", "password changed with success"));
-
+            authService.changePassword(currentUser.getId(), request);
+            return ResponseEntity.ok(Map.of("message", "password changed successfully"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    // follow 
     @PostMapping("/follow/{userId}")
     public ResponseEntity<FollowResponse> followUser(
             @PathVariable Long userId,
-            @RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace("Bearer ", "");
-        Long followerId = jwtService.extractId(token);
+            @AuthenticationPrincipal User currentUser) {
 
-        FollowResponse response = followService.follow(followerId, userId);
+        FollowResponse response = followService.follow(currentUser.getId(), userId);
         return ResponseEntity.ok(response);
     }
 
-
-    // unfollow
     @DeleteMapping("/follow/{userId}")
     public ResponseEntity<FollowResponse> unfollowUser(
             @PathVariable Long userId,
-            @RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace("Bearer ", "");
-        Long followerId = jwtService.extractId(token);
+            @AuthenticationPrincipal User currentUser) {
 
-        FollowResponse response = followService.unfollow(followerId, userId);
+        FollowResponse response = followService.unfollow(currentUser.getId(), userId);
         return ResponseEntity.ok(response);
     }
 
-    //followers state
     @GetMapping("/follow/status/{userId}")
     public ResponseEntity<Map<String, Boolean>> isFollowing(
             @PathVariable Long userId,
-            @RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace("Bearer ", "");
-        Long followerId = jwtService.extractId(token);
+            @AuthenticationPrincipal User currentUser) {
 
-        boolean status = followService.isFollowing(followerId, userId);
+        boolean status = followService.isFollowing(currentUser.getId(), userId);
         return ResponseEntity.ok(Map.of("isFollowing", status));
     }
 }

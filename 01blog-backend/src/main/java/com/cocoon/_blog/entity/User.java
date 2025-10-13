@@ -4,6 +4,11 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
 @Table(name = "users") // avoid reserved keyword "user"
@@ -12,7 +17,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 
-public class User {
+public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -34,4 +39,15 @@ public class User {
     private String profilePic;
 
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+       String roleName = (role != null) ? role.name() : "USER";
+       return java.util.List.of(new SimpleGrantedAuthority("ROLE_"+roleName));
+    }
+
+    @Override
+    public String getUsername() {
+     return email;
+    }
 }

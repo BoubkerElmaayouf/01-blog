@@ -4,14 +4,15 @@ import java.util.HashSet;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import com.cocoon._blog.dto.PostRequest;
 import com.cocoon._blog.entity.NotificationType;
 import com.cocoon._blog.entity.Post;
+import com.cocoon._blog.entity.User;
 import com.cocoon._blog.service.FollowService;
-import com.cocoon._blog.service.JwtService;
 import com.cocoon._blog.service.NotificationService;
 import com.cocoon._blog.service.PostService;
 
@@ -25,30 +26,23 @@ import lombok.RequiredArgsConstructor;
 public class PostController {
 
     private final PostService postService;
-    private final JwtService jwtService;
     private final NotificationService notificationService;
     private final FollowService followService;
 
     @PostMapping("/create")
-    public ResponseEntity<?> createPost(@Valid @RequestBody PostRequest request,
-                                        BindingResult bindingResult,
-                                        @RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<?> createPost(
+            @Valid @RequestBody PostRequest request,
+            BindingResult bindingResult,
+            @AuthenticationPrincipal User currentUser) {
+
         try {
             if (bindingResult.hasErrors()) {
                 String errors = bindingResult.getAllErrors()
-                    .stream()
-                    .map(err -> err.getDefaultMessage())
-                    .reduce((m1, m2) -> m1 + ", " + m2)
-                    .orElse("Invalid input");
+                        .stream()
+                        .map(err -> err.getDefaultMessage())
+                        .reduce((m1, m2) -> m1 + ", " + m2)
+                        .orElse("Invalid input");
                 return ResponseEntity.badRequest().body(errors);
-            }
-
-            String token = authHeader.replace("Bearer ", "");
-            Long userId = jwtService.extractId(token);
-            String username = jwtService.extractUsername(token);
-
-            if (!jwtService.validateToken(token, username)) {
-                return ResponseEntity.badRequest().body("Invalid or expired token");
             }
 
             HashSet<String> topics = new HashSet<>(List.of("tech", "gaming", "products", "education", "saas"));
@@ -57,160 +51,133 @@ public class PostController {
             }
 
             // 1️⃣ Create the post
-            Post post = postService.createPost(request, userId);
-            System.out.println("this is the post: " + post);
+            Post post = postService.createPost(request, currentUser.getId());
 
             // 2️⃣ Fetch followers of the user
-            var followers = followService.getFollowers(userId);
-            System.out.println("this is a List ofFollowers: " + followers.toString());
+            var followers = followService.getFollowers(currentUser.getId());
 
-            // 3️⃣ Send notification to each follower
+            // 3️⃣ Send notifications to followers
             for (Long followerId : followers) {
-            notificationService.createNotification(
-                    userId,                    // sender = post creator
-                    followerId,                // recipient = each follower
-                    NotificationType.POST,     // type
-                    post.getId(),              // postId
-                    null ,
-                     "Someone posted something 📢"
+                notificationService.createNotification(
+                        currentUser.getId(),
+                        followerId,
+                        NotificationType.POST,
+                        post.getId(),
+                        null,
+                        "Someone posted something 📢"
                 );
             }
 
             return ResponseEntity.ok(post);
 
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Invalid token or request: " + e.getMessage());
+            return ResponseEntity.badRequest().body("Error creating post: " + e.getMessage());
         }
     }
 
-
     @PostMapping("/like/{id}")
-    public ResponseEntity<?> likePost(@PathVariable Long id, @RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<?> likePost(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User currentUser) {
         try {
-            String token = authHeader.replace("Bearer ", "");
-            Long userId = jwtService.extractId(token);
-            String username = jwtService.extractUsername(token);
+            var response = postService.likePost(id, currentUser.getId());
+            var postOwnerId = postService.getPostOwnerId(id);
 
-            if (!jwtService.validateToken(token, username)) {
-                return ResponseEntity.badRequest().body("Invalid or expired token");
-            }
-
-            var response = postService.likePost(id, userId); 
-            var postOwnerId =  postService.getPostOwnerId(id); // Long
-
-            // Only send notification if the liker is NOT the owner
-            if (!userId.equals(postOwnerId)) { 
+            // Send notification only if liker is not the owner
+            if (!currentUser.getId().equals(postOwnerId)) {
                 notificationService.createNotification(
-                    userId,
-                    postOwnerId,
-                    NotificationType.POST,
-                    (Long) id, null,
-                    "liked your post 🤩"
+                        currentUser.getId(),
+                        postOwnerId,
+                        NotificationType.POST,
+                        id,
+                        null,
+                        "liked your post 🤩"
                 );
             }
 
             return response;
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Invalid token or request: " + e.getMessage());
+            return ResponseEntity.badRequest().body("Error liking post: " + e.getMessage());
         }
     }
 
     @PatchMapping("/edit/{id}")
-    public ResponseEntity<?> editPost(@PathVariable Long id,
-                                    @Valid @RequestBody PostRequest request,
-                                    BindingResult bindingResult,
-                                    @RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<?> editPost(
+            @PathVariable Long id,
+            @Valid @RequestBody PostRequest request,
+            BindingResult bindingResult,
+            @AuthenticationPrincipal User currentUser) {
         try {
             if (bindingResult.hasErrors()) {
                 String errors = bindingResult.getAllErrors()
-                    .stream()
-                    .map(err -> err.getDefaultMessage())
-                    .reduce((m1, m2) -> m1 + ", " + m2)
-                    .orElse("Invalid input");
+                        .stream()
+                        .map(err -> err.getDefaultMessage())
+                        .reduce((m1, m2) -> m1 + ", " + m2)
+                        .orElse("Invalid input");
                 return ResponseEntity.badRequest().body(errors);
             }
 
-            String token = authHeader.replace("Bearer ", "");
-            Long userId = jwtService.extractId(token);
-            String username = jwtService.extractUsername(token);
-
-            if (!jwtService.validateToken(token, username)) {
-                return ResponseEntity.badRequest().body("Invalid or expired token");
-            }
-
-            // Validate topic
             HashSet<String> topics = new HashSet<>(List.of("tech", "gaming", "products", "education", "saas"));
             if (!topics.contains(request.getTopic().toLowerCase())) {
                 return ResponseEntity.badRequest().body("Invalid topic. Allowed: " + topics);
             }
 
-            // Post updatedPost = postService.updatePost(id, request, userId);
-            // return ResponseEntity.ok(updatedPost);
-
-            Post updatedPost = postService.updatePost(id, request, userId);
-            return ResponseEntity.ok(postService.buildPostResponse(updatedPost, userId));
-
+            Post updatedPost = postService.updatePost(id, request, currentUser.getId());
+            return ResponseEntity.ok(postService.buildPostResponse(updatedPost, currentUser.getId()));
 
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Invalid token or request: " + e.getMessage());
+            return ResponseEntity.badRequest().body("Error editing post: " + e.getMessage());
         }
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deletePost(@PathVariable Long id, @RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<?> deletePost(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User currentUser) {
         try {
-            String token = authHeader.replace("Bearer ", "");
-            Long userId = jwtService.extractId(token);
-            return postService.deletePost(id, userId);
+            return postService.deletePost(id, currentUser.getId());
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error deleting post: " + e.getMessage());
         }
     }
 
-
     @GetMapping("/all")
-    public ResponseEntity<?> getAllPosts(@RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<?> getAllPosts(@AuthenticationPrincipal User currentUser) {
         try {
-            String token = authHeader.replace("Bearer ", "");
-            Long userId = jwtService.extractId(token);
-            return postService.getAllPosts(userId);
+            return postService.getAllPosts(currentUser.getId());
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error fetching posts: " + e.getMessage());
         }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getPostById(@PathVariable Long id, @RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<?> getPostById(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User currentUser) {
         try {
-            String token = authHeader.replace("Bearer ", "");
-            Long userId = jwtService.extractId(token);
-            return postService.getPostsById(id, userId);
+            return postService.getPostsById(id, currentUser.getId());
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error fetching post: " + e.getMessage());
         }
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<?> getPostByUserId(@PathVariable Long userId,
-                                             @RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<?> getPostByUserId(
+            @PathVariable Long userId,
+            @AuthenticationPrincipal User currentUser) {
         try {
-            String token = authHeader.replace("Bearer ", "");
-            Long currentUserId = jwtService.extractId(token);
-            return postService.getPostByUserId(userId, currentUserId);
+            return postService.getPostByUserId(userId, currentUser.getId());
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error fetching posts: " + e.getMessage());
         }
     }
 
     @GetMapping("/mine")
-    public ResponseEntity<?> getMyPosts(@RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<?> getMyPosts(@AuthenticationPrincipal User currentUser) {
         try {
-            String token = authHeader.replace("Bearer ", "");
-            Long userId = jwtService.extractId(token);
-            return postService.getMyPosts(userId);
+            return postService.getMyPosts(currentUser.getId());
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error fetching posts: " + e.getMessage());
         }
     }
-
 }

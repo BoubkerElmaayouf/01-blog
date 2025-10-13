@@ -1,7 +1,7 @@
 package com.cocoon._blog.controller;
 
 import com.cocoon._blog.dto.ReportRequest;
-import com.cocoon._blog.service.JwtService;
+import com.cocoon._blog.entity.User;
 import com.cocoon._blog.service.ReportService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,12 +20,13 @@ import org.springframework.web.bind.annotation.*;
 public class ReportController {
 
     private final ReportService reportService;
-    private final JwtService jwtService;
 
     @PostMapping("/create")
-    public ResponseEntity<?> createReport(@Valid @RequestBody ReportRequest request,
-                                          BindingResult bindingResult,
-                                          @RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<?> createReport(
+            @Valid @RequestBody ReportRequest request,
+            BindingResult bindingResult,
+            @AuthenticationPrincipal User currentUser
+    ) {
         try {
             if (bindingResult.hasErrors()) {
                 String errors = bindingResult.getAllErrors()
@@ -35,34 +37,27 @@ public class ReportController {
                 return ResponseEntity.badRequest().body(Map.of("error", errors));
             }
 
-            String token = authHeader.replace("Bearer ", "");
-            Long userId = jwtService.extractId(token);
-            String username = jwtService.extractUsername(token);
-
-            if (!jwtService.validateToken(token, username)) {
-                return ResponseEntity.badRequest().body(Map.of("error", "Invalid or expired token"));
+            if (currentUser == null) {
+                return ResponseEntity.status(401).body(Map.of("error", "User not authenticated"));
             }
 
-            var report = reportService.createReport(request, userId);
+            var report = reportService.createReport(request, currentUser.getId());
 
             return ResponseEntity.ok(Map.of(
-                "message", "Report submitted successfully",
-                "report", report
+                    "message", "Report submitted successfully",
+                    "report", report
             ));
 
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Invalid token or request: " + e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("error", "Error creating report: " + e.getMessage()));
         }
     }
 
     @GetMapping("/all")
-    public ResponseEntity<?> getAllReports(@RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<?> getAllReports(@AuthenticationPrincipal User currentUser) {
         try {
-            String token = authHeader.replace("Bearer ", "");
-            String username = jwtService.extractUsername(token);
-
-            if (!jwtService.validateToken(token, username)) {
-                return ResponseEntity.badRequest().body(Map.of("error", "Invalid or expired token"));
+            if (currentUser == null) {
+                return ResponseEntity.status(401).body(Map.of("error", "User not authenticated"));
             }
 
             var reports = reportService.getAllReports();
@@ -74,14 +69,13 @@ public class ReportController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getReportById(@PathVariable Long id,
-                                           @RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<?> getReportById(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User currentUser
+    ) {
         try {
-            String token = authHeader.replace("Bearer ", "");
-            String username = jwtService.extractUsername(token);
-
-            if (!jwtService.validateToken(token, username)) {
-                return ResponseEntity.badRequest().body(Map.of("error", "Invalid or expired token"));
+            if (currentUser == null) {
+                return ResponseEntity.status(401).body(Map.of("error", "User not authenticated"));
             }
 
             var report = reportService.getReportById(id);
@@ -93,14 +87,13 @@ public class ReportController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteReport(@PathVariable Long id,
-                                          @RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<?> deleteReport(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User currentUser
+    ) {
         try {
-            String token = authHeader.replace("Bearer ", "");
-            String username = jwtService.extractUsername(token);
-
-            if (!jwtService.validateToken(token, username)) {
-                return ResponseEntity.badRequest().body(Map.of("error", "Invalid or expired token"));
+            if (currentUser == null) {
+                return ResponseEntity.status(401).body(Map.of("error", "User not authenticated"));
             }
 
             reportService.deleteReport(id);
