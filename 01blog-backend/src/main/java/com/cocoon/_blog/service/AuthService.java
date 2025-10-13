@@ -4,6 +4,7 @@ import com.cocoon._blog.dto.ChangePasswordRequest;
 import com.cocoon._blog.dto.LoginRequest;
 import com.cocoon._blog.dto.RegisterRequest;
 import com.cocoon._blog.dto.UserDto;
+import com.cocoon._blog.entity.Role;
 import com.cocoon._blog.entity.User;
 import com.cocoon._blog.repository.CommentRepository;
 import com.cocoon._blog.repository.FollowersRepository;
@@ -136,4 +137,20 @@ public class AuthService {
             );
         }
     }
+
+    public void ensureAdminExits() {
+        if (userRepository.findByEmail("a@a.com").isEmpty()) {
+            User admin = User.builder()
+                        .firstName("ADMIN")
+                        .lastName("1")
+                        .email("a@a.com")
+                        .password(passwordEncoder.encode("a@a.com"))
+                        .role(Role.ADMIN)
+                        .banned(false)
+                        .build();
+
+            userRepository.save(admin);
+        }
+    }
+
 }

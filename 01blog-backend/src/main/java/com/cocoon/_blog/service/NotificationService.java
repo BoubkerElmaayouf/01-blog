@@ -40,9 +40,9 @@ public class NotificationService {
         String message = (customMessage != null && !customMessage.isEmpty()) ? 
                         customMessage :
                         switch (type) {
-                                case PROFILE -> "Someone started following you 🎉";
-                                case POST -> "Someone posted something 📢";
-                                case COMMENT -> "Someone commented on your post 💬";
+                                case PROFILE -> " started following you 🎉";
+                                case POST -> " posted something 📢";
+                                case COMMENT -> " commented on your post 💬";
                                 default -> throw new IllegalArgumentException("Unsupported notification type");
                         };
 
