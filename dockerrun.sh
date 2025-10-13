@@ -48,38 +48,38 @@ else
   exit 1
 fi
 
-# Wait a few seconds for Postgres to fully start
-echo "Waiting for Postgres to be ready..."
-sleep 5
+# # Wait a few seconds for Postgres to fully start
+# echo "Waiting for Postgres to be ready..."
+# sleep 5
 
-# Create SQL commands for table creation and admin insertion
-SQL=$(cat <<EOF
-CREATE TABLE IF NOT EXISTS users (
-    id SERIAL PRIMARY KEY,
-    first_name VARCHAR(255),
-    last_name VARCHAR(255),
-    email VARCHAR(255) UNIQUE NOT NULL,
-    bio TEXT,
-    password VARCHAR(255),
-    role VARCHAR(50),
-    banned BOOLEAN DEFAULT FALSE,
-    profile_pic VARCHAR(255),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+# # Create SQL commands for table creation and admin insertion
+# SQL=$(cat <<EOF
+# CREATE TABLE IF NOT EXISTS users (
+#     id SERIAL PRIMARY KEY,
+#     first_name VARCHAR(255),
+#     last_name VARCHAR(255),
+#     email VARCHAR(255) UNIQUE NOT NULL,
+#     bio TEXT,
+#     password VARCHAR(255),
+#     role VARCHAR(50),
+#     banned BOOLEAN DEFAULT FALSE,
+#     profile_pic VARCHAR(255),
+#     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+# );
 
-INSERT INTO users (first_name, last_name, email, password, role, banned)
-VALUES ('Admin', '1', 'a@a.com', 'a@a.com', 'ADMIN', FALSE)
-ON CONFLICT (email) DO NOTHING;
-EOF
-)
+# INSERT INTO users (first_name, last_name, email, password, role, banned)
+# VALUES ('Admin', '1', 'a@a.com', 'a@a.com', 'ADMIN', FALSE)
+# ON CONFLICT (email) DO NOTHING;
+# EOF
+# )
 
-# Execute SQL inside the container
-echo "Initializing database..."
-docker exec -i my-postgres psql -U 01blog -d 01blog -c "$SQL"
+# # Execute SQL inside the container
+# echo "Initializing database..."
+# docker exec -i my-postgres psql -U 01blog -d 01blog -c "$SQL"
 
-if [[ $? -eq 0 ]]; then
-  echo "Admin user created successfully!"
-else
-  echo "Failed to create admin user."
-  exit 1
-fi
+# if [[ $? -eq 0 ]]; then
+#   echo "Admin user created successfully!"
+# else
+#   echo "Failed to create admin user."
+#   exit 1
+# fi

@@ -147,10 +147,15 @@ public class AuthService {
                         .password(passwordEncoder.encode("a@a.com"))
                         .role(Role.ADMIN)
                         .banned(false)
+                        .profilePic("https://i.pinimg.com/736x/b4/1f/f4/b41ff478e42e31fd71584d9dae338ffa.jpg")
                         .build();
 
             userRepository.save(admin);
         }
+    }
+
+    public boolean isAdmin(User user) {
+        return user.getRole() == Role.ADMIN;
     }
 
 }
