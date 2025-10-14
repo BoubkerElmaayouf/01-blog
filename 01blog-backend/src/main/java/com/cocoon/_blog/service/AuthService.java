@@ -57,12 +57,14 @@ public class AuthService {
         User user = userRepository.findByEmail(request.getEmailOrUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid credentials");
-        }
+        
 
         if (user.getBanned() == true) {
             throw new RuntimeException("Your account has been banned Contact Support");
+        }
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new RuntimeException("Invalid credentials");
         }
 
         // ✅ Return JWT token

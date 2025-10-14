@@ -30,5 +30,16 @@ public class Post {
     @ElementCollection
     private List<String> videos; // URLs only
 
+    @Column(nullable = false)
+    private boolean removed = false;
+
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    // Cascade delete post's comments
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments;
+    
+    // Cascade delete post's reactions
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostReaction> reactions;
 }

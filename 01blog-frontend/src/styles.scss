@@ -3,7 +3,7 @@
 html {
   @include mat.theme((
     color: (
-      primary: mat.$green-palette,
+      primary: mat.$azure-palette,
       tertiary: mat.$blue-palette,
     ),
     typography: Roboto,

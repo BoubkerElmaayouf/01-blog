@@ -17,11 +17,11 @@ public class Notification {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "recipient_id", nullable = false)
+    @JoinColumn(name = "recipient_id", nullable = true)
     private User recipient;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sender_id", nullable = false)
+    @JoinColumn(name = "sender_id", nullable = true)
     private User sender;
 
     private String message;
@@ -37,4 +37,7 @@ public class Notification {
     // Store only IDs of post and comment
     private Long postId;
     private Long commentId;
+
+
+
 }

@@ -26,6 +26,10 @@ public class Report {
 
     @Enumerated(EnumType.STRING)
     private ReportType type;
+    
+    @Column(nullable = false)
+    private boolean resolved = false;
+
 
     private LocalDateTime createdAt = LocalDateTime.now();
 }

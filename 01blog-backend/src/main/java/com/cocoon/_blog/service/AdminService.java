@@ -24,84 +24,138 @@ public class AdminService {
     private final PostRepository postRepository;
     private final ReportRepository reportRepository;
 
-    // Users
+    // ===================== USERS =====================
+
     public List<AdminUserDto> getAllUsers() {
         return userRepository.findAll().stream().map(user -> {
-            String username = user.getFirstName() + "_" + user.getLastName(); // match Angular mock data
+            String username = user.getFirstName() + "_" + user.getLastName();
             int postsCount = (int) postRepository.countByUser(user);
             String status = user.getBanned() ? "banned" : "active";
-            return new AdminUserDto(user.getId(), username, user.getEmail(), user.getCreatedAt(), postsCount, status);
+            return new AdminUserDto(
+                    user.getId(),
+                    username,
+                    user.getEmail(),
+                    user.getCreatedAt(),
+                    postsCount,
+                    status
+            );
         }).collect(Collectors.toList());
     }
 
     @Transactional
     public void banUser(Long id) {
-        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        if (user.getRole().name().equals("ADMIN")) {
+            throw new RuntimeException("Cannot ban an admin user");
+        }
         user.setBanned(true);
         userRepository.save(user);
     }
 
     @Transactional
     public void unbanUser(Long id) {
-        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
         user.setBanned(false);
         userRepository.save(user);
     }
 
     @Transactional
     public void deleteUser(Long id) {
-        userRepository.deleteById(id);
+        // if (!userRepository.existsById(id)) {
+        //     throw new RuntimeException("User not found");
+        // }
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+
+        //System.out.println("Deleting user with ID: " + id + "<<<<<<<<>>>>>>>>>>>" + user.getEmail());
+        if (user.getRole().name().equals("ADMIN")) {
+            throw new RuntimeException("Cannot delete an admin user");
+        }
+        userRepository.delete(user);
     }
 
-    // Posts
+    // ===================== POSTS =====================
+
     public List<AdminPostDto> getAllPosts() {
         return postRepository.findAll().stream().map(post -> {
-            String author = post.getUser().getFirstName() + "_" + post.getUser().getLastName();
-            String status = post.getTitle().contains("removed") ? "removed" : "published"; // or track a real status
-            return new AdminPostDto(post.getId(), post.getTitle(), author, post.getCreatedAt(), 0, status);
+            String author = post.getUser() != null
+                    ? post.getUser().getFirstName() + "_" + post.getUser().getLastName()
+                    : "Unknown";
+            String status = post.isRemoved() ? "removed" : "published";
+            return new AdminPostDto(
+                    post.getId(),
+                    post.getTitle(),
+                    author,
+                    post.getCreatedAt(),
+                    0,
+                    status
+            );
         }).collect(Collectors.toList());
     }
 
     @Transactional
     public void removePost(Long id) {
-        Post post = postRepository.findById(id).orElseThrow(() -> new RuntimeException("Post not found"));
-        post.setTitle(post.getTitle() + " [removed]"); // simple removed marker
-        postRepository.save(post);
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+        // post.setRemoved(true);
+        // postRepository.save(post);
+        postRepository.delete(post);
     }
 
     @Transactional
     public void restorePost(Long id) {
-        Post post = postRepository.findById(id).orElseThrow(() -> new RuntimeException("Post not found"));
-        post.setTitle(post.getTitle().replace(" [removed]", ""));
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+        post.setRemoved(false);
         postRepository.save(post);
     }
 
     @Transactional
     public void deletePost(Long id) {
+        if (!postRepository.existsById(id)) {
+            throw new RuntimeException("Post not found");
+        }
         postRepository.deleteById(id);
     }
 
-    // Reports
+    // ===================== REPORTS =====================
+
     public List<AdminReportDto> getAllReports() {
         return reportRepository.findAll().stream().map(report -> {
-            String reporter = report.getUser().getFirstName() + "_" + report.getUser().getLastName();
-            String reportedItem = report.getType().name().equals("POST") ? report.getDescription() : report.getReason();
-            String itemType = report.getType().name().equals("POST") ? "post" : "user";
-            String status = "pending"; // could be updated later
-            return new AdminReportDto(report.getId(), reporter, reportedItem, itemType, report.getReason(), report.getCreatedAt(), status);
+            String reporter = report.getUser() != null
+                    ? report.getUser().getFirstName() + "_" + report.getUser().getLastName()
+                    : "Unknown";
+            String reportedItem = report.getDescription();
+            String itemType = report.getType() != null ? report.getType().name().toLowerCase() : "unknown";
+            String status = report.isResolved() ? "resolved" : "pending";
+            return new AdminReportDto(
+                    report.getId(),
+                    reporter,
+                    reportedItem,
+                    itemType,
+                    report.getReason(),
+                    report.getCreatedAt(),
+                    status
+            );
         }).collect(Collectors.toList());
     }
 
     @Transactional
     public void resolveReport(Long id) {
-        Report report = reportRepository.findById(id).orElseThrow(() -> new RuntimeException("Report not found"));
-        // mark as resolved in description or add a status field if needed
-        report.setDescription(report.getDescription() + " [resolved]");
+        Report report = reportRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Report not found"));
+        report.setResolved(true);
         reportRepository.save(report);
     }
 
     @Transactional
     public void deleteReport(Long id) {
+        if (!reportRepository.existsById(id)) {
+            throw new RuntimeException("Report not found");
+        }
         reportRepository.deleteById(id);
     }
 }

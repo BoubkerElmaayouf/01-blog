@@ -1,0 +1,18 @@
+# root-level ignores
+node_modules
+target
+build
+dist
+.idea
+.vscode
+*.log
+.DS_Store
+
+
+# backend ignores
+01blog-backend/target
+
+
+# frontend ignores
+01blog-frontend/node_modules
+01blog-frontend/dist
