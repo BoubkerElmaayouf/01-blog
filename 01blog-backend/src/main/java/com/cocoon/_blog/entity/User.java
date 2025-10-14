@@ -37,27 +37,27 @@ public class User implements UserDetails {
     private String profilePic;
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    // 🧨 Cascade delete user’s posts
+    //  Cascade delete user’s posts
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Post> posts;
 
-    // 🧨 Cascade delete user’s comments
+    //  Cascade delete user’s comments
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments;
 
-    // 🧨 Cascade delete user’s post reactions
+    //  Cascade delete user’s post reactions
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostReaction> postReactions;
 
-    // 🧨 Cascade delete user’s comment reactions
+    //  Cascade delete user’s comment reactions
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CommentReaction> commentReactions;
 
-    // 🧨 Cascade delete reports made by the user
+    //  Cascade delete reports made by the user
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Report> reports;
 
-    // 🧨 Cascade delete notifications (both sent and received)
+    //  Cascade delete notifications (both sent and received)
     @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Notification> sentNotifications;
 

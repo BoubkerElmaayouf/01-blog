@@ -33,7 +33,7 @@
       <!-- Author Info -->
       <div class="author-section">
         <div class="author-info">
-          <a [routerLink]="['/profile', article.id]">
+          <a [routerLink]="['/profile', article.userId]">
           <img 
             [src]="article.profilePic || getDefaultAvatar()" 
             [alt]="getFullName()" 
@@ -41,7 +41,7 @@
             (error)="$event.target.src = getDefaultAvatar()">
           </a>
             <div class="author-details">
-              <a [routerLink]="['/profile', article.id]" class="author-name">{{ getFullName() }}</a>
+              <a [routerLink]="['/profile', article.userId]" class="author-name">{{ getFullName() }}</a>
             <div class="article-meta">
               <span class="publish-date">{{ getFormattedDate(article.createdAt) }}</span>
               <span class="meta-separator">·</span>
