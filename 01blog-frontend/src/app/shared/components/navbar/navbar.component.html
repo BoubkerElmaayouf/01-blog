@@ -232,7 +232,11 @@
         <mat-icon>flag</mat-icon>
         <span>Report an issue</span>
       </a>
-      
+
+       <a *ngIf="isAdmin" mat-menu-item routerLink="/admin" class="menu-item">
+        <mat-icon>admin_panel_settings</mat-icon>
+        <span>Admin panel</span>
+      </a>
       <mat-divider class="logout-divider"></mat-divider>
       
       <button mat-menu-item (click)="onLogout()" class="logout-item">

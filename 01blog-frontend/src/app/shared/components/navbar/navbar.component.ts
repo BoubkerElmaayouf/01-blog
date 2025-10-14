@@ -42,6 +42,7 @@ import { debounceTime, distinctUntilChanged, switchMap, filter, startWith } from
 export class NavbarComponent implements OnInit, OnDestroy {
   searchQuery: string = '';
   isMobileMenuOpen: boolean = false;
+  isAdmin: boolean = false;
   
   // Search functionality
   searchResults: SearchUserPostResponse[] = [];
@@ -120,6 +121,11 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.articleService.getUserInfo().subscribe({
       next: (profile) => {
         this.userProfile = profile;
+        if (profile && profile.role == 'ADMIN') {
+          this.isAdmin = true;
+        }else {
+          this.isAdmin = false;
+        }
         console.log('Fetched user profile:', profile);
       },
       error: (err) => {

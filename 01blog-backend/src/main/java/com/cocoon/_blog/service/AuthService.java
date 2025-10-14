@@ -36,8 +36,8 @@ public class AuthService {
             profilePicture = "https://i.pinimg.com/736x/fc/cf/36/fccf365288b90c4a0a4fb410ca24c889.jpg";
         }
 
-        // if (request.getRole() == null || request.getRole().trim().isEmpty() || request.getRole().equals("ADMIN")) {
-        //     return null;
+        // if (request.getRole().equals("ADMIN")) {
+        //     throw new RuntimeException("Cannot register as ADMIN");
         // }
 
         User user = User.builder()
