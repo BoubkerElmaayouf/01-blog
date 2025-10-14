@@ -4,6 +4,9 @@
   background-color: #ffffff;
   color: #000000;
   display: flex;
+  justify-content: center;
+  align-items: center;
+  
   flex-direction: column;
   width: 100%;
   overflow-x: hidden;
@@ -12,11 +15,13 @@
 
 /* Header */
 .admin-header {
-  margin-top: 64px;
   background-color: #ffffff;
   color: black;
   padding: 0 24px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); */
+  margin-top: 80px;
+  border-bottom: 1px solid #e0e0e0;
+  max-width: 67%;
 }
 
 .admin-header svg {
