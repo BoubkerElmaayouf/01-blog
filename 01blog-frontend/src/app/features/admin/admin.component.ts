@@ -10,6 +10,8 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { NavbarComponent } from "../../shared/components/navbar/navbar.component";
 import { AdminService, User, Post, Report } from "../../services/admin.service";
+import { ConfirmDialogComponent } from "../../shared/components/confirm-dialog/confirm-component";
+import { MatDialog } from "@angular/material/dialog";
 
 @Component({
   selector: 'app-admin',
@@ -45,7 +47,8 @@ export class AdminComponent implements OnInit {
 
   constructor(
     private adminService: AdminService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit() {
@@ -58,7 +61,26 @@ export class AdminComponent implements OnInit {
     this.loadReports();
   }
 
-  // Users
+  // ------------------ Generic Confirmation ------------------
+  confirmAction(message: string, action: () => void, event?: Event) {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: { message }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        action();
+      }
+    });
+  }
+
+  // ------------------ Users ------------------
   loadUsers() {
     this.adminService.getUsers().subscribe({
       next: (users) => {
@@ -91,22 +113,29 @@ export class AdminComponent implements OnInit {
     });
   }
 
+  openDeleteUserDialog(user: User, event: Event) {
+    this.confirmAction(
+      `Are you sure you want to delete "${user.username}"?`,
+      () => this.deleteUser(user.id),
+      event
+    );
+  }
+
   deleteUser(userId: number) {
-    if (!confirm('Are you sure you want to delete this user?')) return;
     this.adminService.deleteUser(userId).subscribe({
       next: () => {
-        // this.users = this.users.filter(u => u.id !== userId);
+        this.users = this.users.filter(u => u.id !== userId);
         this.updateStatistics();
         this.showMessage('User deleted successfully');
       },
-      error: (error) =>  {
-        this.showMessage('Error deleting user')
-        console.log(error);
+      error: (error) => {
+        this.showMessage('Error deleting user');
+        console.error(error);
       }
     });
   }
 
-  // Posts
+  // ------------------ Posts ------------------
   loadPosts() {
     this.adminService.getPosts().subscribe({
       next: (posts) => {
@@ -139,8 +168,15 @@ export class AdminComponent implements OnInit {
     });
   }
 
+  openDeletePostDialog(post: Post, event: Event) {
+    this.confirmAction(
+      `Are you sure you want to delete "${post.title}"?`,
+      () => this.deletePost(post.id),
+      event
+    );
+  }
+
   deletePost(postId: number) {
-    if (!confirm('Are you sure you want to delete this post?')) return;
     this.adminService.deletePost(postId).subscribe({
       next: () => {
         this.posts = this.posts.filter(p => p.id !== postId);
@@ -151,7 +187,7 @@ export class AdminComponent implements OnInit {
     });
   }
 
-  // Reports
+  // ------------------ Reports ------------------
   loadReports() {
     this.adminService.getReports().subscribe({
       next: (reports) => {
@@ -173,8 +209,15 @@ export class AdminComponent implements OnInit {
     });
   }
 
+  openDismissReportDialog(report: Report, event: Event) {
+    this.confirmAction(
+      `Are you sure you want to dismiss this report?`,
+      () => this.dismissReport(report.id),
+      event
+    );
+  }
+
   dismissReport(reportId: number) {
-    if (!confirm('Are you sure you want to dismiss this report?')) return;
     this.adminService.dismissReport(reportId).subscribe({
       next: () => {
         this.reports = this.reports.filter(r => r.id !== reportId);
@@ -185,7 +228,7 @@ export class AdminComponent implements OnInit {
     });
   }
 
-  // Utils
+  // ------------------ Utils ------------------
   updateStatistics() {
     this.totalUsers = this.users.length;
     this.bannedUsers = this.users.filter(u => u.status === 'banned').length;

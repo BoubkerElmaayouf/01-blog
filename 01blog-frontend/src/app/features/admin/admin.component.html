@@ -140,7 +140,7 @@
                         Unban
                       </button>
                       <button mat-button 
-                              (click)="deleteUser(user.id)"
+                              (click)="openDeleteUserDialog(user, $event)"
                               class="action-button delete-button">
                         <mat-icon>delete</mat-icon>
                         Delete
@@ -234,7 +234,7 @@
                         Restore
                       </button>
                       <button mat-button 
-                              (click)="deletePost(post.id)"
+                              (click)="openDeletePostDialog(post, $event)"
                               class="action-button delete-button">
                         <mat-icon>delete</mat-icon>
                         Delete
@@ -321,7 +321,7 @@
                         Resolve
                       </button>
                       <button mat-button 
-                              (click)="dismissReport(report.id)"
+                              (click)="openDismissReportDialog(report, $event)"
                               class="action-button dismiss-button">
                         <mat-icon>close</mat-icon>
                         Dismiss
