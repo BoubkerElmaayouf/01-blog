@@ -20,6 +20,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { LoaderComponent } from '../../shared/components/loader/loader.component';
 import { repopopComponent, ReportData } from '../../shared/components/reportpopup/repop.component';
 import { ReportService } from '../../services/report.service';
+import {ConfirmDialogComponent} from "../../shared/components/confirm-dialog/confirm-component";
 
 @Component({
   selector: 'app-profile',
@@ -77,7 +78,8 @@ export class ProfileComponent implements OnInit {
     private router: Router,
     private articleService: ArticleService,
     private imageUploadService: ImageUploadService,
-    private ReportService : ReportService
+    private ReportService : ReportService, 
+    private Dialog: MatDialog
   ) {
     this.profileForm = this.fb.group({
       firstName: ['', [Validators.required, Validators.minLength(2)]],
@@ -422,6 +424,48 @@ export class ProfileComponent implements OnInit {
 
   navigateToArticle(articleId: number): void {
     this.router.navigate(['/explore', articleId]);
+  }
+
+  onUpdate(post: Article) {
+    // console.log('Update post:', post.title);
+    this.router.navigate(['/edit-post', post.id]);
+  }
+
+  onDelete(article: Article) {
+    this.articleService.deletePost(article.id).subscribe({
+      next: () => {
+        this.userArticles = this.userArticles.filter(p => p.id !== article.id);
+        this.snackBar.open('✅ Post deleted successfully', '', {
+          duration: 2000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top'
+        });
+      },
+      error: (err) => {
+        console.error('Error deleting post:', err);
+        this.snackBar.open('❌ Failed to delete post', '', {
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top'
+        });
+      }
+    })
+  }
+
+  openDeleteDialog(article: Article, $event: Event) {
+    $event.preventDefault();
+    $event.stopPropagation();
+    
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: { message: `Are you sure you want to delete "${article.title}"?` }
+    });
+    
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.onDelete(article);
+      }
+    });
   }
 
   // --- UI feedback ---

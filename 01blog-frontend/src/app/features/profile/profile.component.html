@@ -206,7 +206,8 @@
           <div class="blog-topic" *ngIf="article.topic">
             <span class="topic-tag">{{ article.topic }}</span>
           </div>
-          
+
+
           <div class="blog-meta">
             <span class="blog-date">{{ formatDate(article.createdAt) }}</span>
             <div class="blog-stats">
@@ -220,6 +221,29 @@
                 <mat-icon class="stat-icon">comment</mat-icon>
                 {{ article.commentCount }}
               </span>
+
+              <!-- Add this trigger button -->
+              <button
+                mat-icon-button
+                [matMenuTriggerFor]="articleMenu"
+                (click)="$event.stopPropagation()"
+                class="more-options-btn"
+              >
+                <mat-icon>more_vert</mat-icon>
+              </button>
+
+              <!-- Keep the existing menu here -->
+              <mat-menu #articleMenu="matMenu">
+                <button mat-menu-item (click)="onUpdate(article)">
+                  <mat-icon>edit</mat-icon>
+                  <span>Update</span>
+                </button>
+                <button mat-menu-item (click)="openDeleteDialog(article, $event)" class="delete-item">
+                  <mat-icon>delete</mat-icon>
+                  <span>Delete</span>
+                </button>
+              </mat-menu>
+
             </div>
           </div>
         </div>

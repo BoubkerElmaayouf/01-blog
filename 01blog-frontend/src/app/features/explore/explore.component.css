@@ -491,3 +491,18 @@
     background: white;
   }
 }
+
+/* White background for mat-menu */
+::ng-deep .mat-mdc-menu-panel {
+  background-color: #ffffff !important;
+  color: #1a1a1a !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  border-radius: 8px !important;
+}
+
+/* Optional: darker hover effect for items */
+::ng-deep .mat-mdc-menu-item:hover {
+  background-color: #f5f5f5 !important;
+}
+
+
