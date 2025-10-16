@@ -246,6 +246,12 @@
   height: 18px;
 }
 
+.action-lable {
+  font-family: 'Charter', Georgia, serif;
+  font-size: 0.9rem;
+  color: #1a1a1a;
+}
+
 /* Menu Styles */
 /* Menu Styles - Fixed for white background */
 .more-menu {

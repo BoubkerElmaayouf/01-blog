@@ -99,15 +99,15 @@
             <mat-menu #moreMenu="matMenu" class="more-menu">
               <button mat-menu-item (click)="onReport(post)">
                 <mat-icon>flag</mat-icon>
-                <span>Report</span>
+                <span class="action-lable">Report</span>
               </button>
               <button mat-menu-item (click)="onUpdate(post)">
                 <mat-icon>edit</mat-icon>
-                <span>Update</span>
+                <span class="action-lable">Update</span>
               </button>
               <button mat-menu-item (click)="openDeleteDialog(post, $event)" class="delete-item">
                 <mat-icon>delete</mat-icon>
-                <span>Delete</span>
+                <span class="action-lable" >Delete</span>
               </button>
             </mat-menu>
           </div>
