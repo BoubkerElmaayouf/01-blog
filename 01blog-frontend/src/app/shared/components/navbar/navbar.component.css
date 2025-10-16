@@ -43,6 +43,7 @@
   font-size: 24px;
   font-weight: bold;
 }
+
 .logo-container .logo {
   font-family: "UnifrakturMaguntia", cursive;
   font-weight: 600;
@@ -335,6 +336,7 @@ a {
 /* Right section */
 .navbar-right {
   display: flex;
+  justify-content: center;
   align-items: center;
   gap: 4px;
   min-width: 0;
@@ -359,7 +361,7 @@ a {
 }
 
 .write-text {
-  font-size: 14px;
+  font-size: 16px;
   color: rgba(0, 0, 0, 0.54);
   margin-right: 12px;
   font-weight: 400;
@@ -495,7 +497,6 @@ a {
 
 /* Notification Items */
 ::ng-deep .notification-menu .notification-item {
-  font-family: inherit !important;
   font-family: 'Charter', Georgia, serif !important;
   padding: 0 !important;
   color: rgba(0, 0, 0, 0.8) !important;
@@ -604,7 +605,7 @@ a {
 
 /* View All Notifications */
 ::ng-deep .notification-menu .view-all-notifications {
-  /* font-family: inherit !important; */
+  /*  font-family: 'Charter', Georgia, serif; */
   font-family: 'Charter', Georgia, serif !important;
 
   font-size: 14px !important;
@@ -633,8 +634,8 @@ a {
 }
 
 .user-avatar {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   padding: 0;
   border-radius: 50%;
   min-width: 32px;
@@ -710,21 +711,19 @@ a {
 .profile-name {
   font-family: 'Charter', Georgia, serif !important;
   font-size: 16px;
-
   font-weight: 600;
   color: rgba(0, 0, 0, 0.9);
   margin-bottom: 2px;
   line-height: 1.3;
   /* font-family: inherit; */
-
 }
 
 .profile-email {
   font-size: 14px;
   color: rgba(0, 0, 0, 0.6);
   line-height: 1.3;
-  font-family: inherit;
   word-break: break-word;
+  font-family: 'Charter', Georgia, serif;
 }
 
 /* Profile divider */
@@ -735,7 +734,7 @@ a {
 
 /* Regular menu items */
 ::ng-deep .user-menu .menu-item {
-  font-family: inherit !important;
+  font-family: 'Charter', Georgia, serif;
   font-size: 14px !important;
   line-height: 1.4 !important;
   height: 48px !important;
@@ -771,7 +770,7 @@ a {
 
 /* Logout item styling */
 ::ng-deep .user-menu .logout-item {
-  font-family: inherit !important;
+  font-family: 'Charter', Georgia, serif;
   font-size: 14px !important;
   line-height: 1.4 !important;
   height: 48px !important;
@@ -1054,12 +1053,14 @@ a {
 ::ng-deep .mat-mdc-button-ripple,
 ::ng-deep .mat-mdc-icon-button-ripple,
 ::ng-deep .mat-ripple-element {
+  font-family: 'Charter', Georgia, serif;
   display: none !important;
 }
 
 /* Ensure proper button styling */
 ::ng-deep .mat-mdc-button,
 ::ng-deep .mat-mdc-icon-button {
+    font-family: 'Charter', Georgia, serif;
   --mdc-text-button-label-text-color: inherit;
   --mdc-icon-button-icon-color: inherit;
 }

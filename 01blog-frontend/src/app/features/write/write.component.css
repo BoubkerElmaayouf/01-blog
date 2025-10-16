@@ -1,6 +1,7 @@
 /* Container Styles */
 .write-container {
   min-height: 100vh;
+  width: 100%;
   background-color: #ffffff;
   padding-top: 64px; /* Account for navbar */
 }
@@ -8,20 +9,25 @@
 /* Header Styles */
 .write-header {
   background-color: #ffffff;
-  border-bottom: 1px solid #e0e0e0;
+  /* border-bottom: 1px solid #e0e0e0; */
   position: sticky;
   top: 64px;
   z-index: 100;
   padding: 16px 0;
 }
 
+/* Center header content with the form below */
 .header-content {
   max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 24px;
+  /* background-color: red; */
+  border-bottom: 1px solid #e0e0e0;
+  margin: 0 auto;           /* centers it horizontally */
+  padding: 0 24px;          /* matches .form-container padding */
   display: flex;
+  padding-bottom: 20px;
   justify-content: space-between;
   align-items: center;
+  width: 100%;              /* ensures alignment consistency */
 }
 
 .write-header h1 {
@@ -199,6 +205,7 @@
 
 /* Quill Editor Customization */
 :host ::ng-deep .quill-editor {
+  font-family:'Charter', Georgia, serif;
   min-height: 500px;
   background-color: #ffffff;
 }
@@ -212,8 +219,9 @@
 }
 
 :host ::ng-deep .ql-container {
+  font-family:'Charter', Georgia, serif;
+  background-color: #ffffff;
   border: none;
-  font-family: 'Roboto', sans-serif;
   font-size: 16px;
   line-height: 1.6;
 }
@@ -273,6 +281,7 @@
 
   .header-content {
     padding: 0 20px;
+    padding-bottom: 24px;
   }
 
   .title-category-row {
@@ -296,7 +305,7 @@
   }
 
   .header-content {
-    padding: 0 16px;
+    padding: 16px 16px;
     flex-direction: column;
     gap: 16px;
     align-items: stretch;

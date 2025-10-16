@@ -6,7 +6,6 @@ html {
       primary: mat.$azure-palette,
       tertiary: mat.$blue-palette,
     ),
-    typography: Roboto,
     density: 0,
   ));
 }
@@ -15,8 +14,9 @@ body {
   color-scheme: light;
   background-color: var(--mat-sys-surface);
   color: var(--mat-sys-on-surface);
-  font: var(--mat-sys-body-medium);
+  // font: var(--mat-sys-body-medium);
   // Reset the user agent margin.
+  font-family: 'Charter', Georgia, serif;
   margin: 0;
 }
 
@@ -46,4 +46,7 @@ html, body { height: 100vh;
   overflow-x: hidden;
 }
 
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+body { 
+  margin: 0;     
+    font-family: "Noticia Text", serif;
+}

@@ -23,9 +23,10 @@
 
 /* Logo */
 .logo-container {
-  font-size: 22px;
-  font-weight: bold;
+  font-size: 30px;
+  font-weight: 600;
   color: #000;
+  font-family: "UnifrakturMaguntia", cursive;
 }
 
 /* Nav links */

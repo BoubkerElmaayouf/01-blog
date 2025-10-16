@@ -8,7 +8,6 @@
   min-height: 50vh;
   padding: 40px 20px;
   font-family: 'Charter', Georgia, serif;
-
 }
 
 .loading-spinner {
@@ -89,8 +88,6 @@
 
 /* Article Header */
 .article-header {
-  /* border-bottom: 1px solid #f0f0f0; */
-
   padding: 40px 0 30px;
   margin-bottom: 30px;
 }
@@ -182,10 +179,11 @@
   border: 1px solid #e5e7eb;
   border-radius: 20px;
   color: #6c757d;
-  font-size: 14px;
+  font-size: 16px;
   cursor: pointer;
   transition: all 0.2s ease;
   flex-shrink: 0;
+  font-family: 'Charter', Georgia, serif;
 }
 
 .report-btn:hover {
@@ -221,6 +219,7 @@
   color: #374151;
   word-wrap: break-word;
   overflow-wrap: break-word;
+  font-family: 'Charter', Georgia, serif;
 }
 
 /* Content Styling for Quill.js HTML */
@@ -360,6 +359,7 @@
   cursor: pointer;
   transition: color 0.2s ease;
   font-weight: 400;
+  font-family: 'Charter', Georgia, serif;
 }
 
 .engagement-btn:hover {
@@ -513,6 +513,7 @@
   padding: 6px 12px;
   border-radius: 4px;
   transition: color 0.2s ease;
+  font-family: 'Charter', Georgia, serif;
 }
 
 .cancel-btn:hover:not(:disabled) {
@@ -535,6 +536,7 @@
   cursor: pointer;
   transition: background-color 0.2s ease;
   min-width: 80px;
+  font-family: 'Charter', Georgia, serif;
 }
 
 .respond-btn:hover:not(:disabled) {
@@ -629,6 +631,7 @@
   padding: 0;
   transition: color 0.2s ease;
   font-weight: 400;
+  font-family: 'Charter', Georgia, serif;
 }
 
 .comment-action-btn:hover {
