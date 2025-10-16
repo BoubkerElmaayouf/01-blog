@@ -145,6 +145,11 @@
   justify-content: flex-end;
   margin-top: 16px;
 }
+.lable {
+  color: #1a1a1a;
+  font-size: 14px;
+  font-weight: 500;
+}
 
 /* Statistics Section */
 .statistics-section {
