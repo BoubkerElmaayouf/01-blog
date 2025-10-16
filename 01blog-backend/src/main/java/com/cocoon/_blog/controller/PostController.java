@@ -2,6 +2,7 @@ package com.cocoon._blog.controller;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -68,7 +69,7 @@ public class PostController {
                 );
             }
 
-            return ResponseEntity.ok(post);
+            return ResponseEntity.ok(Map.of("message" , "Post created successfully" ,  "post", post));
 
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error creating post: " + e.getMessage());

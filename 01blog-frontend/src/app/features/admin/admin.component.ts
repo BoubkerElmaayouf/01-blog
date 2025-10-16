@@ -198,6 +198,14 @@ export class AdminComponent implements OnInit {
     });
   }
 
+  onResolveReport(report: Report, event: Event) {
+    this.confirmAction(
+      `Are you sure you want to resolve this report?`,
+      () => this.resolveReport(report),
+      event
+    );
+  }
+
   resolveReport(report: Report) {
     this.adminService.resolveReport(report.id).subscribe({
       next: () => {
