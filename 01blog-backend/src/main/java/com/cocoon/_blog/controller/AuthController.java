@@ -43,7 +43,6 @@ public class AuthController {
             UserDto userDto = authService.toUserDto(currentUser);
             return ResponseEntity.ok(userDto);
         } catch (Exception e) {
-            System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>" + e.getMessage());
             return ResponseEntity.badRequest().build();
         }
     }

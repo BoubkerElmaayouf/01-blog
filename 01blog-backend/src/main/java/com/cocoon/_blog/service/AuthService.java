@@ -49,6 +49,7 @@ public class AuthService {
                 .role(com.cocoon._blog.entity.Role.USER)
                 .banned(false)
                 .profilePic(profilePicture)
+                .createdAt(java.time.LocalDateTime.now())
                 .build();
         return userRepository.save(user);
     }

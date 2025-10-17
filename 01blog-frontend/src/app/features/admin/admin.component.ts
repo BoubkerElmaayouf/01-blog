@@ -8,6 +8,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from "../../shared/components/navbar/navbar.component";
 import { AdminService, User, Post, Report } from "../../services/admin.service";
 import { ConfirmDialogComponent } from "../../shared/components/confirm-dialog/confirm-component";
@@ -18,6 +22,7 @@ import { MatDialog } from "@angular/material/dialog";
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     NavbarComponent,
     MatToolbarModule,
     MatCardModule,
@@ -26,7 +31,10 @@ import { MatDialog } from "@angular/material/dialog";
     MatIconModule,
     MatTabsModule,
     MatChipsModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatInputModule,
+    MatFormFieldModule,
+    MatSelectModule
   ],
   templateUrl: './admin.component.html',
   styleUrls: ['./admin.component.css']
@@ -40,6 +48,20 @@ export class AdminComponent implements OnInit {
   users: User[] = [];
   posts: Post[] = [];
   reports: Report[] = [];
+
+  filteredUsers: User[] = [];
+  filteredPosts: Post[] = [];
+  filteredReports: Report[] = [];
+
+  // Search & Filter properties
+  userSearchTerm = '';
+  postSearchTerm = '';
+  reportSearchTerm = '';
+
+  userStatusFilter = 'all';
+  postStatusFilter = 'all';
+  reportStatusFilter = 'all';
+  reportTypeFilter = 'all';
 
   userColumns = ['id', 'username', 'email', 'joinDate', 'postsCount', 'status', 'actions'];
   postColumns = ['id', 'title', 'author', 'publishDate', 'views', 'status', 'actions'];
@@ -61,7 +83,114 @@ export class AdminComponent implements OnInit {
     this.loadReports();
   }
 
-  // ------------------ Generic Confirmation ------------------
+  // ==================== SEARCH & FILTER ====================
+  onUserSearchChange() {
+    this.filterUsers();
+  }
+
+  onPostSearchChange() {
+    this.filterPosts();
+  }
+
+  onReportSearchChange() {
+    this.filterReports();
+  }
+
+  onUserStatusFilterChange() {
+    this.filterUsers();
+  }
+
+  onPostStatusFilterChange() {
+    this.filterPosts();
+  }
+
+  onReportStatusFilterChange() {
+    this.filterReports();
+  }
+
+  onReportTypeFilterChange() {
+    this.filterReports();
+  }
+
+  filterUsers() {
+    let result = this.users;
+
+    if (this.userSearchTerm) {
+      const term = this.userSearchTerm.toLowerCase();
+      result = result.filter(u =>
+        u.username.toLowerCase().includes(term) ||
+        u.email.toLowerCase().includes(term)
+      );
+    }
+
+    if (this.userStatusFilter !== 'all') {
+      result = result.filter(u => u.status === this.userStatusFilter);
+    }
+
+    this.filteredUsers = result;
+  }
+
+  filterPosts() {
+    let result = this.posts;
+
+    if (this.postSearchTerm) {
+      const term = this.postSearchTerm.toLowerCase();
+      result = result.filter(p =>
+        p.title.toLowerCase().includes(term) ||
+        p.author.toLowerCase().includes(term)
+      );
+    }
+
+    if (this.postStatusFilter !== 'all') {
+      result = result.filter(p => p.status === this.postStatusFilter);
+    }
+
+    this.filteredPosts = result;
+  }
+
+  filterReports() {
+    let result = this.reports;
+
+    if (this.reportSearchTerm) {
+      const term = this.reportSearchTerm.toLowerCase();
+      result = result.filter(r =>
+        r.reporterUsername.toLowerCase().includes(term) ||
+        r.reportedItem.toLowerCase().includes(term) ||
+        r.reason.toLowerCase().includes(term)
+      );
+    }
+
+    if (this.reportStatusFilter !== 'all') {
+      result = result.filter(r => r.status === this.reportStatusFilter);
+    }
+
+    if (this.reportTypeFilter !== 'all') {
+      result = result.filter(r => r.itemType === this.reportTypeFilter);
+    }
+
+    this.filteredReports = result;
+  }
+
+  clearUserFilters() {
+    this.userSearchTerm = '';
+    this.userStatusFilter = 'all';
+    this.filterUsers();
+  }
+
+  clearPostFilters() {
+    this.postSearchTerm = '';
+    this.postStatusFilter = 'all';
+    this.filterPosts();
+  }
+
+  clearReportFilters() {
+    this.reportSearchTerm = '';
+    this.reportStatusFilter = 'all';
+    this.reportTypeFilter = 'all';
+    this.filterReports();
+  }
+
+  // ==================== GENERIC CONFIRMATION ====================
   confirmAction(message: string, action: () => void, event?: Event) {
     if (event) {
       event.preventDefault();
@@ -80,11 +209,12 @@ export class AdminComponent implements OnInit {
     });
   }
 
-  // ------------------ Users ------------------
+  // ==================== USERS ====================
   loadUsers() {
     this.adminService.getUsers().subscribe({
       next: (users) => {
         this.users = users;
+        this.filterUsers();
         this.updateStatistics();
       },
       error: () => this.showMessage('Error loading users')
@@ -95,6 +225,7 @@ export class AdminComponent implements OnInit {
     this.adminService.banUser(user.id).subscribe({
       next: () => {
         user.status = 'banned';
+        this.filterUsers();
         this.updateStatistics();
         this.showMessage('User banned successfully');
       },
@@ -106,6 +237,7 @@ export class AdminComponent implements OnInit {
     this.adminService.unbanUser(user.id).subscribe({
       next: () => {
         user.status = 'active';
+        this.filterUsers();
         this.updateStatistics();
         this.showMessage('User unbanned successfully');
       },
@@ -125,6 +257,7 @@ export class AdminComponent implements OnInit {
     this.adminService.deleteUser(userId).subscribe({
       next: () => {
         this.users = this.users.filter(u => u.id !== userId);
+        this.filterUsers();
         this.updateStatistics();
         this.showMessage('User deleted successfully');
       },
@@ -135,11 +268,12 @@ export class AdminComponent implements OnInit {
     });
   }
 
-  // ------------------ Posts ------------------
+  // ==================== POSTS ====================
   loadPosts() {
     this.adminService.getPosts().subscribe({
       next: (posts) => {
         this.posts = posts;
+        this.filterPosts();
         this.updateStatistics();
       },
       error: () => this.showMessage('Error loading posts')
@@ -150,6 +284,7 @@ export class AdminComponent implements OnInit {
     this.adminService.removePost(post.id).subscribe({
       next: () => {
         this.posts = this.posts.filter(p => p.id !== post.id);
+        this.filterPosts();
         this.updateStatistics();
         this.showMessage('Post removed successfully');
       },
@@ -161,6 +296,7 @@ export class AdminComponent implements OnInit {
     this.adminService.restorePost(post.id).subscribe({
       next: () => {
         post.status = 'published';
+        this.filterPosts();
         this.updateStatistics();
         this.showMessage('Post restored successfully');
       },
@@ -180,6 +316,7 @@ export class AdminComponent implements OnInit {
     this.adminService.deletePost(postId).subscribe({
       next: () => {
         this.posts = this.posts.filter(p => p.id !== postId);
+        this.filterPosts();
         this.updateStatistics();
         this.showMessage('Post deleted successfully');
       },
@@ -187,11 +324,12 @@ export class AdminComponent implements OnInit {
     });
   }
 
-  // ------------------ Reports ------------------
+  // ==================== REPORTS ====================
   loadReports() {
     this.adminService.getReports().subscribe({
       next: (reports) => {
         this.reports = reports;
+        this.filterReports();
         this.updateStatistics();
       },
       error: () => this.showMessage('Error loading reports')
@@ -210,6 +348,7 @@ export class AdminComponent implements OnInit {
     this.adminService.resolveReport(report.id).subscribe({
       next: () => {
         report.status = 'resolved';
+        this.filterReports();
         this.updateStatistics();
         this.showMessage('Report resolved successfully');
       },
@@ -229,6 +368,7 @@ export class AdminComponent implements OnInit {
     this.adminService.dismissReport(reportId).subscribe({
       next: () => {
         this.reports = this.reports.filter(r => r.id !== reportId);
+        this.filterReports();
         this.updateStatistics();
         this.showMessage('Report dismissed successfully');
       },
@@ -236,7 +376,7 @@ export class AdminComponent implements OnInit {
     });
   }
 
-  // ------------------ Utils ------------------
+  // ==================== UTILS ====================
   updateStatistics() {
     this.totalUsers = this.users.length;
     this.bannedUsers = this.users.filter(u => u.status === 'banned').length;

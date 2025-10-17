@@ -6,11 +6,9 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  
   flex-direction: column;
   width: 100%;
   overflow-x: hidden;
-
 }
 
 /* Header */
@@ -18,14 +16,13 @@
   background-color: #ffffff;
   color: black;
   padding: 0 24px;
-  /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); */
   margin-top: 80px;
   border-bottom: 1px solid #e0e0e0;
   max-width: 67%;
 }
 
 .admin-header svg {
-    width: 28px;
+  width: 28px;
 }
 
 .admin-title {
@@ -83,6 +80,99 @@
   color: #666666;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+/* ==================== FILTERS & SEARCH ==================== */
+.filters-container {
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.filter-group {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  margin-bottom: 12px;
+}
+
+.search-field {
+  flex: 1;
+  min-width: 200px;
+}
+
+.filter-field {
+  min-width: 150px;
+}
+
+.search-field::ng-deep .mat-mdc-form-field,
+.filter-field::ng-deep .mat-mdc-form-field {
+  width: 100%;
+}
+
+.search-field::ng-deep .mat-mdc-text-field-wrapper,
+.filter-field::ng-deep .mat-mdc-text-field-wrapper {
+  padding-bottom: 0;
+}
+
+.clear-filters-btn {
+  background-color: transparent;
+  color: #666666;
+  border: 1px solid #666666;
+  border-radius: 4px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 56px;
+}
+
+.clear-filters-btn:hover {
+  background-color: #666666;
+  color: #ffffff;
+}
+
+.clear-filters-btn mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.results-count {
+  font-size: 13px;
+  color: #666666;
+  font-style: italic;
+}
+
+/* No Results State */
+.no-results {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  color: #999999;
+  text-align: center;
+}
+
+.no-results mat-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.no-results p {
+  font-size: 16px;
+  margin: 0;
 }
 
 /* Management Tabs */
@@ -227,12 +317,13 @@
   align-items: center;
   cursor: pointer;
 }
+
 .actions-cell {
   display: flex;
-  justify-content: center; /* center horizontally */
-  align-items: center;      /* align icons/text vertically */
-  gap: 8px;                 /* space between buttons */
-  padding: 16px 0;           /* optional: vertical padding */
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 0;
 }
 
 .ban-button {
@@ -326,21 +417,21 @@
   font-size: 14px;
 }
 
-/* Responsive Design */
+/* ==================== RESPONSIVE DESIGN ==================== */
+
+/* Tablet (768px and below) */
 @media (max-width: 768px) {
-    .admin-header {
-        padding: 0 24px;
-        font-size: 22px;
-        max-width: 100%;
-
-    }
-
-  .admin-content {
-    padding: 16px;
+  .admin-header {
+    padding: 0 16px;
+    max-width: 100%;
   }
 
   .admin-title {
-    font-size: 20px;
+    font-size: 18px;
+  }
+
+  .admin-content {
+    padding: 16px;
   }
 
   .statistics-section {
@@ -353,9 +444,246 @@
     font-size: 24px;
   }
 
+  .stat-label {
+    font-size: 12px;
+  }
+
+  .filters-container {
+    padding: 12px;
+  }
+
+  .filter-group {
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .search-field {
+    min-width: 150px;
+  }
+
+  .filter-field {
+    min-width: 120px;
+  }
+
+  .search-field::ng-deep .mat-mdc-form-field-infix {
+    padding-top: 8px !important;
+  }
+
+  .clear-filters-btn {
+    padding: 8px 12px;
+    font-size: 12px;
+    height: 48px;
+  }
+
+  .results-count {
+    font-size: 12px;
+  }
+
   .action-button {
     margin-right: 4px;
-    padding: 2px 8px;
+    padding: 6px 10px;
     font-size: 11px;
+  }
+
+  .action-button .mat-icon {
+    margin-right: 2px;
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
+
+  .mat-mdc-cell {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+
+  .mat-mdc-header-cell {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+
+  .reason-text {
+    max-width: 100px;
+  }
+
+  .tab-content {
+    padding: 16px 0;
+  }
+
+  .mat-mdc-card {
+    margin-bottom: 16px;
+  }
+}
+
+/* Mobile (480px and below) */
+@media (max-width: 480px) {
+  .admin-header {
+    padding: 0 12px;
+    margin-top: 70px;
+  }
+
+  .admin-header svg {
+    width: 24px;
+  }
+
+  .admin-title {
+    font-size: 16px;
+    margin-left: 8px;
+  }
+
+  .admin-content {
+    padding: 12px;
+  }
+
+  .statistics-section {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .stat-number {
+    font-size: 20px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+  }
+
+  .stat-card {
+    padding: 16px;
+  }
+
+  .filters-container {
+    padding: 12px;
+    border-radius: 4px;
+  }
+
+  .filter-group {
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+  }
+
+  .search-field,
+  .filter-field {
+    width: 100% !important;
+    min-width: unset !important;
+  }
+
+  .clear-filters-btn {
+    width: 100%;
+    height: 44px;
+  }
+
+  .results-count {
+    font-size: 11px;
+    margin-top: 8px;
+  }
+
+  .no-results {
+    padding: 30px 16px;
+  }
+
+  .no-results mat-icon {
+    font-size: 40px;
+    width: 40px;
+    height: 40px;
+  }
+
+  .no-results p {
+    font-size: 14px;
+  }
+
+  .actions-cell {
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 12px 0;
+  }
+
+  .action-button {
+    padding: 6px 8px;
+    font-size: 10px;
+    margin-right: 0;
+  }
+
+  .action-button .mat-icon {
+    margin-right: 1px;
+    font-size: 12px;
+    width: 12px;
+    height: 12px;
+  }
+
+  .mat-mdc-cell {
+    font-size: 11px;
+    padding: 6px 8px;
+  }
+
+  .mat-mdc-header-cell {
+    font-size: 11px;
+    padding: 6px 8px;
+  }
+
+  .mat-mdc-card-header .mat-mdc-card-title {
+    font-size: 16px;
+  }
+
+  .reason-text {
+    max-width: 80px;
+    font-size: 11px;
+  }
+
+  .table-container {
+    border-radius: 4px;
+  }
+
+  .admin-footer p {
+    font-size: 12px;
+  }
+
+  /* Hide less important columns on very small screens */
+  .userColumns:nth-child(4),
+  .postColumns:nth-child(5) {
+    display: none;
+  }
+}
+
+/* Extra small devices (below 360px) */
+@media (max-width: 360px) {
+  .admin-header {
+    padding: 0 8px;
+  }
+
+  .admin-content {
+    padding: 8px;
+  }
+
+  .statistics-section {
+    gap: 8px;
+  }
+
+  .filters-container {
+    padding: 10px;
+  }
+
+  .filter-group {
+    gap: 8px;
+  }
+
+  .stat-card {
+    padding: 12px;
+  }
+
+  .stat-number {
+    font-size: 18px;
+  }
+
+  .action-button {
+    padding: 4px 6px;
+    font-size: 9px;
+  }
+
+  .mat-mdc-cell,
+  .mat-mdc-header-cell {
+    padding: 4px 6px;
+    font-size: 10px;
   }
 }
