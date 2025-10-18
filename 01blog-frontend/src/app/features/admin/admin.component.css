@@ -95,7 +95,8 @@
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
-  align-items: flex-end;
+  justify-content: center;
+  align-items: center;
   margin-bottom: 12px;
 }
 
@@ -132,6 +133,7 @@
   align-items: center;
   gap: 6px;
   height: 56px;
+  margin-top: -22px;
 }
 
 .clear-filters-btn:hover {
@@ -453,6 +455,10 @@
   }
 
   .filter-group {
+    /* display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: red; */
     gap: 8px;
     margin-bottom: 12px;
   }
