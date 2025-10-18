@@ -18,13 +18,11 @@ export const authGuard: CanActivateFn = (route, state) => {
   return authService.isValidToken().pipe(
     map(({ isValid, role }) => {
       if (isValid) {
-        // ✅ Token valid
-        console.log('✅ Token valid, role:', role);
+        // console.log(' Token valid, role:', role);
 
-        // (Optional) Save role for later use
+        //Save role for later use
         localStorage.setItem('role', role || '');
 
-        // 🔒 Optional: restrict access by role (example: admin route)
         const path = route.routeConfig?.path;
         if (path === 'admin' && role !== 'ADMIN') {
           router.navigate(['/explore']);
@@ -33,7 +31,7 @@ export const authGuard: CanActivateFn = (route, state) => {
 
         return true;
       } else {
-        // ❌ Token invalid or expired
+        // Token invalid or expired
         authService.logout();
         router.navigate(['/login']);
         return false;
