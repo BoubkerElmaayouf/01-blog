@@ -18,14 +18,15 @@ export const routes: Routes = [
   {path: 'login', component: LoginComponent, canActivate: [noAuthGuard]},
   
   // Protected routes
+  { path: 'admin', component: AdminComponent, canActivate: [authGuard] },
   {path: 'explore', component: ExploreComponent, canActivate: [authGuard]},
   {path: 'explore/:id', component: ArticleComponent, canActivate: [authGuard]},
   { path: 'write', component: WriteComponent, canActivate: [authGuard] },
- { path: "edit-post/:id", component: WriteComponent, canActivate: [authGuard] },
+  { path: "edit-post/:id", component: WriteComponent, canActivate: [authGuard] },
   { path: 'profile', component: ProfileComponent, canActivate: [authGuard] },
   { path: 'profile/:id', component: ProfileComponent, canActivate: [authGuard] },
+  {path: 'report', component: ReportComponent, canActivate: [authGuard]},
 
-  { path: 'admin', component: AdminComponent, canActivate: [authGuard] },
   
   // {path: 'explore', component: ExploreComponent},
   // { path: 'write', component: WriteComponent },
@@ -34,6 +35,5 @@ export const routes: Routes = [
 
   {path: 'privacy-policy', component: PolicyPrivacyComponent},
   {path: 'contact', component: ContactComponent, canActivate: [noAuthGuard]},
-  {path: 'report', component: ReportComponent},
   {path: 'about', component: AboutComponent, canActivate: [noAuthGuard]},
 ];

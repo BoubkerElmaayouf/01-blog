@@ -8,12 +8,14 @@ import com.cocoon._blog.dto.UserDto;
 import com.cocoon._blog.entity.User;
 import com.cocoon._blog.service.AuthService;
 import com.cocoon._blog.service.FollowService;
+import com.cocoon._blog.service.JwtService;
 import com.cocoon._blog.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -24,6 +26,7 @@ public class AuthController {
     private final AuthService authService;
     private final FollowService followService;
     private final NotificationService notificationService;
+    private final JwtService jwtService;
 
     @PostMapping("/register")
     public ResponseEntity<User> register(@RequestBody RegisterRequest request) {
@@ -46,6 +49,34 @@ public class AuthController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    @PostMapping("/isValidtoken")
+   public ResponseEntity<?> isValid(@RequestParam("Authorization") String token) {
+        try {
+            if (token.startsWith("Bearer ")) {
+                token = token.substring(7);
+            }
+
+            String username = jwtService.extractUsername(token);
+            boolean isValid = jwtService.validateToken(token, username);
+            String role = jwtService.extractRole(token);
+
+            // Build response JSON
+            Map<String, Object> response = new HashMap<>();
+            response.put("isValid", isValid);
+            response.put("role", role);
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("isValid", false);
+            response.put("role", null);
+            return ResponseEntity.ok(response);
+        }
+    }
+
+
 
     @PatchMapping("/user/{id}")
     public ResponseEntity<UserDto> updateUser(

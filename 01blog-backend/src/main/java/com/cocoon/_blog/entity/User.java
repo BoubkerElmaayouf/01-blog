@@ -38,6 +38,7 @@ public class User implements UserDetails {
     private LocalDateTime createdAt = LocalDateTime.now();
 
     //  Cascade delete user’s posts
+    
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Post> posts;
 

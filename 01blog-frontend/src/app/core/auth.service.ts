@@ -43,15 +43,16 @@ export class AuthService {
     return !!localStorage.getItem('token');
   }
 
-  // // Fetch current user from backend (with JWT attached)
-  // getCurrentUser(): Observable<User | null> {
-  //   if (this.currentUser) {
-  //     return of(this.currentUser); // return cached user
-  //   }
+  isValidToken(): Observable<{ isValid: boolean; role: string | null }> {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      return of({ isValid: false, role: null });
+    }
 
-  //   return this.http.get<User>(`${this.baseUrl}/me`).pipe(
-  //     tap(user => this.currentUser = user),
-  //     catchError(() => of(null)) // return null if error (unauthenticated)
-  //   );
-  // }
+    return this.http.post<{ isValid: boolean; role: string | null }>(
+      `${this.baseUrl}/isValidtoken?Authorization=Bearer ${token}`,
+      {}
+    );
+  }
+
 }
