@@ -149,8 +149,6 @@ public class PostService {
                     postReactionRepository.save(reaction);
                     return ResponseEntity.ok(Map.of("message", "Like added"));
                 });
-
-
     }
 
     public Long getPostOwnerId(Long id) {
