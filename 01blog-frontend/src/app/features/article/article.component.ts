@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component,ViewEncapsulation, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
@@ -14,7 +14,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
   standalone: true,
   imports: [NavbarComponent, CommonModule, FormsModule, LoaderComponent, repopopComponent, RouterModule],
   templateUrl: './article.component.html',
-  styleUrls: ['./article.component.css']
+  styleUrls: ['./article.component.css'],
+  encapsulation: ViewEncapsulation.None
 })
 
 export class ArticleComponent implements OnInit {

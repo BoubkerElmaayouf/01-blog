@@ -19,7 +19,6 @@
 /* Center header content with the form below */
 .header-content {
   max-width: 1200px;
-  /* background-color: red; */
   border-bottom: 1px solid #e0e0e0;
   margin: 0 auto;           /* centers it horizontally */
   padding: 0 24px;          /* matches .form-container padding */
@@ -208,7 +207,10 @@
   min-height: 500px;
   background-color: #ffffff;
 }
-
+:host ::ng-deep .quill-local-video {
+  max-width: 100%;
+  max-height: 400px;
+}
 :host ::ng-deep .ql-toolbar {
   background-color: #fafafa;
   border-bottom: 1px solid #e0e0e0;

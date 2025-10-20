@@ -72,8 +72,6 @@
   min-height: 100vh;
   background-color: #ffffff;
   font-family: 'Charter', Georgia, serif;
-
-  /* font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; */
   color: #242424;
   line-height: 1.6;
   margin-top: 50px;
@@ -209,7 +207,7 @@
 /* Content Section */
 .content-section {
   border-top: 1px solid #f0f0f0;
-
+  padding-top: 40px;
   margin-bottom: 50px;
 }
 
@@ -220,93 +218,254 @@
   word-wrap: break-word;
   overflow-wrap: break-word;
   font-family: 'Charter', Georgia, serif;
+  letter-spacing: 0.01em;
+  padding: 0 20px;
 }
 
-/* Content Styling for Quill.js HTML */
-.content-wrapper h1 {
+/* ========================================
+   QUILL CONTENT STYLING - Enhanced
+   ======================================== */
+
+/* Headings */
+.content-wrapper h1,
+.content-wrapper .ql-size-huge {
   font-size: 2.25rem;
   font-weight: 700;
-  margin: 40px 0 20px;
+  margin: 48px 0 24px;
   color: #1a1a1a;
   line-height: 1.2;
+  transition: color 0.2s ease;
 }
 
-.content-wrapper h2 {
+.content-wrapper h2,
+.content-wrapper .ql-size-large {
   font-size: 1.875rem;
   font-weight: 600;
-  margin: 35px 0 18px;
+  margin: 40px 0 20px;
   color: #1a1a1a;
   line-height: 1.3;
 }
 
-.content-wrapper h3 {
-  font-size: 1.5rem;
+.content-wrapper h3,
+.content-wrapper h4,
+.content-wrapper h5,
+.content-wrapper h6 {
   font-weight: 600;
-  margin: 30px 0 15px;
+  margin: 32px 0 16px;
   color: #1a1a1a;
   line-height: 1.4;
 }
 
+.content-wrapper h3 { font-size: 1.5rem; }
+.content-wrapper h4 { font-size: 1.25rem; }
+.content-wrapper h5 { font-size: 1.125rem; }
+.content-wrapper h6 { font-size: 1rem; }
+
+/* Paragraphs */
 .content-wrapper p {
-  margin: 20px 0;
+  margin: 24px 0;
   font-size: 18px;
   line-height: 1.75;
 }
 
-.content-wrapper .ql-align-center {
-  text-align: center;
+.content-wrapper .ql-size-small {
+  font-size: 14px;
+  line-height: 1.6;
 }
 
-.content-wrapper .ql-align-right {
+/* Text Alignment Classes */
+.content-wrapper .ql-align-center,
+.content-wrapper [style*="text-align: center"],
+.content-wrapper [style*="text-align:center"] {
+  text-align: center !important;
+}
+
+.content-wrapper .ql-align-right,
+.content-wrapper [style*="text-align: right"],
+.content-wrapper [style*="text-align:right"] {
+  text-align: right !important;
+}
+
+.content-wrapper .ql-align-left,
+.content-wrapper [style*="text-align: left"],
+.content-wrapper [style*="text-align:left"] {
+  text-align: left !important;
+}
+
+.content-wrapper .ql-align-justify,
+.content-wrapper [style*="text-align: justify"],
+.content-wrapper [style*="text-align:justify"] {
+  text-align: justify !important;
+}
+
+/* Text Direction */
+.content-wrapper .ql-direction-rtl {
+  direction: rtl;
   text-align: right;
 }
 
-.content-wrapper .ql-align-left {
-  text-align: left;
-}
-
-.content-wrapper img {
-  max-width: 100%;
-  height: auto;
-  border-radius: 6px;
-  margin: 20px 0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.content-wrapper strong {
+/* Text Formatting */
+.content-wrapper strong,
+.content-wrapper b {
   font-weight: 600;
   color: #1a1a1a;
 }
 
-.content-wrapper em {
+.content-wrapper em,
+.content-wrapper i {
   font-style: italic;
 }
 
+.content-wrapper u {
+  text-decoration: underline;
+}
+
+.content-wrapper s,
+.content-wrapper strike {
+  text-decoration: line-through;
+}
+
+/* Subscript and Superscript */
+.content-wrapper sub {
+  vertical-align: sub;
+  font-size: 0.8em;
+}
+
+.content-wrapper sup {
+  vertical-align: super;
+  font-size: 0.8em;
+}
+
+/* Colors - Quill applies inline styles */
+.content-wrapper [style*="background-color"] {
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+
+/* Images */
+.content-wrapper img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 32px auto;
+  display: block;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.content-wrapper img:hover {
+  transform: scale(1.02);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Videos - Enhanced Styling */
+.content-wrapper video,
+.content-wrapper .quill-local-video {
+  max-width: 100%;
+  width: 100%;
+  height: auto;
+  min-height: 300px;
+  max-height: 600px;
+  border-radius: 8px;
+  margin: 32px auto;
+  display: block;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background-color: #000;
+  transition: box-shadow 0.3s ease;
+}
+
+.content-wrapper video:hover,
+.content-wrapper .quill-local-video:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Blockquotes */
 .content-wrapper blockquote {
-  border-left: 4px solid #e5e7eb;
-  padding-left: 20px;
-  margin: 30px 0;
+  border-left: 4px solid #242424;
+  padding: 16px 24px;
+  margin: 32px 0;
   font-style: italic;
-  color: #6b7280;
+  color: #4a5568;
   font-size: 19px;
+  background-color: #f9fafb;
+  border-radius: 4px;
 }
 
+/* Lists */
 .content-wrapper ul,
 .content-wrapper ol {
   padding-left: 30px;
-  margin: 20px 0;
+  margin: 24px 0;
 }
 
 .content-wrapper li {
-  margin: 8px 0;
+  margin: 10px 0;
+  line-height: 1.75;
 }
 
+.content-wrapper ul li {
+  list-style-type: disc;
+}
+
+.content-wrapper ol li {
+  list-style-type: decimal;
+}
+
+.content-wrapper ul ul,
+.content-wrapper ol ul {
+  list-style-type: circle;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.content-wrapper ul ol,
+.content-wrapper ol ol {
+  list-style-type: lower-alpha;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+/* Indentation */
+.content-wrapper .ql-indent-1 {
+  padding-left: 3em;
+}
+
+.content-wrapper .ql-indent-2 {
+  padding-left: 6em;
+}
+
+.content-wrapper .ql-indent-3 {
+  padding-left: 9em;
+}
+
+.content-wrapper .ql-indent-4 {
+  padding-left: 12em;
+}
+
+.content-wrapper .ql-indent-5 {
+  padding-left: 15em;
+}
+
+.content-wrapper .ql-indent-6 {
+  padding-left: 18em;
+}
+
+.content-wrapper .ql-indent-7 {
+  padding-left: 21em;
+}
+
+.content-wrapper .ql-indent-8 {
+  padding-left: 24em;
+}
+
+/* Code */
 .content-wrapper code {
   background-color: #f3f4f6;
-  padding: 2px 6px;
+  padding: 3px 8px;
   border-radius: 4px;
-  font-family: 'Monaco', 'Consolas', monospace;
+  font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
   font-size: 0.9em;
+  color: #e83e8c;
 }
 
 .content-wrapper pre {
@@ -315,24 +474,57 @@
   padding: 20px;
   border-radius: 8px;
   overflow-x: auto;
-  margin: 25px 0;
+  margin: 32px 0;
+  line-height: 1.5;
 }
 
 .content-wrapper pre code {
   background: none;
   padding: 0;
   color: inherit;
+  font-size: 14px;
 }
 
+.content-wrapper .ql-code-block {
+  background-color: #1f2937;
+  color: #f9fafb;
+  padding: 20px;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 32px 0;
+  font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Links */
 .content-wrapper a {
   color: #3b82f6;
   text-decoration: none;
   border-bottom: 1px solid transparent;
-  transition: border-bottom-color 0.2s ease;
+  transition: all 0.2s ease;
+  font-weight: 500;
 }
 
 .content-wrapper a:hover {
   border-bottom-color: #3b82f6;
+  color: #2563eb;
+}
+
+/* Fonts */
+.content-wrapper .ql-font-serif {
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+.content-wrapper .ql-font-monospace {
+  font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
+}
+
+/* Horizontal Rule */
+.content-wrapper hr {
+  border: none;
+  border-top: 2px solid #e5e7eb;
+  margin: 40px 0;
 }
 
 /* Article Footer */
@@ -679,7 +871,10 @@
   color: #9e9e9e;
 }
 
-/* Responsive Design */
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+
 @media (max-width: 768px) {
   .article-container {
     max-width: 100%;
@@ -717,14 +912,17 @@
 
   .content-wrapper {
     font-size: 17px;
+    padding: 0 15px;
   }
 
-  .content-wrapper h1 {
+  .content-wrapper h1,
+  .content-wrapper .ql-size-huge {
     font-size: 1.875rem;
     margin: 30px 0 15px;
   }
 
-  .content-wrapper h2 {
+  .content-wrapper h2,
+  .content-wrapper .ql-size-large {
     font-size: 1.5rem;
     margin: 25px 0 12px;
   }
@@ -733,6 +931,45 @@
     font-size: 1.25rem;
     margin: 20px 0 10px;
   }
+
+  .content-wrapper h4 {
+    font-size: 1.125rem;
+  }
+
+  .content-wrapper h5 {
+    font-size: 1rem;
+  }
+
+  .content-wrapper h6 {
+    font-size: 0.875rem;
+  }
+
+  .content-wrapper p {
+    margin: 20px 0;
+  }
+
+  .content-wrapper blockquote {
+    font-size: 18px;
+    padding: 12px 20px;
+    margin: 28px 0;
+  }
+
+  /* Responsive Videos */
+  .content-wrapper video,
+  .content-wrapper .quill-local-video {
+    min-height: 200px;
+    max-height: 400px;
+  }
+
+  /* Responsive Indentation */
+  .content-wrapper .ql-indent-1 { padding-left: 2em; }
+  .content-wrapper .ql-indent-2 { padding-left: 4em; }
+  .content-wrapper .ql-indent-3 { padding-left: 6em; }
+  .content-wrapper .ql-indent-4 { padding-left: 8em; }
+  .content-wrapper .ql-indent-5 { padding-left: 10em; }
+  .content-wrapper .ql-indent-6 { padding-left: 12em; }
+  .content-wrapper .ql-indent-7 { padding-left: 14em; }
+  .content-wrapper .ql-indent-8 { padding-left: 16em; }
 
   .engagement-section {
     gap: 20px;
@@ -780,7 +1017,68 @@
 
   .content-wrapper {
     font-size: 16px;
+    padding: 0 10px;
   }
+
+  .content-wrapper h1,
+  .content-wrapper .ql-size-huge {
+    font-size: 1.625rem;
+  }
+
+  .content-wrapper h2,
+  .content-wrapper .ql-size-large {
+    font-size: 1.375rem;
+  }
+
+  .content-wrapper h3 {
+    font-size: 1.125rem;
+  }
+
+  .content-wrapper h4 {
+    font-size: 1rem;
+  }
+
+  .content-wrapper h5 {
+    font-size: 0.875rem;
+  }
+
+  .content-wrapper h6 {
+    font-size: 0.75rem;
+  }
+
+  .content-wrapper p {
+    margin: 18px 0;
+  }
+
+  .content-wrapper blockquote {
+    font-size: 17px;
+    padding: 10px 18px;
+    margin: 24px 0;
+  }
+
+  .content-wrapper pre,
+  .content-wrapper .ql-code-block {
+    padding: 16px;
+    font-size: 13px;
+  }
+
+  /* Responsive Videos */
+  .content-wrapper video,
+  .content-wrapper .quill-local-video {
+    min-height: 180px;
+    max-height: 300px;
+    border-radius: 4px;
+  }
+
+  /* Smaller Indentation on Mobile */
+  .content-wrapper .ql-indent-1 { padding-left: 1.5em; }
+  .content-wrapper .ql-indent-2 { padding-left: 3em; }
+  .content-wrapper .ql-indent-3 { padding-left: 4.5em; }
+  .content-wrapper .ql-indent-4 { padding-left: 6em; }
+  .content-wrapper .ql-indent-5 { padding-left: 7.5em; }
+  .content-wrapper .ql-indent-6 { padding-left: 9em; }
+  .content-wrapper .ql-indent-7 { padding-left: 10.5em; }
+  .content-wrapper .ql-indent-8 { padding-left: 12em; }
 
   .engagement-section {
     gap: 16px;
@@ -820,6 +1118,11 @@
 }
 
 @media (max-width: 320px) {
+  .article-container {
+    padding: 10px;
+    margin-top: 20px;
+  }
+
   .article-title {
     font-size: 1.5rem;
   }
@@ -830,7 +1133,67 @@
 
   .content-wrapper {
     font-size: 15px;
+    padding: 0 5px;
   }
+
+  .content-wrapper h1,
+  .content-wrapper .ql-size-huge {
+    font-size: 1.5rem;
+  }
+
+  .content-wrapper h2,
+  .content-wrapper .ql-size-large {
+    font-size: 1.25rem;
+  }
+
+  .content-wrapper h3 {
+    font-size: 1rem;
+  }
+
+  .content-wrapper h4 {
+    font-size: 0.875rem;
+  }
+
+  .content-wrapper h5 {
+    font-size: 0.75rem;
+  }
+
+  .content-wrapper h6 {
+    font-size: 0.625rem;
+  }
+
+  .content-wrapper p {
+    margin: 16px 0;
+  }
+
+  .content-wrapper blockquote {
+    font-size: 16px;
+    padding: 8px 16px;
+    margin: 20px 0;
+  }
+
+  .content-wrapper pre,
+  .content-wrapper .ql-code-block {
+    padding: 12px;
+    font-size: 12px;
+  }
+
+  /* Extra Small Videos */
+  .content-wrapper video,
+  .content-wrapper .quill-local-video {
+    min-height: 150px;
+    max-height: 250px;
+  }
+
+  /* Minimal Indentation on Very Small Screens */
+  .content-wrapper .ql-indent-1 { padding-left: 1em; }
+  .content-wrapper .ql-indent-2 { padding-left: 2em; }
+  .content-wrapper .ql-indent-3 { padding-left: 3em; }
+  .content-wrapper .ql-indent-4 { padding-left: 4em; }
+  .content-wrapper .ql-indent-5 { padding-left: 5em; }
+  .content-wrapper .ql-indent-6 { padding-left: 6em; }
+  .content-wrapper .ql-indent-7 { padding-left: 7em; }
+  .content-wrapper .ql-indent-8 { padding-left: 8em; }
 
   .comments-header h3 {
     font-size: 16px;
