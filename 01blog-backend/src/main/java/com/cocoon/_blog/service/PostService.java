@@ -1,6 +1,5 @@
 package com.cocoon._blog.service;
 
-import java.net.ResponseCache;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +15,7 @@ import com.cocoon._blog.dto.PostResponse;
 import com.cocoon._blog.entity.Post;
 import com.cocoon._blog.entity.PostReaction;
 import com.cocoon._blog.entity.User;
+import com.cocoon._blog.exception.UserBannedException;
 import com.cocoon._blog.repository.CommentRepository;
 import com.cocoon._blog.repository.PostReactionRepository;
 import com.cocoon._blog.repository.PostRepository;
@@ -31,9 +31,15 @@ public class PostService {
     private final PostReactionRepository postReactionRepository;
     private final CommentRepository commentRepository;
 
+    // 🔹 Create a post
     public Post createPost(PostRequest request, Long userId) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // 🚫 Prevent banned users from creating posts
+        if (Boolean.TRUE.equals(user.getBanned())) {
+            throw new UserBannedException("Your account has been banned. You cannot perform this action.");
+        }
 
         Post post = Post.builder()
             .title(request.getTitle())
@@ -49,14 +55,23 @@ public class PostService {
         return post;
     }
 
+    // 🔹 Update a post
     public Post updatePost(Long postId, PostRequest request, Long userId) {
-    Post post = postRepository.findById(postId)
-        .orElseThrow(() -> new RuntimeException("Post not found with id: " + postId));
+        Post post = postRepository.findById(postId)
+            .orElseThrow(() -> new RuntimeException("Post not found with id: " + postId));
 
-    // Ensure the current user is the owner
-    if (!post.getUser().getId().equals(userId)) {
-        throw new RuntimeException("You are not allowed to edit this post");
-    }
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+
+        // 🚫 Prevent banned users from updating posts
+        if (Boolean.TRUE.equals(user.getBanned())) {
+            throw new UserBannedException("Your account has been banned. You cannot perform this action.");
+        }
+
+        // Ensure the current user is the owner
+        if (!post.getUser().getId().equals(userId)) {
+            throw new RuntimeException("You are not allowed to edit this post");
+        }
 
         post.setTitle(request.getTitle());
         post.setTopic(request.getTopic());
@@ -69,8 +84,7 @@ public class PostService {
         return post;
     }
 
-
-    // Build PostResponse with isLiked
+    // 🔹 Build PostResponse with like status
     public PostResponse buildPostResponse(Post post, Long currentUserId) {
         int likeCount = (int) postReactionRepository.countByPost(post);
         int commentCount = (int) commentRepository.countByPost(post);
@@ -100,6 +114,7 @@ public class PostService {
         );
     }
 
+    // 🔹 Get all posts
     public ResponseEntity<?> getAllPosts(Long currentUserId) {
         List<PostResponse> posts = postRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt")).stream()
             .map(post -> buildPostResponse(post, currentUserId))
@@ -107,12 +122,14 @@ public class PostService {
         return ResponseEntity.ok(posts);
     }
 
+    // 🔹 Get post by ID
     public ResponseEntity<?> getPostsById(long id, Long currentUserId) {
         Post post = postRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Post not found with id: " + id));
         return ResponseEntity.ok(buildPostResponse(post, currentUserId));
     }
 
+    // 🔹 Get posts by user ID
     public ResponseEntity<?> getPostByUserId(Long userId, Long currentUserId) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
@@ -124,16 +141,23 @@ public class PostService {
         return ResponseEntity.ok(posts);
     }
 
+    // 🔹 Get current user's posts
     public ResponseEntity<?> getMyPosts(Long userId) {
         return getPostByUserId(userId, userId);
     }
 
+    // 🔹 Like or unlike a post
     public ResponseEntity<?> likePost(Long postId, Long userId) {
         Post post = postRepository.findById(postId)
             .orElseThrow(() -> new RuntimeException("Post not found with id: " + postId));
 
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+
+        // 🚫 Prevent banned users from liking/unliking posts
+        if (Boolean.TRUE.equals(user.getBanned())) {
+            throw new UserBannedException("Your account has been banned. You cannot perform this action.");
+        }
 
         return postReactionRepository.findByUserAndPost(user, post)
                 .<ResponseEntity<Map<String, String>>>map(existingReaction -> {
@@ -151,15 +175,25 @@ public class PostService {
                 });
     }
 
+    // 🔹 Get post owner's ID
     public Long getPostOwnerId(Long id) {
         Post post = postRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Post not found with id: " + id));
         return post.getUser().getId();
     }
 
+    // 🔹 Delete a post
     public ResponseEntity<?> deletePost(Long id, Long userId) {
         Post post = postRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Post not found with id: " + id));
+
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+
+        // 🚫 Prevent banned users from deleting posts
+        if (Boolean.TRUE.equals(user.getBanned())) {
+            throw new UserBannedException("Your account has been banned. You cannot perform this action.");
+        }
 
         if (post.getUser().getId().equals(userId)) {
             postRepository.deleteById(id);
@@ -170,7 +204,4 @@ public class PostService {
                 .body(Map.of("message", "You are not allowed to delete this post"));
         }
     }
-
-
 }
-

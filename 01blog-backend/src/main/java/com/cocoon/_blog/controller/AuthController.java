@@ -60,11 +60,13 @@ public class AuthController {
             String username = jwtService.extractUsername(token);
             boolean isValid = jwtService.validateToken(token, username);
             String role = jwtService.extractRole(token);
+            boolean banned = jwtService.isTokenBanned(token);
 
             // Build response JSON
             Map<String, Object> response = new HashMap<>();
             response.put("isValid", isValid);
             response.put("role", role);
+            response.put("banned", banned);
 
             return ResponseEntity.ok(response);
 

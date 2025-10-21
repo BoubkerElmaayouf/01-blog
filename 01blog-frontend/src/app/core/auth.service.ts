@@ -43,16 +43,15 @@ export class AuthService {
     return !!localStorage.getItem('token');
   }
 
-  isValidToken(): Observable<{ isValid: boolean; role: string | null }> {
+  isValidToken(): Observable<{ isValid: boolean; role: string | null; banned: boolean }> {
     const token = localStorage.getItem('token');
     if (!token) {
-      return of({ isValid: false, role: null });
+      return of({ isValid: false, role: null, banned: false });
     }
 
-    return this.http.post<{ isValid: boolean; role: string | null }>(
+    return this.http.post<{ isValid: boolean; role: string | null; banned: boolean }>(
       `${this.baseUrl}/isValidtoken?Authorization=Bearer ${token}`,
       {}
     );
   }
-
 }

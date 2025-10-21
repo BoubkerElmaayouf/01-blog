@@ -12,6 +12,7 @@ import com.cocoon._blog.entity.Comment;
 import com.cocoon._blog.entity.CommentReaction;
 import com.cocoon._blog.entity.Post;
 import com.cocoon._blog.entity.User;
+import com.cocoon._blog.exception.UserBannedException;
 import com.cocoon._blog.repository.CommentReactionRepository;
 import com.cocoon._blog.repository.CommentRepository;
 import com.cocoon._blog.repository.PostRepository;
@@ -28,11 +29,15 @@ public class CommentService {
     private final PostRepository postRepository;
     private final CommentReactionRepository commentReactionRepository;
 
-    // Create a new comment (authorization already handled in controller)
+    // 🔹 Create a new comment
     public CommentDto createComment(Long postId, CommentRequest request, Long userId) {
-        // User and authorization already validated in controller
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // 🚫 Prevent banned users from commenting
+        if (user.getBanned()) {
+            throw new UserBannedException("Your account has been banned. You cannot comment.");
+        }
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
@@ -45,12 +50,10 @@ public class CommentService {
                 .build();
 
         Comment savedComment = commentRepository.save(comment);
-
-        CommentDto dto = mapToDto(savedComment, userId);
-        return dto;
+        return mapToDto(savedComment, userId);
     }
 
-    // Get comments for a post (authorization handled in controller)
+    // 🔹 Get comments for a post
     public ResponseEntity<List<CommentDto>> getCommentsByPost(Long postId, Long currentUserId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
@@ -64,13 +67,18 @@ public class CommentService {
         return ResponseEntity.ok(dtos);
     }
 
-    // Like or unlike a comment (authorization handled in controller)
+    // 🔹 Like or unlike a comment
     public ResponseEntity<CommentDto> likeComment(Long commentId, Long userId) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new RuntimeException("Comment not found"));
-        
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // 🚫 Prevent banned users from liking/unliking comments
+        if (user.getBanned()) {
+            throw new UserBannedException("Your account has been banned. You cannot react to comments.");
+        }
 
         boolean isLiked = commentReactionRepository.findByUserAndComment(user, comment)
                 .map(existingReaction -> {
@@ -92,7 +100,7 @@ public class CommentService {
         return ResponseEntity.ok(dto);
     }
 
-    // Helper to map Comment entity to CommentDto
+    // 🔹 Helper to map Comment entity to DTO
     private CommentDto mapToDto(Comment comment, Long currentUserId) {
         CommentDto dto = new CommentDto();
         dto.setId(comment.getId());
@@ -103,18 +111,19 @@ public class CommentService {
         dto.setProfilePic(comment.getUser().getProfilePic());
 
         int likeCount = commentReactionRepository.countByComment(comment);
-        boolean isLiked = currentUserId != null && 
+        boolean isLiked = currentUserId != null &&
                 commentReactionRepository.findByUserAndComment(
-                    userRepository.findById(currentUserId).orElse(null), comment).isPresent();
+                        userRepository.findById(currentUserId).orElse(null), comment).isPresent();
 
         dto.setLikeCount(likeCount);
         dto.setLiked(isLiked);
         return dto;
     }
 
+    // 🔹 Get post owner's ID
     public Long getPostOwnerId(Long postId) {
-    Post post = postRepository.findById(postId)
-            .orElseThrow(() -> new RuntimeException("Post not found"));
-    return post.getUser().getId(); // return the user ID of the post owner
-}
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+        return post.getUser().getId();
+    }
 }

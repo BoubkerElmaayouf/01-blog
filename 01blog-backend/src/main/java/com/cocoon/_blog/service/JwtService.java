@@ -19,11 +19,12 @@ public class JwtService {
     "MySuperSuperSecretKeyThatIsAtLeast32Bytes!".getBytes(StandardCharsets.UTF_8)
 );
 
-    public String generateToken(String username, Long id, Role role) {
+    public String generateToken(String username, Long id, Role role, boolean banned ) {
         return Jwts.builder()
                 .setSubject(username)
                 .claim("id", id)
                 .claim("role", role.toString())
+                .claim("banned", banned)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 3000 * 60 * 60)) // 1 hour
                 .signWith(key) // now this works
@@ -57,5 +58,9 @@ public class JwtService {
 
     private boolean isTokenExpired(String token) {
         return extractAllClaims(token).getExpiration().before(new Date());
+    }
+
+    public boolean isTokenBanned(String token) {
+        return extractAllClaims(token).get("banned", Boolean.class);
     }
 }
