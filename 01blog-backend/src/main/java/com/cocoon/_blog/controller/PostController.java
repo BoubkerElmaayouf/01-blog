@@ -65,7 +65,7 @@ public class PostController {
                         NotificationType.POST,
                         post.getId(),
                         null,
-                        "Someone posted something 📢"
+                        "posted something 📢"
                 );
             }
 

@@ -4,6 +4,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Collections;
+
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +20,7 @@ import com.cocoon._blog.entity.PostReaction;
 import com.cocoon._blog.entity.User;
 import com.cocoon._blog.exception.UserBannedException;
 import com.cocoon._blog.repository.CommentRepository;
+import com.cocoon._blog.repository.FollowersRepository;
 import com.cocoon._blog.repository.PostReactionRepository;
 import com.cocoon._blog.repository.PostRepository;
 import com.cocoon._blog.repository.UserRepository;
@@ -30,6 +34,7 @@ public class PostService {
     private final UserRepository userRepository;
     private final PostReactionRepository postReactionRepository;
     private final CommentRepository commentRepository;
+    private final FollowersRepository followersRepository;
 
     // 🔹 Create a post
     public Post createPost(PostRequest request, Long userId) {
@@ -114,11 +119,34 @@ public class PostService {
         );
     }
 
-    // 🔹 Get all posts
+    //  Get all posts
+    // public ResponseEntity<?> getAllPosts(Long currentUserId) {
+    //     List<PostResponse> posts = postRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt")).stream()
+    //         .map(post -> buildPostResponse(post, currentUserId))
+    //         .collect(Collectors.toList());
+    //     return ResponseEntity.ok(posts);
+    // }
+
+
+
     public ResponseEntity<?> getAllPosts(Long currentUserId) {
-        List<PostResponse> posts = postRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt")).stream()
-            .map(post -> buildPostResponse(post, currentUserId))
-            .collect(Collectors.toList());
+        // Get IDs of users followed by current user
+        List<Long> followedIds = followersRepository.findFollowingIdsByFollowerId(currentUserId);
+
+        // Make a new list and add the current user ID
+        List<Long> userIds = new ArrayList<>(followedIds);
+        userIds.add(currentUserId); // include current user's posts
+
+        if (userIds.isEmpty()) { // this will never be empty now, but safe check
+            return ResponseEntity.ok(Collections.emptyList());
+        }
+
+        // Fetch posts from followed users AND current user
+        List<PostResponse> posts = postRepository.findByUserIdIn(userIds, Sort.by(Sort.Direction.DESC, "createdAt"))
+                .stream()
+                .map(post -> buildPostResponse(post, currentUserId))
+                .collect(Collectors.toList());
+
         return ResponseEntity.ok(posts);
     }
 
@@ -134,7 +162,7 @@ public class PostService {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
 
-        List<PostResponse> posts = postRepository.findByUser(user).stream()
+        List<PostResponse> posts = postRepository.findByUser(user, Sort.by(Sort.Direction.DESC, "createdAt")).stream()
             .map(post -> buildPostResponse(post, currentUserId))
             .collect(Collectors.toList());
 
@@ -154,7 +182,7 @@ public class PostService {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
 
-        // 🚫 Prevent banned users from liking/unliking posts
+        // Prevent banned users from liking/unliking posts
         if (Boolean.TRUE.equals(user.getBanned())) {
             throw new UserBannedException("Your account has been banned. You cannot perform this action.");
         }

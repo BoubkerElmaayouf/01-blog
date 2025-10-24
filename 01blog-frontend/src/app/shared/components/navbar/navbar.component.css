@@ -43,7 +43,12 @@
   font-size: 24px;
   font-weight: bold;
 }
-
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 14px;
+}
 .logo-container .logo {
   font-family: "UnifrakturMaguntia", cursive;
   font-weight: 600;
