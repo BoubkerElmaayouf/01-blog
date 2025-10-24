@@ -16,7 +16,7 @@ body {
   color: var(--mat-sys-on-surface);
   // font: var(--mat-sys-body-medium);
   // Reset the user agent margin.
-  font-family: 'Charter', Georgia, serif;
+  // font-family: 'Charter', Georgia, serif;
   margin: 0;
 }
 
@@ -48,5 +48,6 @@ html, body { height: 100vh;
 
 body { 
   margin: 0;     
-    font-family: "Noticia Text", serif;
+    // font-family: "Noticia Text", serif;
+     font-family: "Roboto", sans-serif;
 }

@@ -6,7 +6,7 @@
   /* background-color: #fafafa; */
   min-height: calc(100vh - 64px);
   margin-top: 60px;
-  font-family: 'Charter', Georgia, serif;
+  /* font-family: 'Charter', Georgia, serif; */
 }
 
 /* Header Styles */
@@ -19,16 +19,16 @@
   font-size: 2rem;
   color: #1a1a1a;
   margin: 0;
-  font-weight: 600;
+  /* font-weight: 600; */
   letter-spacing: 0.02em;
-    font-family: "Noticia Text", serif;
+    /* font-family: "Noticia Text", serif; */
     font-weight: 800;
     /* color: red; */
 }
 
 /* Category Navigation */
 .category-nav {
-  font-family: "Noticia Text", serif;
+  /* font-family: "Noticia Text", serif; */
   margin-bottom: 3rem;
   border-bottom: 1px solid #e6e6e6;
   background: white;
@@ -41,11 +41,11 @@
   gap: 0;
   justify-content: center;
   flex-wrap: wrap;
-  font-family: "Noticia Text", serif;
+  /* font-family: "Noticia Text", serif; */
 }
 
 .category-btn {
-  font-family: "Noticia Text", serif;
+  /* font-family: "Noticia Text", serif; */
   padding: 1rem 1.5rem;
   background: none;
   border: none;
@@ -141,7 +141,7 @@
 
 /* Article Title */
 .article-title {
-  font-size: 1.6rem;
+  font-size: 1.8rem;
   font-weight: 700;
   color: #1a1a1a;
   line-height: 1.4;
@@ -151,7 +151,7 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-    font-family: "Noticia Text", serif;
+    /* font-family: "Noticia Text", serif; */
     font-weight: 900;
 }
 
@@ -247,7 +247,7 @@
 }
 
 .action-lable {
-  font-family: 'Charter', Georgia, serif;
+  /* font-family: 'Charter', Georgia, serif; */
   font-size: 0.9rem;
   color: #1a1a1a;
 }
@@ -261,7 +261,7 @@
 
 /* Target the actual menu panel that Angular Material creates */
 .mat-mdc-menu-panel {
- font-family: 'Charter', Georgia, serif;
+ /* font-family: 'Charter', Georgia, serif; */
   background-color: white !important;
 }
 
@@ -293,7 +293,7 @@
 
 /* Additional global override if the above doesn't work */
 ::ng-deep .mat-mdc-menu-panel {
- font-family: 'Charter', Georgia, serif;
+ /* font-family: 'Charter', Georgia, serif; */
   background-color: white !important;
 }
 
@@ -374,7 +374,7 @@
     padding-bottom: 0.5rem;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    font-family: 'Charter', Georgia, serif;
+    /* font-family: 'Charter', Georgia, serif; */
   }
   
   .category-buttons::-webkit-scrollbar {
@@ -382,7 +382,7 @@
   }
   
   .category-btn {
-    font-family: 'Charter', Georgia, serif;
+    /* font-family: 'Charter', Georgia, serif; */
     padding: 0.75rem 1rem;
     font-size: 0.9rem;
     flex-shrink: 0;
@@ -513,7 +513,7 @@
 
 /* White background for mat-menu */
 ::ng-deep .mat-mdc-menu-panel {
- font-family: 'Charter', Georgia, serif;
+ /* font-family: 'Charter', Georgia, serif; */
  font-size: 14px;
   background-color: #ffffff !important;
   color: #1a1a1a !important;

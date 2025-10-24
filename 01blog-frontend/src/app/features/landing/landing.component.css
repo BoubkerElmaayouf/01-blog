@@ -11,8 +11,7 @@
   align-items: center;
   justify-content: center;
   padding: 2rem;
-  font-family: "Noticia Text", serif;
-
+  /* font-family: "Noticia Text", serif; */
 }
 
 .content {
@@ -76,6 +75,8 @@
   font-weight: 600;
   color: #1a1a1a;
   text-align: center;
+  font-family: "UnifrakturMaguntia", cursive;
+
 }
 
 /* Footer */

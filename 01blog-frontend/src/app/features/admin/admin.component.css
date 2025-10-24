@@ -11,6 +11,11 @@
   overflow-x: hidden;
 }
 
+.ths {
+  font-size: 500;
+  background-color: red;
+}
+
 /* Header */
 .admin-header {
   background-color: #ffffff;

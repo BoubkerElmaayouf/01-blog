@@ -8,7 +8,7 @@
         <div *ngIf="isEditingProfile && isCurrentUserProfile" class="avatar-overlay">
           <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" style="display: none;">
           <button mat-icon-button (click)="fileInput.click()" class="change-photo-btn">
-            <mat-icon>camera_alt</mat-icon>
+            <mat-icon fontSet="material-icons-outlined">camera_alt</mat-icon>
           </button>
         </div>
       </div>
@@ -22,7 +22,7 @@
           <p class="profile-email">{{ userProfile.email }}</p>
           <p class="profile-bio">{{ userProfile.bio || 'No bio available.' }}</p>
           <button mat-stroked-button (click)="toggleEditProfile()" class="edit-btn">
-            <mat-icon>edit</mat-icon>
+            <mat-icon fontSet="material-icons-outlined">edit</mat-icon>
             Edit Profile
           </button>
         </div>
@@ -137,7 +137,7 @@
     <div class="section-header">
       <h2>Password</h2>
       <button *ngIf="!isEditingPassword" mat-stroked-button (click)="toggleEditPassword()">
-        <mat-icon class="lable">lock</mat-icon>
+        <mat-icon fontSet="material-icons-outlined" class="lable">lock</mat-icon>
         <span class="lable">Change Password</span>
       </button>
     </div>
@@ -180,7 +180,7 @@
           </button>
           <button mat-raised-button color="primary" (click)="savePassword()" 
                   [disabled]="passwordForm.invalid || isLoading" type="button">
-            <mat-icon *ngIf="isLoading" class="loading-icon">autorenew</mat-icon>
+            <mat-icon  *ngIf="isLoading" class="loading-icon">autorenew</mat-icon>
             Update Password
           </button>
         </div>
@@ -212,13 +212,13 @@
             <span class="blog-date">{{ formatDate(article.createdAt) }}</span>
             <div class="blog-stats">
               <span class="blog-stat">
-                <mat-icon class="stat-icon" [class.liked]="article.isLiked">
+                <mat-icon fontSet="material-icons-outlined" class="stat-icon" [class.liked]="article.isLiked">
                   {{ article.isLiked ? 'favorite' : 'favorite_border' }}
                 </mat-icon>
                 {{ article.likeCount }}
               </span>
               <span class="blog-stat">
-                <mat-icon class="stat-icon">comment</mat-icon>
+                <mat-icon fontSet="material-icons-outlined" class="stat-icon">comment</mat-icon>
                 {{ article.commentCount }}
               </span>
 
@@ -235,11 +235,11 @@
               <!-- Keep the existing menu here -->
               <mat-menu #articleMenu="matMenu">
                 <button mat-menu-item (click)="onUpdate(article)">
-                  <mat-icon>edit</mat-icon>
+                  <mat-icon fontSet="material-icons-outlined" >edit</mat-icon>
                   <span>Update</span>
                 </button>
                 <button mat-menu-item (click)="openDeleteDialog(article, $event)" class="delete-item">
-                  <mat-icon>delete</mat-icon>
+                  <mat-icon fontSet="material-icons-outlined" >delete</mat-icon>
                   <span>Delete</span>
                 </button>
               </mat-menu>

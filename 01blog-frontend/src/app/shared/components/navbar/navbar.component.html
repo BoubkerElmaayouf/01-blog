@@ -223,31 +223,33 @@
       <mat-divider class="profile-divider"></mat-divider>
       
       <a mat-menu-item routerLink="/profile" class="menu-item">
-        <mat-icon>person_outline</mat-icon>
+        <mat-icon fontSet="material-icons-outlined">person</mat-icon>
         <span>Profile</span>
       </a>
 
       <a mat-menu-item routerLink="/privacy-policy" class="menu-item">
-        <mat-icon>description</mat-icon>
+        <mat-icon fontSet="material-icons-outlined">description</mat-icon>
         <span>Privacy Policy</span>
       </a>
 
       <a mat-menu-item routerLink="/report" class="menu-item">
-        <mat-icon>flag</mat-icon>
+        <mat-icon fontSet="material-icons-outlined">flag</mat-icon>
         <span>Report an issue</span>
       </a>
 
-       <a *ngIf="isAdmin" mat-menu-item routerLink="/admin" class="menu-item">
-        <mat-icon>admin_panel_settings</mat-icon>
+      <a *ngIf="isAdmin" mat-menu-item routerLink="/admin" class="menu-item">
+        <mat-icon fontSet="material-icons-outlined">admin_panel_settings</mat-icon>
         <span>Admin panel</span>
       </a>
+
       <mat-divider class="logout-divider"></mat-divider>
       
       <button mat-menu-item (click)="onLogout()" class="logout-item">
-        <mat-icon>logout</mat-icon>
+        <mat-icon fontSet="material-icons-outlined">logout</mat-icon>
         <span>Logout</span>
       </button>
     </mat-menu>
+
   </div>
 </div>
 

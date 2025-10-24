@@ -12,6 +12,7 @@ import {AdminComponent} from './features/admin/admin.component'
 import { authGuard } from './core/auth-guard';
 import { noAuthGuard } from './core/noAuthGuard';
 import { ArticleComponent } from './features/article/article.component';
+import { NotFoundComponent } from './features/notfound/notfound.component';
 
 export const routes: Routes = [
   { path: '', component: LandingComponent, canActivate: [noAuthGuard] },
@@ -35,5 +36,8 @@ export const routes: Routes = [
 
   {path: 'privacy-policy', component: PolicyPrivacyComponent},
   {path: 'contact', component: ContactComponent, canActivate: [noAuthGuard]},
-  {path: 'about', component: AboutComponent, canActivate: [noAuthGuard]},
+  {path: 'about', component: AboutComponent},
+
+  {path: 'not-found', component: NotFoundComponent},
+  {path: '**', redirectTo: '/not-found'}
 ];
