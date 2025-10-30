@@ -51,13 +51,10 @@ public class PostController {
                 return ResponseEntity.badRequest().body("Invalid topic. Allowed: " + topics);
             }
 
-            // 1️⃣ Create the post
             Post post = postService.createPost(request, currentUser.getId());
 
-            // 2️⃣ Fetch followers of the user
             var followers = followService.getFollowers(currentUser.getId());
 
-            // 3️⃣ Send notifications to followers
             for (Long followerId : followers) {
                 notificationService.createNotification(
                         currentUser.getId(),
@@ -84,7 +81,6 @@ public class PostController {
             var response = postService.likePost(id, currentUser.getId());
             var postOwnerId = postService.getPostOwnerId(id);
 
-            // Send notification only if liker is not the owner
             if (!currentUser.getId().equals(postOwnerId)) {
                 notificationService.createNotification(
                         currentUser.getId(),
@@ -143,9 +139,12 @@ public class PostController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<?> getAllPosts(@AuthenticationPrincipal User currentUser) {
+    public ResponseEntity<?> getAllPosts(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @AuthenticationPrincipal User currentUser) {
         try {
-            return postService.getAllPosts(currentUser.getId());
+            return postService.getAllPosts(currentUser.getId(), page, size);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error fetching posts: " + e.getMessage());
         }

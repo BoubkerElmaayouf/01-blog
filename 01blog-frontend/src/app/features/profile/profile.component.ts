@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
@@ -21,6 +21,8 @@ import { LoaderComponent } from '../../shared/components/loader/loader.component
 import { repopopComponent, ReportData } from '../../shared/components/reportpopup/repop.component';
 import { ReportService } from '../../services/report.service';
 import {ConfirmDialogComponent} from "../../shared/components/confirm-dialog/confirm-component";
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-profile',
@@ -42,7 +44,7 @@ import {ConfirmDialogComponent} from "../../shared/components/confirm-dialog/con
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css']
 })
-export class ProfileComponent implements OnInit {
+export class ProfileComponent implements OnInit, OnDestroy {
   profileForm: FormGroup;
   passwordForm: FormGroup;
   isEditingProfile = false;
@@ -62,6 +64,12 @@ export class ProfileComponent implements OnInit {
   currentUserProfile: UserProfile | null = null;
   userArticles: Article[] = [];
   
+  // Pagination for posts
+  currentPage: number = 0;
+  pageSize: number = 10;
+  isLoadingMorePosts: boolean = false;
+  hasMorePosts: boolean = true;
+  
   // Route state
   isCurrentUserProfile = true;
   profileUserId: number | null = null;
@@ -69,6 +77,10 @@ export class ProfileComponent implements OnInit {
   // Follow state
   isFollowing = false;
   isLoading = false;
+
+  private destroy$ = new Subject<void>();
+  private scrollThreshold = 100; // pixels from bottom
+  private scrollCheckInterval: any;
 
   constructor(
     private fb: FormBuilder,
@@ -95,6 +107,7 @@ export class ProfileComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.setupScrollListener();
     this.articleService.getUserInfo().subscribe({
       next: (profile) => {
         this.currentUserProfile = profile;
@@ -127,6 +140,134 @@ export class ProfileComponent implements OnInit {
         this.showError("Failed to load user information");
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    if (this.scrollCheckInterval) {
+      clearInterval(this.scrollCheckInterval);
+    }
+  }
+
+  // --- Scroll Listener Setup ---
+  setupScrollListener() {
+    this.scrollCheckInterval = setInterval(() => {
+      this.onScroll();
+    }, 200);
+  }
+
+  onScroll() {
+    if (this.isLoading || this.isLoadingMorePosts) {
+      return;
+    }
+
+    const html = document.documentElement;
+    const body = document.body;
+    
+    const scrollTop = window.pageYOffset || html.scrollTop || body.scrollTop || 0;
+    const scrollHeight = Math.max(
+      body.scrollHeight,
+      body.offsetHeight,
+      html.clientHeight,
+      html.scrollHeight,
+      html.offsetHeight
+    );
+    const clientHeight = window.innerHeight || html.clientHeight;
+    
+    const distanceFromBottom = scrollHeight - (scrollTop + clientHeight);
+
+    // console.log('Profile Scrolling....', { scrollTop, scrollHeight, clientHeight, distanceFromBottom });
+
+    // Trigger load when within threshold of bottom
+    if (distanceFromBottom < this.scrollThreshold && !this.isLoadingMorePosts && this.hasMorePosts) {
+      console.log('Infinite scroll triggered for posts - Distance from bottom:', distanceFromBottom);
+      this.fetchMorePosts();
+    }
+  }
+
+  fetchMorePosts() {
+    if (this.isLoadingMorePosts || !this.hasMorePosts) {
+      return;
+    }
+
+    this.isLoadingMorePosts = true;
+    const scrollHeightBefore = document.documentElement.scrollHeight;
+
+    const nextPage = this.currentPage + 1;
+
+    // Load more articles based on whether it's current user or other user
+    if (this.isCurrentUserProfile) {
+      this.loadMyArticlesPage(nextPage);
+    } else if (this.profileUserId) {
+      this.loadUserArticlesPage(this.profileUserId, nextPage);
+    }
+  }
+
+  private loadMyArticlesPage(page: number): void {
+    // Since getMyPosts doesn't support pagination, we'll load all and handle pagination on frontend
+    this.articleService.getMyPosts()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (articles) => {
+          const newArticles = articles.slice(page * this.pageSize, (page + 1) * this.pageSize);
+          
+          if (newArticles.length === 0) {
+            this.hasMorePosts = false;
+          } else {
+            this.userArticles = [...this.userArticles, ...newArticles];
+            this.currentPage = page;
+          }
+
+          // Maintain scroll position
+          setTimeout(() => {
+            const scrollHeightAfter = document.documentElement.scrollHeight;
+            const heightDifference = scrollHeightAfter - (document.documentElement.scrollHeight - 100); // approximate
+            window.scrollBy(0, heightDifference);
+          }, 0);
+
+          this.isLoadingMorePosts = false;
+          console.log('Loaded more user articles:', newArticles.length);
+        },
+        error: (error) => {
+          console.error('Error loading more user articles:', error);
+          this.isLoadingMorePosts = false;
+          this.showError('Failed to load more articles');
+        }
+      });
+  }
+
+  private loadUserArticlesPage(userId: number, page: number): void {
+    // Since getPostsByUserId doesn't support pagination, we'll load all and handle pagination on frontend
+    this.articleService.getPostsByUserId(userId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (articles) => {
+          const newArticles = articles.slice(page * this.pageSize, (page + 1) * this.pageSize);
+          
+          if (newArticles.length === 0) {
+            this.hasMorePosts = false;
+          } else {
+            this.userArticles = [...this.userArticles, ...newArticles];
+            this.currentPage = page;
+          }
+
+          // Maintain scroll position
+          setTimeout(() => {
+            const scrollHeightAfter = document.documentElement.scrollHeight;
+            const heightDifference = scrollHeightAfter - (document.documentElement.scrollHeight - 100);
+            window.scrollBy(0, heightDifference);
+          }, 0);
+
+          this.isLoadingMorePosts = false;
+          console.log('Loaded more user articles:', newArticles.length);
+        },
+        error: (error) => {
+          console.error('Error loading more user articles:', error);
+          this.isLoadingMorePosts = false;
+          this.showError('Failed to load more articles');
+        }
+      });
   }
 
   // --- Profile loading ---
@@ -169,27 +310,41 @@ export class ProfileComponent implements OnInit {
   }
 
   private loadMyArticles(): void {
-    this.articleService.getMyPosts().subscribe({
-      next: (articles) => {
-        this.userArticles = articles;
-      },
-      error: (error) => {
-        console.error('Error loading articles:', error);
-        this.showError('Failed to load articles');
-      }
-    });
+    this.currentPage = 0;
+    this.hasMorePosts = true;
+    this.articleService.getMyPosts()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (articles) => {
+          this.userArticles = articles.slice(0, this.pageSize);
+          this.currentPage = 0;
+          // Check if there are more articles
+          this.hasMorePosts = articles.length > this.pageSize;
+        },
+        error: (error) => {
+          console.error('Error loading articles:', error);
+          this.showError('Failed to load articles');
+        }
+      });
   }
 
   private loadUserArticles(userId: number): void {
-    this.articleService.getPostsByUserId(userId).subscribe({
-      next: (articles) => {
-        this.userArticles = articles;
-      },
-      error: (error) => {
-        console.error('Error loading user articles:', error);
-        this.showError('Failed to load user articles');
-      }
-    });
+    this.currentPage = 0;
+    this.hasMorePosts = true;
+    this.articleService.getPostsByUserId(userId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (articles) => {
+          this.userArticles = articles.slice(0, this.pageSize);
+          this.currentPage = 0;
+          // Check if there are more articles
+          this.hasMorePosts = articles.length > this.pageSize;
+        },
+        error: (error) => {
+          console.error('Error loading user articles:', error);
+          this.showError('Failed to load user articles');
+        }
+      });
   }
 
   private updateFormWithProfile(profile: UserProfile): void {
@@ -372,13 +527,11 @@ export class ProfileComponent implements OnInit {
     
     this.isLoading = true;
     
-    // Prepare the report data with user ID
     const fullReportData = {
       ...reportData,
       userId: this.profileUserId.toString(),
       username: this.getFullName()
     };
-    
 
     this.ReportService.submitReport(fullReportData).subscribe({
       next: () => {
@@ -427,7 +580,6 @@ export class ProfileComponent implements OnInit {
   }
 
   onUpdate(post: Article) {
-    // console.log('Update post:', post.title);
     this.router.navigate(['/edit-post', post.id]);
   }
 

@@ -20,6 +20,14 @@ export interface Article {
   isLiked: boolean;
 }
 
+export interface PaginatedResponse {
+  content: Article[];
+  currentPage: number;
+  totalPages: number;
+  totalElements: number;
+  hasNext: boolean;
+}
+
 export interface Comment {
   id: number;
   content: string;
@@ -65,14 +73,17 @@ export class ArticleService {
   }
 
   // --- Posts ---
-  getAllPosts(): Observable<Article[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/all`, { 
+  getAllPosts(page: number = 0, size: number = 10): Observable<PaginatedResponse> {
+    return this.http.get<any>(`${this.apiUrl}/all?page=${page}&size=${size}`, { 
       headers: this.getAuthHeaders() 
     }).pipe(
-      map(posts => posts.map(post => ({
-        ...post,
-        isLiked: post.liked || false
-      })))
+      map(response => ({
+        ...response,
+        content: response.content.map((post: any) => ({
+          ...post,
+          isLiked: post.liked || false
+        }))
+      }))
     );
   }
 
@@ -121,14 +132,14 @@ export class ArticleService {
   }
 
   updatePost(postId: number, post: Partial<Article>): Observable<Article> {
-  return this.http.patch<any>(`${this.apiUrl}/edit/${postId}`, post, { 
+    return this.http.patch<any>(`${this.apiUrl}/edit/${postId}`, post, { 
       headers: this.getAuthHeaders() 
-      }).pipe(
-        map(updatedPost => ({
-          ...updatedPost,
-          isLiked: updatedPost.liked || false
-        }))
-      );
+    }).pipe(
+      map(updatedPost => ({
+        ...updatedPost,
+        isLiked: updatedPost.liked || false
+      }))
+    );
   }
 
   deletePost(postId: number): Observable<any> {
@@ -143,7 +154,6 @@ export class ArticleService {
     });
   }
 
-  // search for users or posts
   searchBar(title: String, firstName: String) : Observable<any> {
     return this.http.get(`${this.apiUrl}/search?title=${title}&firstName=${firstName}`, { 
       headers: this.getAuthHeaders() 
@@ -192,13 +202,11 @@ export class ArticleService {
     })
   }
 
-  // change password (no userId in path, backend uses JWT)
   changePassword(passwordData: { oldPassword: string; newPassword: string }): Observable<any> {
     const url = `${this.userUrl}/user/change-password`;
     const headers = this.getAuthHeaders();
     return this.http.patch(url, passwordData, { headers });
   }
-
 
   // --- Follow/Unfollow ---
   followUser(userId: number): Observable<any> {
@@ -226,9 +234,7 @@ export class ArticleService {
     });
   }
 
-  // In your ArticleService
   submitReport(reportData: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/reports`, reportData);
   }
-
 }

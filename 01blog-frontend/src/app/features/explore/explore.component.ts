@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClientModule } from '@angular/common/http';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
@@ -12,6 +12,8 @@ import { LoaderComponent } from '../../shared/components/loader/loader.component
 import { ArticleService, Article } from '../../services/article.service';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-component';
+import { Subject, fromEvent } from 'rxjs';
+import { takeUntil, throttleTime } from 'rxjs/operators';
 
 interface Post extends Article {
   likes?: number;
@@ -38,13 +40,21 @@ interface Post extends Article {
     MatDialogModule,
   ]
 })
-export class ExploreComponent implements OnInit {
+export class ExploreComponent implements OnInit, OnDestroy {
   selectedCategory = 'Tech';
   categories = ['Tech', 'Education', 'Products', 'SaaS', 'Gaming'];
+  
   isLoading: boolean = true;
+  isLoadingMore: boolean = false;
+  hasMorePages: boolean = true;
+  currentPage: number = 0;
+  pageSize: number = 10;
 
   posts: Post[] = [];
   filteredPosts: Post[] = [];
+
+  private destroy$ = new Subject<void>();
+  private scrollThreshold = 100; // pixels from bottom
 
   constructor(
     private articleService: ArticleService,
@@ -54,21 +64,81 @@ export class ExploreComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.fetchPosts();
+    this.fetchInitialPosts();
+    this.setupScrollListener();
   }
 
-  fetchPosts() {
-    this.articleService.getAllPosts()
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  setupScrollListener() {
+    // Use setInterval to manually check scroll position
+    const scrollCheckInterval = setInterval(() => {
+      if (this.destroy$) {
+        this.onScroll();
+      }
+    }, 200);
+
+    // Clean up interval on destroy
+    this.destroy$.subscribe(() => {
+      clearInterval(scrollCheckInterval);
+    });
+  }
+
+  onScroll() {
+    if (this.isLoading) {
+      return;
+    }
+
+    // Get scroll information from multiple sources
+    const html = document.documentElement;
+    const body = document.body;
+    
+    const scrollTop = window.pageYOffset || html.scrollTop || body.scrollTop || 0;
+    const scrollHeight = Math.max(
+      body.scrollHeight,
+      body.offsetHeight,
+      html.clientHeight,
+      html.scrollHeight,
+      html.offsetHeight
+    );
+    const clientHeight = window.innerHeight || html.clientHeight;
+    
+    const distanceFromBottom = scrollHeight - (scrollTop + clientHeight);
+
+    // console.log('Scrolling....', { scrollTop, scrollHeight, clientHeight, distanceFromBottom });
+
+    // Trigger load when within threshold of bottom
+    if (distanceFromBottom < this.scrollThreshold && !this.isLoadingMore && this.hasMorePages) {
+      console.log('Infinite scroll triggered - Distance from bottom:', distanceFromBottom);
+      this.fetchMorePosts();
+    }
+  }
+
+  fetchInitialPosts() {
+    this.isLoading = true;
+    this.currentPage = 0;
+    this.posts = [];
+    this.filteredPosts = [];
+    
+    this.articleService.getAllPosts(0, this.pageSize)
+      .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (data) => {
-          this.posts = data.map(article => ({
+        next: (response) => {
+          this.posts = response.content.map(article => ({
             ...article,
             likes: article.likeCount,
             comments: article.commentCount,
             saves: Math.floor(Math.random() * 100) + 5,
             isSaved: Math.random() > 0.8
           }));
-          console.log('Fetched posts:', this.posts);
+          
+          this.hasMorePages = response.hasNext;
+          this.currentPage = response.currentPage + 1;
+          
+          console.log('Fetched initial posts:', this.posts.length);
           this.isLoading = false;
           this.filterPosts();
         },
@@ -76,6 +146,54 @@ export class ExploreComponent implements OnInit {
           console.error('Error fetching posts:', err);
           this.isLoading = false;
           this.snackBar.open('Error loading posts', 'Close', { duration: 3000 });
+        }
+      });
+  }
+
+  fetchMorePosts() {
+    if (this.isLoadingMore || !this.hasMorePages) {
+      return;
+    }
+
+    this.isLoadingMore = true;
+
+    this.articleService.getAllPosts(this.currentPage, this.pageSize)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          const newPosts = response.content.map(article => ({
+            ...article,
+            likes: article.likeCount,
+            comments: article.commentCount,
+            saves: Math.floor(Math.random() * 100) + 5,
+            isSaved: Math.random() > 0.8
+          }));
+
+          // Get current scroll height before adding new items
+          const scrollHeightBefore = document.documentElement.scrollHeight;
+
+          // Append new posts
+          this.posts = [...this.posts, ...newPosts];
+          this.hasMorePages = response.hasNext;
+          this.currentPage = response.currentPage + 1;
+
+          // Filter posts and trigger change detection
+          this.filterPosts();
+
+          // Maintain scroll position
+          setTimeout(() => {
+            const scrollHeightAfter = document.documentElement.scrollHeight;
+            const heightDifference = scrollHeightAfter - scrollHeightBefore;
+            window.scrollBy(0, heightDifference);
+          }, 0);
+
+          this.isLoadingMore = false;
+          console.log('Loaded more posts:', newPosts.length, 'Total:', this.posts.length);
+        },
+        error: (err) => {
+          console.error('Error loading more posts:', err);
+          this.isLoadingMore = false;
+          this.snackBar.open('Error loading more posts', 'Close', { duration: 3000 });
         }
       });
   }

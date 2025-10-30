@@ -7,11 +7,13 @@ import java.util.stream.Collectors;
 import java.util.ArrayList;
 import java.util.Collections;
 
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
 
 import com.cocoon._blog.dto.PostRequest;
 import com.cocoon._blog.dto.PostResponse;
@@ -41,7 +43,6 @@ public class PostService {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // 🚫 Prevent banned users from creating posts
         if (Boolean.TRUE.equals(user.getBanned())) {
             throw new UserBannedException("Your account has been banned. You cannot perform this action.");
         }
@@ -68,12 +69,10 @@ public class PostService {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
 
-        // 🚫 Prevent banned users from updating posts
         if (Boolean.TRUE.equals(user.getBanned())) {
             throw new UserBannedException("Your account has been banned. You cannot perform this action.");
         }
 
-        // Ensure the current user is the owner
         if (!post.getUser().getId().equals(userId)) {
             throw new RuntimeException("You are not allowed to edit this post");
         }
@@ -119,35 +118,37 @@ public class PostService {
         );
     }
 
-    //  Get all posts
-    // public ResponseEntity<?> getAllPosts(Long currentUserId) {
-    //     List<PostResponse> posts = postRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt")).stream()
-    //         .map(post -> buildPostResponse(post, currentUserId))
-    //         .collect(Collectors.toList());
-    //     return ResponseEntity.ok(posts);
-    // }
-
-
-
-    public ResponseEntity<?> getAllPosts(Long currentUserId) {
-        // Get IDs of users followed by current user
+    // 🔹 Get all posts with pagination
+    public ResponseEntity<?> getAllPosts(Long currentUserId, int page, int size) {
         List<Long> followedIds = followersRepository.findFollowingIdsByFollowerId(currentUserId);
 
-        // Make a new list and add the current user ID
         List<Long> userIds = new ArrayList<>(followedIds);
-        userIds.add(currentUserId); // include current user's posts
+        userIds.add(currentUserId);
 
-        if (userIds.isEmpty()) { // this will never be empty now, but safe check
-            return ResponseEntity.ok(Collections.emptyList());
+        if (userIds.isEmpty()) {
+            return ResponseEntity.ok(Map.of(
+                "content", Collections.emptyList(),
+                "currentPage", 0,
+                "totalPages", 0,
+                "totalElements", 0L,
+                "hasNext", false
+            ));
         }
 
-        // Fetch posts from followed users AND current user
-        List<PostResponse> posts = postRepository.findByUserIdIn(userIds, Sort.by(Sort.Direction.DESC, "createdAt"))
-                .stream()
-                .map(post -> buildPostResponse(post, currentUserId))
-                .collect(Collectors.toList());
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Post> postsPage = postRepository.findByUserIdIn(userIds, pageable);
 
-        return ResponseEntity.ok(posts);
+        List<PostResponse> content = postsPage.getContent().stream()
+            .map(post -> buildPostResponse(post, currentUserId))
+            .collect(Collectors.toList());
+
+        return ResponseEntity.ok(Map.of(
+            "content", content,
+            "currentPage", postsPage.getNumber(),
+            "totalPages", postsPage.getTotalPages(),
+            "totalElements", postsPage.getTotalElements(),
+            "hasNext", postsPage.hasNext()
+        ));
     }
 
     // 🔹 Get post by ID
@@ -182,7 +183,6 @@ public class PostService {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
 
-        // Prevent banned users from liking/unliking posts
         if (Boolean.TRUE.equals(user.getBanned())) {
             throw new UserBannedException("Your account has been banned. You cannot perform this action.");
         }
@@ -218,7 +218,6 @@ public class PostService {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
 
-        // 🚫 Prevent banned users from deleting posts
         if (Boolean.TRUE.equals(user.getBanned())) {
             throw new UserBannedException("Your account has been banned. You cannot perform this action.");
         }
