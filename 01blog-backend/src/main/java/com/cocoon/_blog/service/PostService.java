@@ -100,6 +100,10 @@ public class PostService {
             isLiked = postReactionRepository.findByUserAndPost(currentUser, post).isPresent();
         }
 
+        // if(post.isHidden()) {
+        //     return null;
+        // }
+
         return new PostResponse(
             post.getUser().getId(),
             post.getId(),

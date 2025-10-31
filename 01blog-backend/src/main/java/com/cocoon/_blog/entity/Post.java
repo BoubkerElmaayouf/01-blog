@@ -33,6 +33,9 @@ public class Post {
     @Column(nullable = false)
     private boolean removed = false;
 
+    @Column(nullable = false)
+    private boolean isHidden = false;
+
     private LocalDateTime createdAt = LocalDateTime.now();
 
     // Cascade delete post's comments

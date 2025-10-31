@@ -298,7 +298,7 @@ export class ExploreComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         console.error('Error deleting post:', err);
-        this.snackBar.open('❌ Failed to delete post', '', { 
+        this.snackBar.open('❌ You are not allowed to delete this post', '', { 
           duration: 3000,
           horizontalPosition: 'center',
           verticalPosition: 'top'

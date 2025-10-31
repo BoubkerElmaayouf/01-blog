@@ -342,26 +342,26 @@ private async extractAndUploadMediaFromContent(content: string): Promise<string>
       const url = this.isEditMode
         ? `http://localhost:8080/api/post/edit/${this.postId}`
         : 'http://localhost:8080/api/post/create';
+
+      console.log("ejejjejejejej", url);
+      
+
       const method = this.isEditMode ? 'patch' : 'post';
 
       this.snackBar.open(this.isEditMode ? 'Updating post...' : 'Publishing post...', '', { duration: 2000 });
-      await this.http.request(method, url, { body: postData, headers }).toPromise();
-
-      this.snackBar.open(this.isEditMode ? 'Post updated successfully!' : 'Post published successfully!', 'Close', { duration: 3000 });
-
-      if (!this.isEditMode) {
-        this.postForm.reset();
-        this.selectedFile = null;
-        this.imagePreview = null;
-        if (this.quillEditor) this.quillEditor.setContents([]);
-      } else {
-        this.router.navigate(['/post', this.postId]);
+      await this.http.request(method, url, { body: postData, headers }).toPromise().then((response : any) => {
+        this.snackBar.open(this.isEditMode ? 'Post updated successfully!' : 'Post published successfully!', 'Close', { duration: 3000 });
+      }, 
+      (error : any) => {
+        this.snackBar.open("Failed to publish post", 'Close', { duration: 3000 });
       }
-
-    } catch (error: any) {
+    )
+    this.snackBar.open(this.isEditMode  ? 'Post updated successfully!' : 'Post published successfully!', 'Close', { duration: 3000 });
+    
+  } catch (error: any) {
       console.error('Error publishing post:', error);
-      const errorMsg = error.error || error.message || 'Failed to publish post.';
-      this.snackBar.open(errorMsg, 'Close', { duration: 5000 });
+      // const errorMsg = error.error || error.message || 'Failed to publish post.';
+      // this.snackBar.open(errorMsg, 'Close', { duration: 5000 });
     } finally {
       this.isPublishing = false;
     }

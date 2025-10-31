@@ -1,6 +1,10 @@
-<app-navbar></app-navbar>
+<app-landbar></app-landbar>
 <div class="container">
-    <h1>404 Page Not Found</h1>
-    <app-loader></app-loader>
-    <p>The page you are looking for does not exist.</p>
+  <div class="go_back">
+    <button class="back_btn" (click)="goBack()">Go Back</button>
+  </div>
+
+  <h1>404 Page Not Found</h1>
+  <app-loader></app-loader>
+  <p>The page you are looking for does not exist.</p>
 </div>
