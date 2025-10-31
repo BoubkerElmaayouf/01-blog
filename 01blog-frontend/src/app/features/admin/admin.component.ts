@@ -272,6 +272,9 @@ export class AdminComponent implements OnInit {
       next: (posts) => {
         this.posts = posts;
         this.filterPosts();
+        console.log("status", this.posts);
+        
+
         this.updateStatistics();
       },
       error: () => this.showMessage('Error loading posts')
@@ -290,17 +293,46 @@ export class AdminComponent implements OnInit {
     });
   }
 
-  restorePost(post: Post) {
-    this.adminService.restorePost(post.id).subscribe({
-      next: () => {
-        post.status = 'published';
-        this.filterPosts();
-        this.updateStatistics();
-        this.showMessage('Post restored successfully');
-      },
-      error: () => this.showMessage('Error restoring post')
-    });
+  togglePostStatus(post: Post) {
+        if (post.status === 'hidden') {
+          this.confirmAction(
+            `Are you sure you want to restore "${post.title}"?`,
+            () => this.restorePost(post)
+          );
+        } else if (post.status === 'published') {
+          this.confirmAction(
+            `Are you sure you want to hide "${post.title}"?`,
+            () => this.hidePost(post)
+          )
+        } else {
+          this.showMessage('Cannot change status of this post')
+        }
   }
+
+  restorePost(post: Post) {
+      this.adminService.restorePost(post.id).subscribe({
+        next: () => {
+          post.status = 'published';
+          this.filterPosts();
+          this.updateStatistics();
+          this.showMessage('Post restored successfully');
+        },
+        error: () => this.showMessage('Error restoring post')
+      });
+    }
+
+    hidePost(post: Post) {
+      this.adminService.hidePost(post.id).subscribe({
+        next: () => {
+          post.status = 'hidden'
+          this.filterPosts();
+          this.updateStatistics();
+          this.showMessage('Post hidden successfully');
+        },
+        error: () => this.showMessage('Error hiding post')
+      });
+    }
+
 
   openDeletePostDialog(post: Post, event: Event) {
     this.confirmAction(

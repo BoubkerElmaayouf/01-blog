@@ -293,10 +293,10 @@
                         Delete
                       </button>
                       <button 
-                         
+                        (click)="togglePostStatus(post)"
                         class="action-button restore-button">
                         <mat-icon fontSet="material-icons-outlined">restore_from_trash</mat-icon>
-                        Hide
+                        {{ post.status === 'published' ? 'Hide' : 'Restore' }}
                       </button>
 
                     </td>

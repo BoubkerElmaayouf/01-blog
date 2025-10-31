@@ -84,7 +84,7 @@ public class AdminService {
             String author = post.getUser() != null
                     ? post.getUser().getFirstName() + "_" + post.getUser().getLastName()
                     : "Unknown";
-            String status = post.isRemoved() ? "removed" : "published";
+            String status = post.isHidden() ? "hidden" : "published";
             return new AdminPostDto(
                     post.getId(),
                     post.getTitle(),
@@ -109,7 +109,15 @@ public class AdminService {
     public void restorePost(Long id) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
-        post.setRemoved(false);
+        post.setHidden(false);
+        postRepository.save(post);
+    }
+
+    @Transactional
+    public void hidePost(Long id) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+        post.setHidden(true);
         postRepository.save(post);
     }
 

@@ -140,7 +140,9 @@ public class PostService {
         }
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<Post> postsPage = postRepository.findByUserIdIn(userIds, pageable);
+        // Page<Post> postsPage = postRepository.findByUserIdIn(userIds, pageable);
+        Page<Post> postsPage = postRepository.findByUserIdInAndIsHiddenFalse(userIds, pageable);
+
 
         List<PostResponse> content = postsPage.getContent().stream()
             .map(post -> buildPostResponse(post, currentUserId))

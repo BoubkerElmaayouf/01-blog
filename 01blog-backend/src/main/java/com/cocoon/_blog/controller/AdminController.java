@@ -56,6 +56,12 @@ public class AdminController {
         return ResponseEntity.ok("Post restored successfully");
     }
 
+    @PostMapping("/posts/hide/{id}")
+    public ResponseEntity<?> hidePost(@PathVariable Long id) {
+        adminService.hidePost(id);
+        return ResponseEntity.ok("Post hidden successfully");
+    }
+
     @DeleteMapping("/posts/{id}")
     public ResponseEntity<?> deletePost(@PathVariable Long id) {
         adminService.deletePost(id);

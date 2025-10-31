@@ -4,6 +4,7 @@ import com.cocoon._blog.entity.Post;
 import com.cocoon._blog.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.domain.Sort;
 
@@ -16,4 +17,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     
     // Fetch posts from a list of users with pagination
     Page<Post> findByUserIdIn(List<Long> userIds, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"user"})
+    Page<Post> findByUserIdInAndIsHiddenFalse(List<Long> userIds, Pageable pageable);
 }

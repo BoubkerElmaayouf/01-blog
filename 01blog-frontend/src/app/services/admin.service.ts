@@ -19,7 +19,7 @@ export interface Post {
   author: string;
   publishDate: Date;
   views: number;
-  status: 'published' | 'removed';
+  status: 'published' | 'hidden' | 'removed';
 }
 
 export interface Report {
@@ -109,7 +109,7 @@ export class AdminService {
           author: post.author,
           publishDate: new Date(post.publishDate),
           views: post.views,
-          status: post.status as 'published' | 'removed'
+          status: post.status as 'published' | 'hidden' | 'removed'
         }))
       )
     );
@@ -124,6 +124,13 @@ export class AdminService {
 
   restorePost(postId: number): Observable<any> {
     return this.http.post(`${this.apiUrl}/posts/restore/${postId}`, {}, {
+      headers: this.getAuthHeaders(),
+      responseType: 'text'
+    });
+  }
+
+  hidePost(postId: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/posts/hide/${postId}`, {}, {
       headers: this.getAuthHeaders(),
       responseType: 'text'
     });

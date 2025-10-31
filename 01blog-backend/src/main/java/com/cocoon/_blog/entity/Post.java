@@ -29,7 +29,7 @@ public class Post {
 
     @ElementCollection
     private List<String> videos; // URLs only
-
+    
     @Column(nullable = false)
     private boolean removed = false;
 
