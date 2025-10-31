@@ -118,7 +118,8 @@ public class PostService {
             post.getUser().getProfilePic(),
             likeCount,
             commentCount,
-            isLiked
+            isLiked,
+            post.isHidden()
         );
     }
 
@@ -165,11 +166,13 @@ public class PostService {
     }
 
     // 🔹 Get posts by user ID
-    public ResponseEntity<?> getPostByUserId(Long userId, Long currentUserId) {
-        User user = userRepository.findById(userId)
+   public ResponseEntity<?> getPostByUserId(Long userId, Long currentUserId) {
+    User user = userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
 
-        List<PostResponse> posts = postRepository.findByUser(user, Sort.by(Sort.Direction.DESC, "createdAt")).stream()
+        List<PostResponse> posts = postRepository
+            .findByUserAndIsHiddenFalse(user, Sort.by(Sort.Direction.DESC, "createdAt"))
+            .stream()
             .map(post -> buildPostResponse(post, currentUserId))
             .collect(Collectors.toList());
 

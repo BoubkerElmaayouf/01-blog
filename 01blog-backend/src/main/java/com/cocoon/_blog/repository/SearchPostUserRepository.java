@@ -1,7 +1,7 @@
 package com.cocoon._blog.repository;
 
 import com.cocoon._blog.dto.SearchUserPostResponse;
-import com.cocoon._blog.entity.Post; // import your Post entity
+import com.cocoon._blog.entity.Post;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

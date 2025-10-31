@@ -20,4 +20,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     @EntityGraph(attributePaths = {"user"})
     Page<Post> findByUserIdInAndIsHiddenFalse(List<Long> userIds, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"user"})
+    List<Post> findByUserAndIsHiddenFalse(User user, Sort sort);
 }
