@@ -221,28 +221,26 @@ export class AdminComponent implements OnInit {
     });
   }
 
-  banUser(user: User) {
-    this.adminService.banUser(user.id).subscribe({
-      next: () => {
-        user.status = 'banned';
-        this.filterUsers();
-        this.updateStatistics();
-        this.showMessage('User banned successfully');
-      },
-      error: () => this.showMessage('Error banning user')
-    });
+  onBanManagment(user: User , userStatus : any) {
+   this.confirmAction(
+     `Are you sure you want to ${userStatus === 'banned' ? 'unban' : 'ban'} "${user.username}"?`,
+     () => this.banManagment(user, userStatus)
+   )
   }
 
-  unbanUser(user: User) {
-    this.adminService.unbanUser(user.id).subscribe({
+  banManagment(user: User , userStatus : any) {
+    this.adminService.BanMangment(user.id, userStatus).subscribe( {
       next: () => {
-        user.status = 'active';
+        user.status = userStatus;
         this.filterUsers();
         this.updateStatistics();
-        this.showMessage('User unbanned successfully');
-      },
-      error: () => this.showMessage('Error unbanning user')
-    });
+        if(userStatus == "banned") {
+          this.showMessage('User banned successfully');
+        } else {
+          this.showMessage('User unbanned successfully');
+        }
+      }, error: () => this.showMessage('Error banning or unbanning user')
+    }) 
   }
 
   openDeleteUserDialog(user: User, event: Event) {

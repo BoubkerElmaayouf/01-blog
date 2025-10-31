@@ -36,6 +36,7 @@ export interface Report {
   providedIn: 'root'
 })
 export class AdminService {
+
   private apiUrl = 'http://localhost:8080/api/admin';
 
   constructor(private http: HttpClient) {}
@@ -65,6 +66,14 @@ export class AdminService {
         }))
       )
     );
+  }
+
+  BanMangment(id: number, userStatus: any) : Observable<any> {
+    if (userStatus == "banned") {
+      return this.banUser(id);
+    } else {
+      return this.unbanUser(id);
+    }
   }
 
   banUser(userId: number): Observable<any> {
