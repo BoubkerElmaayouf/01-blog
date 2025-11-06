@@ -77,7 +77,7 @@ export class ArticleComponent implements OnInit {
         this.loadComments();
         this.isLoading = false;
 
-        console.log("------------->>",this.article);
+        // console.log("------------->>",this.article);
         
       },
       error: (err) => {
@@ -239,6 +239,10 @@ export class ArticleComponent implements OnInit {
   }
 
   openDeleteDialog(commentId: number): void {
+    console.log("-----------> comentid: " ,commentId);
+
+    // console.log("----------->", this.comments.forEach(comment => console.log(comment.lastName)));
+
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: { message: 'Are you sure you want to delete this comment?' }
@@ -252,18 +256,32 @@ export class ArticleComponent implements OnInit {
   }
 
 
-  onDeleteComment(commentId: number): void {
-    this.articleService.deleteComment(commentId).subscribe({
-      next: () => {
-        this.comments = this.comments.filter(comment => comment.id !== commentId);
-        this.displaySnackBar('Comment deleted successfully.');
-      },
-      error: (err) => {
-        console.error('❌ Error deleting comment:', err);
-        this.displaySnackBar('Failed to delete comment. Please try again.');
+onDeleteComment(commentId: number): void {
+  this.articleService.deleteComment(commentId).subscribe({
+    next: (response: any) => {
+      // if backend sent a message field
+      if (response && response.message) {
+        this.displaySnackBar(response.message)
+
+        // only remove the comment if deletion succeeded
+        if (response.message === 'Comment deleted successfully.' || response.message === 'Comment deleted') {
+          this.comments = this.comments.filter(comment => comment.id !== commentId);
+        }
+      } else {
+        // fallback if no message provided
+        this.displaySnackBar('Comment deleted successfully.')
+        this.comments = this.comments.filter(comment => comment.id !== commentId)
       }
-    });
-  }
+    },
+    error: (err) => {
+      console.error('❌ Error deleting comment:', err)
+      // Try to extract backend message if availabl
+      const backendMsg = err.error?.message || 'Failed to delete comment. Please try again.'
+      this.displaySnackBar(backendMsg);
+    }
+  });
+}
+
 
   getFormattedDate(dateString: string): string {
     try {
@@ -296,19 +314,19 @@ export class ArticleComponent implements OnInit {
     }
   }
 
-handleReportSubmit(reportData: ReportData): void {
-  this.reportService.submitReport(reportData).subscribe({
-    next: () => {
-      this.showReportPopup = false;
-      this.isReported = true;
-      this.showSuccessMessage('Thank you for your report. We will review it shortly.');
-    },
-    error: (err) => {
-      console.error('Error submitting report:', err);
-      this.showErrorMessage('Failed to submit report. Please try again.');
-    }
-  });
-}
+  handleReportSubmit(reportData: ReportData): void {
+    this.reportService.submitReport(reportData).subscribe({
+      next: () => {
+        this.showReportPopup = false;
+        this.isReported = true;
+        this.showSuccessMessage('Thank you for your report. We will review it shortly.');
+      },
+      error: (err) => {
+        console.error('Error submitting report:', err);
+        this.showErrorMessage('Failed to submit report. Please try again.');
+      }
+    });
+  }
 
 
   handleReportCancel(): void {

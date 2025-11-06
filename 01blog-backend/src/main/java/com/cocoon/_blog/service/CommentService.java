@@ -128,8 +128,27 @@ public class CommentService {
         return post.getUser().getId();
     }
 
-    public ResponseEntity<?> deleteComment(Long commentId) {
-        commentRepository.deleteById(commentId);
-        return ResponseEntity.ok(Map.of("message", "Comment deleted"));
+public ResponseEntity<?> deleteComment(Long commentId, Long currentUserId) {
+    Comment comment = commentRepository.findById(commentId)
+            .orElseThrow(() -> new RuntimeException("Comment not found"));
+
+    User commentOwner = comment.getUser();
+    User currentUser = userRepository.findById(currentUserId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+
+    // 🚫 Check if current user is banned
+    if (Boolean.TRUE.equals(currentUser.getBanned())) {
+        return ResponseEntity.ok(Map.of("message", "Your account has been banned. You cannot perform this action."));
     }
+
+    // 🚫 Check if current user is not the owner of the comment
+    if (!commentOwner.getId().equals(currentUser.getId())) {
+        return ResponseEntity.ok(Map.of("message", "You cannot delete another user's comment."));
+    }
+
+    // ✅ Proceed with deletion
+    commentRepository.deleteById(commentId);
+    return ResponseEntity.ok(Map.of("message", "Comment deleted successfully."));
+}
+
 }

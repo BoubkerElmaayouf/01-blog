@@ -90,7 +90,7 @@ public class CommentController {
     @DeleteMapping("/comment/{commentId}")
     public ResponseEntity<?> deleteComment(@PathVariable Long commentId, @AuthenticationPrincipal User currentUser) {
         try {
-            return commentService.deleteComment(commentId);
+            return commentService.deleteComment(commentId, currentUser.getId());
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Internal server error occurred");
         }
