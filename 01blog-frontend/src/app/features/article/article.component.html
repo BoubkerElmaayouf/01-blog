@@ -164,10 +164,22 @@
                 [alt]="comment.firstName + ' ' + comment.lastName" 
                 class="comment-avatar"
                 (error)="$event.target.src = getDefaultAvatar()">
+              <div class="wrapper">
               <div class="comment-info">
                 <span class="comment-author">{{ comment.firstName }} {{ comment.lastName }}</span>
                 <span class="comment-time">{{ getTimeAgo(comment.createdAt) }}</span>
               </div>
+
+              <div class="delete-comment">
+                <button 
+                  class="delete-btn"
+                 (click)="openDeleteDialog(comment.id)"
+                  type="button">
+                  <mat-icon fontSet="material-icons-outlined">delete</mat-icon>
+                </button>
+              </div>
+              </div>
+
             </div>
             <div class="comment-content">
               <p>{{ comment.content }}</p>

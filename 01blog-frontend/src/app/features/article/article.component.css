@@ -769,6 +769,14 @@
   margin-bottom: 12px;
 }
 
+.wrapper {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
 .comment .comment-avatar {
   width: 32px;
   height: 32px;
@@ -805,7 +813,20 @@
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
-
+.delete-btn {
+  background: none;
+  border: none;
+  color: #757575;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 4px;
+  transition: color 0.2s ease;
+  /* font-family: 'Charter', Georgia, serif; */
+}
+.delete-btn:hover:not(:disabled) {
+  color: #242424;
+}
 .comment-actions-row {
   display: flex;
   align-items: center;

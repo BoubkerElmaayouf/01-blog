@@ -180,6 +180,12 @@ export class ArticleService {
     });
   }
 
+  deleteComment(commentId: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/comment/${commentId}`, {
+      headers: this.getAuthHeaders()
+    })
+  }
+
   // --- User Profile ---
   getUserInfo(): Observable<UserProfile> {
     return this.http.get<UserProfile>(`${this.userUrl}/user`, { 
@@ -237,4 +243,6 @@ export class ArticleService {
   submitReport(reportData: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/reports`, reportData);
   }
+
+
 }

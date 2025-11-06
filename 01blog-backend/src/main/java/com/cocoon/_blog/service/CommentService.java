@@ -2,6 +2,7 @@ package com.cocoon._blog.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -125,5 +126,10 @@ public class CommentService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
         return post.getUser().getId();
+    }
+
+    public ResponseEntity<?> deleteComment(Long commentId) {
+        commentRepository.deleteById(commentId);
+        return ResponseEntity.ok(Map.of("message", "Comment deleted"));
     }
 }

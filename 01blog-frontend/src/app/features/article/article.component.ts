@@ -8,11 +8,14 @@ import { LoaderComponent } from '../../shared/components/loader/loader.component
 import { repopopComponent, ReportData } from '../../shared/components/reportpopup/repop.component';
 import { ReportService } from '../../services/report.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatIcon } from '@angular/material/icon';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-component';
 
 @Component({
   selector: 'app-article',
   standalone: true,
-  imports: [NavbarComponent, CommonModule, FormsModule, LoaderComponent, repopopComponent, RouterModule],
+  imports: [NavbarComponent, CommonModule, FormsModule, LoaderComponent, repopopComponent, RouterModule, MatIcon, ConfirmDialogComponent],
   templateUrl: './article.component.html',
   styleUrls: ['./article.component.css'],
   encapsulation: ViewEncapsulation.None
@@ -38,12 +41,14 @@ export class ArticleComponent implements OnInit {
   newComment: string = '';
   comments: Comment[] = [];
   isSubmittingComment: boolean = false;
+  // dialog: any;
 
   constructor(
     private articleService: ArticleService,
     private route: ActivatedRoute,
     private reportService: ReportService, 
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -231,6 +236,33 @@ export class ArticleComponent implements OnInit {
     if (textarea) {
       textarea.style.height = 'auto';
     }
+  }
+
+  openDeleteDialog(commentId: number): void {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: { message: 'Are you sure you want to delete this comment?' }
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (confirmed) {
+        this.onDeleteComment(commentId);
+      }
+    });
+  }
+
+
+  onDeleteComment(commentId: number): void {
+    this.articleService.deleteComment(commentId).subscribe({
+      next: () => {
+        this.comments = this.comments.filter(comment => comment.id !== commentId);
+        this.displaySnackBar('Comment deleted successfully.');
+      },
+      error: (err) => {
+        console.error('❌ Error deleting comment:', err);
+        this.displaySnackBar('Failed to delete comment. Please try again.');
+      }
+    });
   }
 
   getFormattedDate(dateString: string): string {
