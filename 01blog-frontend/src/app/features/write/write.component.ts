@@ -354,7 +354,6 @@ private async extractAndUploadMediaFromContent(content: string): Promise<string>
       }
     )
     this.snackBar.open(this.isEditMode  ? 'Post updated successfully!' : 'Post published successfully!', 'Close', { duration: 3000 });
-    // this.router.navigate([`/explore/${this.postForm.get('postId')?.value}`])
     this.router.navigate(['/explore']);
 
   } catch (error: any) {
