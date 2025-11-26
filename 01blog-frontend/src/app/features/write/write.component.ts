@@ -343,9 +343,6 @@ private async extractAndUploadMediaFromContent(content: string): Promise<string>
         ? `http://localhost:8080/api/post/edit/${this.postId}`
         : 'http://localhost:8080/api/post/create';
 
-      console.log("ejejjejejejej", url);
-      
-
       const method = this.isEditMode ? 'patch' : 'post';
 
       this.snackBar.open(this.isEditMode ? 'Updating post...' : 'Publishing post...', '', { duration: 2000 });
@@ -357,11 +354,11 @@ private async extractAndUploadMediaFromContent(content: string): Promise<string>
       }
     )
     this.snackBar.open(this.isEditMode  ? 'Post updated successfully!' : 'Post published successfully!', 'Close', { duration: 3000 });
-    
+    // this.router.navigate([`/explore/${this.postForm.get('postId')?.value}`])
+    this.router.navigate(['/explore']);
+
   } catch (error: any) {
       console.error('Error publishing post:', error);
-      // const errorMsg = error.error || error.message || 'Failed to publish post.';
-      // this.snackBar.open(errorMsg, 'Close', { duration: 5000 });
     } finally {
       this.isPublishing = false;
     }
