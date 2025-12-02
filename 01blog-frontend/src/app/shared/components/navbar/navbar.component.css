@@ -152,7 +152,7 @@ a {
 }
 
 ::ng-deep .search-spinner circle {
-  stroke: #1976d2 !important;
+  stroke: #1e1e1e !important;
 }
 
 /* Search Results Dropdown */
@@ -272,7 +272,7 @@ a {
 }
 
 .search-result-user:hover .user-name {
-  color: #1976d2;
+  color: #1e1e1e;
 }
 
 .user-bio {
@@ -604,7 +604,7 @@ a {
   top: 24px;
   width: 8px;
   height: 8px;
-  background-color: #1976d2;
+  background-color: #1e1e1e;
   border-radius: 50%;
 }
 
@@ -617,10 +617,10 @@ a {
   line-height: 1.4 !important;
   height: 48px !important;
   padding: 0 20px !important;
-  color: #1976d2 !important;
+  color: #1e1e1e !important;
   display: flex !important;
   align-items: center !important;
-  justify-content: space-between !important;
+  justify-content: flex-start !important;
   margin: 0 !important;
   border-radius: 0 !important;
   font-weight: 500 !important;
@@ -628,11 +628,11 @@ a {
 
 ::ng-deep .notification-menu .view-all-notifications:hover {
   background-color: #e3f2fd !important;
-  color: #1976d2 !important;
+  color: #1e1e1e !important;
 }
 
 ::ng-deep .notification-menu .view-all-notifications mat-icon {
-  color: #1976d2 !important;
+  color: #1e1e1e !important;
   font-size: 18px !important;
   width: 18px !important;
   height: 18px !important;

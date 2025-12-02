@@ -333,7 +333,7 @@ private async extractAndUploadMediaFromContent(content: string): Promise<string>
         title: this.postForm.get('title')?.value,
         topic: this.postForm.get('category')?.value,
         banner: bannerUrl.secure_url || this.postForm.get('banner')?.value || "https://res.cloudinary.com/dsv24pun2/image/upload/v1759512402/rw8cum1ojxkel1gaeqij.png",
-        description: processedContent && processedContent.length > 20 ? processedContent : "<p>No description provided</p>",
+        description: processedContent && processedContent.length > 10 ? processedContent : "<p>No description provided</p>",
         videos: []
       };
 

@@ -15,7 +15,7 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/c
 @Component({
   selector: 'app-article',
   standalone: true,
-  imports: [NavbarComponent, CommonModule, FormsModule, LoaderComponent, repopopComponent, RouterModule, MatIcon, ConfirmDialogComponent],
+  imports: [NavbarComponent, CommonModule, FormsModule, LoaderComponent, repopopComponent, RouterModule, MatIcon],
   templateUrl: './article.component.html',
   styleUrls: ['./article.component.css'],
   encapsulation: ViewEncapsulation.None

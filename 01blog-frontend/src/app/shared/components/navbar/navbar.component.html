@@ -25,7 +25,6 @@
           (input)="onSearchInput()"
           (focus)="onSearchFocus()"
           (blur)="onSearchBlur()"
-          (keyup.enter)="onSearch()"
         />
         <button 
           *ngIf="searchQuery.length > 0"
@@ -80,7 +79,7 @@
                   <h4 class="post-title" >{{ result.title }}</h4>
                   <div class="post-meta">
                     <span class="post-topic" *ngIf="result.topic">{{ result.topic }}</span>
-                    <span class="post-date">{{ getTimeAgo(result.createdAt) }}</span>
+                    <span class="post-date">{{ getNotificationTimeAgo(result.createdAt) }}</span>
                   </div>
                 </div>
               </div>
@@ -131,15 +130,6 @@
       <div class="notification-header" mat-menu-item disabled>
         <div class="notification-title">
           <span>Notifications</span>
-          <button 
-            mat-icon-button 
-            class="mark-all-read-btn"
-            (click)="markAllAsRead(); $event.stopPropagation()"
-            [disabled]="unreadCount === 0"
-            matTooltip="Mark all as read"
-          >
-            <mat-icon>done_all</mat-icon>
-          </button>
         </div>
       </div>
       
@@ -191,10 +181,10 @@
       
       <!-- View All Link -->
       <mat-divider class="notification-divider" *ngIf="notifications.length > 0"></mat-divider>
-      <a mat-menu-item routerLink="/notifications" class="view-all-notifications" *ngIf="notifications.length > 0">
-        <span>View all notifications</span>
-        <mat-icon>arrow_forward</mat-icon>
-      </a>
+      <div class="view-all-notifications" *ngIf="notifications.length > 0">
+        <span>{{notifications?.length}}</span>
+        <mat-icon>notifications_none</mat-icon>
+      </div>
     </mat-menu>
 
     <!-- User Menu -->

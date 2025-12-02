@@ -112,7 +112,7 @@ export class ExploreComponent implements OnInit, OnDestroy {
 
     // Trigger load when within threshold of bottom
     if (distanceFromBottom < this.scrollThreshold && !this.isLoadingMore && this.hasMorePages) {
-      console.log('Infinite scroll triggered - Distance from bottom:', distanceFromBottom);
+      // console.log('Infinite scroll triggered - Distance from bottom:', distanceFromBottom);
       this.fetchMorePosts();
     }
   }
@@ -138,7 +138,6 @@ export class ExploreComponent implements OnInit, OnDestroy {
           this.hasMorePages = response.hasNext;
           this.currentPage = response.currentPage + 1;
           
-          console.log('Fetched initial posts:', this.posts.length);
           this.isLoading = false;
           this.filterPosts();
         },
@@ -188,7 +187,7 @@ export class ExploreComponent implements OnInit, OnDestroy {
           }, 0);
 
           this.isLoadingMore = false;
-          console.log('Loaded more posts:', newPosts.length, 'Total:', this.posts.length);
+          // console.log('Loaded more posts:', newPosts.length, 'Total:', this.posts.length);
         },
         error: (err) => {
           console.error('Error loading more posts:', err);
@@ -225,7 +224,7 @@ export class ExploreComponent implements OnInit, OnDestroy {
         
         post.likes = post.likeCount;
         
-        console.log('Liked post:', post.title, 'Total likes:', post.likeCount);
+        // console.log('Liked post:', post.title, 'Total likes:', post.likeCount);
       },
       error: (err) => {
         console.error('Error liking post:', err);
@@ -248,23 +247,22 @@ export class ExploreComponent implements OnInit, OnDestroy {
       this.snackBar.open('Post saved!', '', { duration: 2000 });
     }
     
-    console.log('Saved post:', post.title, 'Total saves:', post.saves);
+    // console.log('Saved post:', post.title, 'Total saves:', post.saves);
   }
 
   onComment(post: Post, event: Event) {
     event.preventDefault();
     event.stopPropagation();
-    console.log('Navigate to comments for post:', post.title);
     this.router.navigate(['/explore', post.id]);
   }
 
   onReport(post: Post) {
-    console.log('Report post:', post.title);
+    // console.log('Report post:', post.title);
     this.snackBar.open('Post reported', '', { duration: 2000 });
   }
 
   onUpdate(post: Post) {
-    console.log('Update post:', post.title);
+    // console.log('Update post:', post.title);
     this.router.navigate(['/edit-post', post.id]);
   }
 
@@ -309,7 +307,7 @@ export class ExploreComponent implements OnInit, OnDestroy {
 
   onPostClick(post: Post) {
     this.router.navigate(['/explore', post.id]);
-    console.log('Navigate to post:', post.id);
+    // console.log('Navigate to post:', post.id);
   }
 
   formatCount(count: number = 0): string {

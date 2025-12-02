@@ -106,7 +106,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
         }
         this.showSearchResults = true;
         this.isSearching = false;
-        console.log('Search results:', this.searchResults);
       },
       error: (err) => {
         console.error('Search error:', err);
@@ -126,7 +125,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
         }else {
           this.isAdmin = false;
         }
-        console.log('Fetched user profile:', profile);
       },
       error: (err) => {
         console.error('Error fetching user profile:', err);
@@ -138,7 +136,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.notificationSubscription = this.notificationService.getAllNotifications().subscribe({
       next: (notifications) => {
         this.notifications = this.sortNotifications(notifications);
-        console.log('Fetched notifications:', notifications);
       },
       error: (err) => {
         console.error('Error fetching notifications:', err);
@@ -192,7 +189,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.showSearchResults = false;
     this.searchQuery = '';
     this.searchResults = [];
-    console.log('Clicked search result:', result.postId);
     this.router.navigate(['/explore', result.postId]);
   }
 
@@ -201,7 +197,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.showSearchResults = false;
     this.searchQuery = '';
     this.searchResults = [];
-    console.log('Clicked user result:', result.userId);
     this.router.navigate(['/profile', result.userId]);
   }
 
@@ -211,47 +206,11 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.showSearchResults = false;
     this.isSearching = false;
   }
-
-  getTimeAgo(dateString: string): string {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-    
-    if (diffInSeconds < 60) {
-      return 'just now';
-    }
-    
-    const diffInMinutes = Math.floor(diffInSeconds / 60);
-    if (diffInMinutes < 60) {
-      return `${diffInMinutes}m ago`;
-    }
-    
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) {
-      return `${diffInHours}h ago`;
-    }
-    
-    const diffInDays = Math.floor(diffInHours / 24);
-    if (diffInDays < 30) {
-      return `${diffInDays}d ago`;
-    }
-    
-    const diffInMonths = Math.floor(diffInDays / 30);
-    return `${diffInMonths}mo ago`;
-  }
-
   get unreadCount(): number {
     return this.notifications.filter(n => !n.read).length;
   }
 
-  onSearch(): void {
-    if (this.searchQuery.trim()) {
-      console.log('Searching for:', this.searchQuery);
-    }
-  }
-
   onNotificationClick(): void {
-    console.log('Notification button clicked');
     // Refresh notifications when menu is opened
     this.loadNotifications();
   }
@@ -267,7 +226,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
     if (notification.type === 'POST') {
       this.router.navigate(['/explore', notification.postId]);
     } else if (notification.type === 'PROFILE') {
-      this.router.navigate(['/explore', notification.commentId]);
+      this.router.navigate(['/profile', notification.senderId])
+      
+      // this.router.navigate(['/explore', notification.]);
     } else if (notification.type === 'COMMENT') {
       // Example route for comment
       this.router.navigate(['/explore', notification.id]);
@@ -279,32 +240,16 @@ export class NavbarComponent implements OnInit, OnDestroy {
     if (notification.read) {
       // Mark as unread (locally only - you may need an API endpoint for this)
       notification.read = false;
-      console.log(`Notification ${notification.id} marked as unread (locally)`);
     } else {
       this.notificationService.markAsRead(notification.id).subscribe({
         next: () => {
           notification.read = true;
-          console.log(`Notification ${notification.id} marked as read`);
         },
         error: (err) => {
           console.error('Error marking notification as read:', err);
         }
       });
     }
-  }
-
-  markAllAsRead(): void {
-    this.notificationService.markAllAsRead().subscribe({
-      next: () => {
-        this.notifications.forEach(notification => {
-          notification.read = true;
-        });
-        console.log('All notifications marked as read');
-      },
-      error: (err) => {
-        console.error('Error marking all notifications as read:', err);
-      }
-    });
   }
 
   getNotificationMessage(notification: Notification): string {
@@ -384,6 +329,5 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.isMobileMenuOpen = false;
     window.localStorage.removeItem('token');
     window.location.href = '/login';
-    console.log('Logout clicked');
   }
 }
