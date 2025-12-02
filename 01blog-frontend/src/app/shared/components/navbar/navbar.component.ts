@@ -192,6 +192,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.router.navigate(['/explore', result.postId]);
   }
 
+  get notificationLen() {
+    return this.notifications.length;
+  }
+
   onUserClick(result: SearchUserPostResponse, event: Event): void {
     event.stopPropagation();
     this.showSearchResults = false;

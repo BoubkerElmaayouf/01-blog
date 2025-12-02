@@ -76,9 +76,6 @@ export class ArticleComponent implements OnInit {
         this.likesCount = data.likeCount;
         this.loadComments();
         this.isLoading = false;
-
-        // console.log("------------->>",this.article);
-        
       },
       error: (err) => {
         console.error('❌ Error fetching article:', err);
@@ -91,7 +88,6 @@ export class ArticleComponent implements OnInit {
   loadCurrentUser(): void {
     this.articleService.getUserInfo().subscribe({
       next: (data) => {
-        console.log('✅ User info:', data);
         this.currentUser = data;
       },
       error: (err) => {
@@ -239,10 +235,6 @@ export class ArticleComponent implements OnInit {
   }
 
   openDeleteDialog(commentId: number): void {
-    console.log("-----------> comentid: " ,commentId);
-
-    // console.log("----------->", this.comments.forEach(comment => console.log(comment.lastName)));
-
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: { message: 'Are you sure you want to delete this comment?' }

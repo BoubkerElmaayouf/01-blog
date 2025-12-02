@@ -26,7 +26,7 @@ export interface Report {
   id: number;
   reporterUsername: string;
   reportedItem: string;
-  itemType: 'user' | 'post';
+  itemType: 'profile' | 'post';
   reason: string;
   reportDate: Date;
   status: 'pending' | 'resolved';
@@ -153,7 +153,7 @@ export class AdminService {
           id: report.id,
           reporterUsername: report.reporterUsername,
           reportedItem: report.reportedItem,
-          itemType: report.itemType as 'user' | 'post',
+          itemType: report.itemType as 'profile' | 'post',
           reason: report.reason,
           reportDate: new Date(report.reportDate),
           status: report.status as 'pending' | 'resolved'

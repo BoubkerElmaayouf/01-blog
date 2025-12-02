@@ -150,9 +150,8 @@ export class AdminComponent implements OnInit {
 
   filterReports() {
     let result = this.reports;
-
     if (this.reportSearchTerm) {
-      const term = this.reportSearchTerm.toLowerCase();
+      const term = this.reportSearchTerm.toLowerCase();      
       result = result.filter(r =>
         r.reporterUsername.toLowerCase().includes(term) ||
         r.reportedItem.toLowerCase().includes(term) ||
@@ -163,7 +162,7 @@ export class AdminComponent implements OnInit {
     if (this.reportStatusFilter !== 'all') {
       result = result.filter(r => r.status === this.reportStatusFilter);
     }
-
+    
     if (this.reportTypeFilter !== 'all') {
       result = result.filter(r => r.itemType === this.reportTypeFilter);
     }
@@ -272,9 +271,6 @@ export class AdminComponent implements OnInit {
       next: (posts) => {
         this.posts = posts;
         this.filterPosts();
-        console.log("status", this.posts);
-        
-
         this.updateStatistics();
       },
       error: () => this.showMessage('Error loading posts')

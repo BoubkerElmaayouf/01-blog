@@ -619,8 +619,9 @@ a {
   padding: 0 20px !important;
   color: #1e1e1e !important;
   display: flex !important;
-  align-items: center !important;
   justify-content: flex-start !important;
+  align-items: center !important; 
+  text-align: center;
   margin: 0 !important;
   border-radius: 0 !important;
   font-weight: 500 !important;
