@@ -39,14 +39,14 @@ export class LoginComponent {
   hideLoginPassword = true;
   hideRegisterPassword = true;
 
-  // ✅ Keep file/avatar vars but we won't use them
-  selectedFile: File | null = null;
-  avatarPreview: string | null = null;
+  //  Keep file/avatar vars but we won't use them
+  // selectedFile: File | null = null;
+  // avatarPreview: string | null = null;
   isUploading = false;
 
   constructor(
     private fb: FormBuilder,
-    // private imageUploadService: ImageUploadService, // ✅ won't be used now
+    // private imageUploadService: ImageUploadService, //  won't be used now
     private snackBar: MatSnackBar,
     private authService: AuthService,
     private router: Router
@@ -73,7 +73,7 @@ export class LoginComponent {
           this.snackBar.open('Login successful!', 'Close', { duration: 3000 });
           localStorage.setItem('token', res.token);
           this.router.navigate(['/explore']);
-          console.log('JWT Token:', res.token);
+          // console.log('JWT Token:', res.token);
         },
         error: (err) => {
           this.snackBar.open(err.error || 'Invalid credentials', 'Close', { duration: 4000 });
@@ -84,7 +84,7 @@ export class LoginComponent {
 
   async onRegister() {
     if (this.registerForm.valid) {
-      // ✅ Comment out all avatar/file upload logic
+      //  Comment out all avatar/file upload logic
       /*
       let uploadedFile: { secure_url: string; public_id: string; resourceType: 'image' | 'video' } | null = null;
 
@@ -104,24 +104,21 @@ export class LoginComponent {
       }
       */
 
-      // ✅ Always assign empty string to profilePic
+      //  Always assign empty string to profilePic
       this.registerForm.patchValue({ profilePic: '' });
-
-      console.log("Register data:", this.registerForm.value);
-
       this.authService.register(this.registerForm.value).subscribe({
         next: (res) => {
           this.snackBar.open('User registered successfully!', 'Close', { duration: 3000 });
-          console.log('Registered user:', res);
+          // console.log('Registered user:', res);
         },
-        error: (err) => {
-          this.snackBar.open(err.error?.message || 'Registration failed', 'Close', { duration: 4000 });
+        error: () => {
+          this.snackBar.open('Registration failed', 'Close', { duration: 4000 });
         }
       });
     }
   }
 
-  // ✅ Comment out avatar handlers, keep them if you want later
+  // Comment out avatar handlers, keep them if you want later
   /*
   onFileSelected(event: any) {
     const file = event.target.files[0];
