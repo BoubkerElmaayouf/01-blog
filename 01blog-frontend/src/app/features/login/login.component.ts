@@ -52,17 +52,17 @@ export class LoginComponent {
     private router: Router
   ) {
     this.loginForm = this.fb.group({
-      emailOrUsername: ['', [Validators.required]],
+      emailOrUsername: ['', [Validators.required , Validators.minLength(3)]],
       password: ['', [Validators.required, Validators.minLength(6)]]
     });
 
     this.registerForm = this.fb.group({
-      firstName: ['', [Validators.required]],
-      lastName: ['', [Validators.required]],
+      firstName: ['', [Validators.required, Validators.minLength(2) , Validators.maxLength(15)]],
+      lastName: ['', [Validators.required,  Validators.minLength(2) , Validators.maxLength(15)]],
       email: ['', [Validators.required, Validators.email]],
       bio: [''],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      profilePic: [''] // ✅ will always stay empty
+      profilePic: ['']
     });
   }
 
@@ -73,10 +73,10 @@ export class LoginComponent {
           this.snackBar.open('Login successful!', 'Close', { duration: 3000 });
           localStorage.setItem('token', res.token);
           this.router.navigate(['/explore']);
-          // console.log('JWT Token:', res.token);
         },
         error: (err) => {
-          this.snackBar.open(err.error || 'Invalid credentials', 'Close', { duration: 4000 });
+          const errorMessage = this.getErrorMessage(err);
+          this.snackBar.open(errorMessage, 'Close', { duration: 4000 });
         }
       });
     }
@@ -116,6 +116,19 @@ export class LoginComponent {
         }
       });
     }
+  }
+
+  private getErrorMessage(error: any): string {
+    if (error.error?.message) {
+      return error.error.message;
+    }
+    if (error.status === 400) {
+      return 'Invalid email or password';
+    }
+    if (error.status === 401) {
+      return 'Unauthorized';
+    }
+    return 'An error occurred. Please try again.';
   }
 
   // Comment out avatar handlers, keep them if you want later

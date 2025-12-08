@@ -10,6 +10,20 @@ import java.util.List;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties({
+    "password",
+    "posts",
+    "comments",
+    "postReactions",
+    "commentReactions",
+    "reports",
+    "sentNotifications",
+    "receivedNotifications",
+    "authorities"
+})
+
 @Entity
 @Table(name = "users")
 @Data
