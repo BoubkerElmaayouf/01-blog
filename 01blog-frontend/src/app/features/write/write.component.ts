@@ -70,10 +70,10 @@ export class WriteComponent implements OnInit, AfterViewInit {
     private imageUploadService: ImageUploadService
   ) {
     this.postForm = this.fb.group({
-      title: ['', [Validators.required, Validators.minLength(3)]],
+      title: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
       banner: [''],
       category: ['', Validators.required],
-      content: ['', Validators.required]
+      content: ['', Validators.required],
     });
   }
 
