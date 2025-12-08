@@ -4,8 +4,8 @@ import { ReactiveFormsModule, FormBuilder, Validators, FormGroup } from "@angula
 import { MatFormFieldModule } from "@angular/material/form-field";
 import { MatInputModule } from "@angular/material/input";
 import { MatButtonModule } from "@angular/material/button";
-import { NavbarComponent } from "../../shared/components/navbar/navbar.component";
 import { LandBarComponent } from "../../shared/components/landNavbar/landBar.component";
+import { MatSnackBar, MatSnackBarModule } from "@angular/material/snack-bar";
 
 @Component({
   selector: "app-contact",
@@ -16,7 +16,8 @@ import { LandBarComponent } from "../../shared/components/landNavbar/landBar.com
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    LandBarComponent
+    LandBarComponent,
+    MatSnackBarModule,
   ],
   templateUrl: "./contact.component.html",
   styleUrls: ["./contact.component.css"],
@@ -24,7 +25,10 @@ import { LandBarComponent } from "../../shared/components/landNavbar/landBar.com
 export class ContactComponent implements OnInit {
   contactForm!: FormGroup;
 
-  constructor(private fb: FormBuilder) {}
+  constructor(
+    private fb: FormBuilder,
+    private snackBar: MatSnackBar
+  ) {}
 
   ngOnInit(): void {
     this.contactForm = this.fb.group({
@@ -36,9 +40,36 @@ export class ContactComponent implements OnInit {
 
   onSubmit(): void {
     if (this.contactForm.valid) {
-      console.log("Form Data:", this.contactForm.value);
-      alert("Message sent successfully!");
-      this.contactForm.reset();
+      const formData = new FormData();
+      formData.append("email", this.contactForm.get("email")?.value);
+      formData.append("reason", this.contactForm.get("reason")?.value);
+      formData.append("description", this.contactForm.get("description")?.value);
+
+      fetch("https://formspree.io/f/xrbnalak", {
+        method: "POST",
+        body: formData,
+        headers: { Accept: "application/json" }
+      })
+        .then(res => {
+          if (res.ok) {
+            this.snackBar.open("Message sent successfully!", "Close", {
+              duration: 3000,
+              panelClass: ["success-snackbar"]
+            });
+            this.contactForm.reset();
+          } else {
+            this.snackBar.open("Failed to send message. Please try again.", "Close", {
+              duration: 5000,
+              panelClass: ["error-snackbar"]
+            });
+          }
+        })
+        .catch(() => {
+          this.snackBar.open("Failed to send message. Please try again.", "Close", {
+            duration: 5000,
+            panelClass: ["error-snackbar"]
+          });
+        });
     }
   }
 }
