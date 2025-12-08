@@ -348,13 +348,12 @@ private async extractAndUploadMediaFromContent(content: string): Promise<string>
       this.snackBar.open(this.isEditMode ? 'Updating post...' : 'Publishing post...', '', { duration: 2000 });
       await this.http.request(method, url, { body: postData, headers }).toPromise().then((response : any) => {
         this.snackBar.open(this.isEditMode ? 'Post updated successfully!' : 'Post published successfully!', 'Close', { duration: 3000 });
+        this.router.navigate(['/explore']);
       }, 
       (error : any) => {
-        this.snackBar.open("Failed to publish post", 'Close', { duration: 3000 });
+        this.snackBar.open(error.error, 'Close', { duration: 4000 });
       }
     )
-    this.snackBar.open(this.isEditMode  ? 'Post updated successfully!' : 'Post published successfully!', 'Close', { duration: 3000 });
-    this.router.navigate(['/explore']);
 
   } catch (error: any) {
       console.error('Error publishing post:', error);
