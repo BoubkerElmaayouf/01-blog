@@ -313,6 +313,7 @@ private async extractAndUploadMediaFromContent(content: string): Promise<string>
     }
 
     this.isPublishing = true;
+    this.disableFormControls(true);
 
     try {
       let bannerUrl = { secure_url: '', public_id: '', resourceType: 'image' as 'image' | 'video' };
@@ -359,7 +360,22 @@ private async extractAndUploadMediaFromContent(content: string): Promise<string>
       console.error('Error publishing post:', error);
     } finally {
       this.isPublishing = false;
+      this.disableFormControls(false);
     }
+  }
+
+  private disableFormControls(disable: boolean): void {
+    const controls = ['title', 'category', 'banner', 'content'];
+    controls.forEach(controlName => {
+      const control = this.postForm.get(controlName);
+      if (control) {
+        if (disable) {
+          control.disable({ emitEvent: false });
+        } else {
+          control.enable({ emitEvent: false });
+        }
+      }
+    });
   }
 
   private markFormGroupTouched(): void {
