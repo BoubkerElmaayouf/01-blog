@@ -46,7 +46,7 @@ export class WriteComponent implements OnInit, AfterViewInit {
   selectedFile: File | null = null;
   imagePreview: string | null = null;
   isPublishing: boolean = false;
-  isLoading: boolean = true;
+  // isLoading: boolean = true;
 
   postId: string | null = null;
   isEditMode: boolean = false;
@@ -92,7 +92,7 @@ export class WriteComponent implements OnInit, AfterViewInit {
     this.isEditMode = !!this.postId;
     if (this.isEditMode) this.loadPostData(this.postId!);
 
-    this.isLoading = true;
+    // this.isLoading = true;
     if (typeof Quill === 'undefined') {
       const script = document.createElement('script');
       script.src = 'https://cdn.quilljs.com/1.3.6/quill.min.js';
@@ -116,7 +116,7 @@ export class WriteComponent implements OnInit, AfterViewInit {
     setTimeout(() => {
       if (this.editorElement) {
 
-        /** ✅ 1. Register LocalVideoBlot for local video preview **/
+        /**  1. Register LocalVideoBlot for local video preview **/
         const BlockEmbed = Quill.import('blots/block/embed');
         class LocalVideoBlot extends BlockEmbed {
           static blotName = 'video';
@@ -137,7 +137,7 @@ export class WriteComponent implements OnInit, AfterViewInit {
         }
         Quill.register(LocalVideoBlot, true);
 
-        /** ✅ 2. Initialize the Quill editor **/
+        /**  2. Initialize the Quill editor **/
         this.quillEditor = new Quill(this.editorElement.nativeElement, {
           theme: 'snow',
           placeholder: 'Write your blog post content here...',
@@ -161,13 +161,13 @@ export class WriteComponent implements OnInit, AfterViewInit {
           },
         });
 
-        /** ✅ 3. Update form value when content changes **/
+        /**  3. Update form value when content changes **/
         this.quillEditor.on('text-change', () => {
           const content = this.quillEditor.root.innerHTML;
           this.postForm.get('content')?.setValue(content);
         });
 
-        /** ✅ 4. Custom handler for video uploads **/
+        /**  4. Custom handler for video uploads **/
         const toolbar = this.quillEditor.getModule('toolbar');
         toolbar.addHandler('video', () => {
           const input = document.createElement('input');
@@ -197,7 +197,7 @@ export class WriteComponent implements OnInit, AfterViewInit {
           };
         });
 
-        // ✅ If post data was loaded before Quill was ready
+        //  If post data was loaded before Quill was ready
         if (this.pendingPostData) {
           this.quillEditor.root.innerHTML = this.pendingPostData.description;
           this.pendingPostData = null;
@@ -205,12 +205,12 @@ export class WriteComponent implements OnInit, AfterViewInit {
       }
     }, 100);
 
-    this.isLoading = false;
+    // this.isLoading = false;
   }
 
   private async loadPostData(id: string) {
     try {
-      this.isLoading = true;
+      // this.isLoading = true;
       const token = localStorage.getItem('token');
       if (!token) throw new Error('Authentication required');
 
@@ -238,7 +238,7 @@ export class WriteComponent implements OnInit, AfterViewInit {
       console.error('Error loading post:', error);
       this.snackBar.open('Failed to load post', 'Close', { duration: 3000 });
     } finally {
-      this.isLoading = false;
+      // this.isLoading = false;
     }
   }
 

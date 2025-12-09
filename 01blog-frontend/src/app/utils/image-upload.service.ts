@@ -19,7 +19,7 @@ export class ImageUploadService {
     const token = localStorage.getItem('token');
     const headers = token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : undefined;
 
-    // 1️⃣ Get signed upload payload from backend
+    //  Get signed upload payload from backend
     const signRes = await lastValueFrom(
       this.http.post<any>(`${this.apiUrl}/sign-upload`, { folder: 'posts' }, { headers })
     );
@@ -27,10 +27,10 @@ export class ImageUploadService {
     const isVideo = file.type.startsWith('video/');
     const resourceType: 'image' | 'video' = isVideo ? 'video' : 'image';
 
-    // 2️⃣ Cloudinary upload URL
+    // Cloudinary upload URL
     const url = `https://api.cloudinary.com/v1_1/${signRes.cloudName}/${resourceType}/upload`;
 
-    // 3️⃣ Prepare form data
+    // Prepare form data
     const formData = new FormData();
     formData.append('file', file);
     formData.append('api_key', signRes.apiKey);
@@ -38,7 +38,7 @@ export class ImageUploadService {
     formData.append('signature', signRes.signature);
     formData.append('folder', signRes.folder);
 
-    // 4️⃣ Upload directly to Cloudinary
+    //  Upload directly to Cloudinary
     const res = await lastValueFrom(this.http.post<any>(url, formData));
 
     return {
