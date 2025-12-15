@@ -14,7 +14,6 @@ import { NavbarComponent } from "../../shared/components/navbar/navbar.component
 import { ImageUploadService } from "../../utils/image-upload.service";
 import { jwtDecode } from 'jwt-decode';
 
-// Quill imports
 declare var Quill: any;
 
 @Component({
@@ -49,6 +48,16 @@ export class WriteComponent implements OnInit, AfterViewInit {
   isEditMode: boolean = false;
   private pendingPostData: any = null;
   currentUserId: number | null = null;
+
+  // File validation limits for Cloudinary free tier
+  private readonly MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+  private readonly MAX_VIDEO_SIZE = 15 * 1024 * 1024; // 15MB
+  private readonly ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+  private readonly ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm'];
+  private readonly MAX_CONTENT_MEDIA = 5; // Maximum 5 images/videos in content
+
+  // Track content media count
+  private contentMediaCount = 0;
 
   categories = [
     { value: 'tech', label: 'Technology' },
@@ -108,11 +117,47 @@ export class WriteComponent implements OnInit, AfterViewInit {
     }
   }
 
+  // File validation method
+  private validateFile(file: File): string | null {
+    const isVideo = file.type.startsWith('video/');
+    const isImage = file.type.startsWith('image/');
+
+    // Check if file is image or video
+    if (!isImage && !isVideo) {
+      return 'Only images and videos are allowed';
+    }
+
+    // Check format
+    if (isImage && !this.ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      return 'Invalid image format. Use JPG, PNG, GIF, or WebP';
+    }
+
+    if (isVideo && !this.ALLOWED_VIDEO_TYPES.includes(file.type)) {
+      return 'Invalid video format. Use MP4 or WebM';
+    }
+
+    // Check size
+    const maxSize = isVideo ? this.MAX_VIDEO_SIZE : this.MAX_IMAGE_SIZE;
+    if (file.size > maxSize) {
+      const maxMB = maxSize / (1024 * 1024);
+      return `File too large. Maximum size: ${maxMB}MB`;
+    }
+
+    return null; // Valid file
+  }
+
+  // Count current media in editor
+  private countEditorMedia(): number {
+    if (!this.quillEditor) return 0;
+    const images = this.quillEditor.root.querySelectorAll('img').length;
+    const videos = this.quillEditor.root.querySelectorAll('video').length;
+    return images + videos;
+  }
+
   private initQuill(): void {
     setTimeout(() => {
       if (this.editorElement) {
 
-        /**  1. Register LocalVideoBlot for local video preview **/
         const BlockEmbed = Quill.import('blots/block/embed');
         class LocalVideoBlot extends BlockEmbed {
           static blotName = 'video';
@@ -123,7 +168,6 @@ export class WriteComponent implements OnInit, AfterViewInit {
             const node = super.create() as HTMLVideoElement;
             node.setAttribute('controls', '');
             node.setAttribute('src', value);
-            // node.setAttribute('style', 'max-width: 100%; max-height: 400px;');
             return node;
           }
 
@@ -133,7 +177,6 @@ export class WriteComponent implements OnInit, AfterViewInit {
         }
         Quill.register(LocalVideoBlot, true);
 
-        /**  2. Initialize the Quill editor **/
         this.quillEditor = new Quill(this.editorElement.nativeElement, {
           theme: 'snow',
           placeholder: 'Write your blog post content here...',
@@ -157,15 +200,56 @@ export class WriteComponent implements OnInit, AfterViewInit {
           },
         });
 
-        /**  3. Update form value when content changes **/
         this.quillEditor.on('text-change', () => {
           const content = this.quillEditor.root.innerHTML;
           this.postForm.get('content')?.setValue(content);
         });
 
-        /**  4. Custom handler for video uploads **/
+        // Custom image handler
         const toolbar = this.quillEditor.getModule('toolbar');
+        toolbar.addHandler('image', () => {
+          const currentCount = this.countEditorMedia();
+          
+          if (currentCount >= this.MAX_CONTENT_MEDIA) {
+            this.snackBar.open(`Maximum ${this.MAX_CONTENT_MEDIA} images/videos allowed in content`, 'Close', { duration: 4000 });
+            return;
+          }
+
+          const input = document.createElement('input');
+          input.setAttribute('type', 'file');
+          input.setAttribute('accept', 'image/*');
+          input.click();
+
+          input.onchange = async () => {
+            const file = input.files?.[0];
+            if (!file) return;
+
+            // Validate image file
+            const error = this.validateFile(file);
+            if (error) {
+              this.snackBar.open(error, 'Close', { duration: 4000 });
+              return;
+            }
+
+            // Show local preview
+            const reader = new FileReader();
+            reader.onload = (e: any) => {
+              const range = this.quillEditor.getSelection(true);
+              this.quillEditor.insertEmbed(range.index, 'image', e.target.result, 'user');
+            };
+            reader.readAsDataURL(file);
+          };
+        });
+
+        // Custom video handler
         toolbar.addHandler('video', () => {
+          const currentCount = this.countEditorMedia();
+          
+          if (currentCount >= this.MAX_CONTENT_MEDIA) {
+            this.snackBar.open(`Maximum ${this.MAX_CONTENT_MEDIA} images/videos allowed in content`, 'Close', { duration: 4000 });
+            return;
+          }
+
           const input = document.createElement('input');
           input.setAttribute('type', 'file');
           input.setAttribute('accept', 'video/*');
@@ -175,32 +259,26 @@ export class WriteComponent implements OnInit, AfterViewInit {
             const file = input.files?.[0];
             if (!file) return;
 
+            // Validate video file
+            const error = this.validateFile(file);
+            if (error) {
+              this.snackBar.open(error, 'Close', { duration: 4000 });
+              return;
+            }
+
             // Show local preview
             const localUrl = URL.createObjectURL(file);
             const range = this.quillEditor.getSelection(true);
             this.quillEditor.insertEmbed(range.index, 'video', localUrl, 'user');
-
-            // Optionally upload to Cloudinary & replace URL
-            // try {
-            //   const uploaded = await this.imageUploadService.uploadImage(file);
-            //   const videos = this.quillEditor.root.querySelectorAll('video');
-            //   const lastVideo = videos[videos.length - 1];
-            //   if (lastVideo) lastVideo.setAttribute('src', uploaded.secure_url);
-            // } catch (err) {
-            //   console.error('Video upload failed:', err);
-            //   this.snackBar.open('Video preview added, but upload failed', 'Close', { duration: 3000 });
-            // }
           };
         });
 
-        //  If post data was loaded before Quill was ready
         if (this.pendingPostData) {
           this.quillEditor.root.innerHTML = this.pendingPostData.description;
           this.pendingPostData = null;
         }
       }
     }, 100);
-
   }
 
   private async loadPostData(id: string) {
@@ -231,13 +309,22 @@ export class WriteComponent implements OnInit, AfterViewInit {
     } catch (error: any) {
       console.error('Error loading post:', error);
       this.snackBar.open('Failed to load post', 'Close', { duration: 3000 });
-    } finally {
     }
   }
 
   onFileSelected(event: Event, fileInput: HTMLInputElement): void {
     if (fileInput.files && fileInput.files.length > 0) {
-      this.selectedFile = fileInput.files[0];
+      const file = fileInput.files[0];
+
+      // Validate banner file
+      const error = this.validateFile(file);
+      if (error) {
+        this.snackBar.open(error, 'Close', { duration: 4000 });
+        fileInput.value = ''; // Clear input
+        return;
+      }
+
+      this.selectedFile = file;
 
       const reader = new FileReader();
       reader.onload = (e: any) => { this.imagePreview = e.target.result; };
@@ -258,45 +345,60 @@ export class WriteComponent implements OnInit, AfterViewInit {
     fileInput.click();
   }
 
-private async extractAndUploadMediaFromContent(content: string): Promise<string> {
-  const doc = document.createElement('div');
-  doc.innerHTML = content;
+  private async extractAndUploadMediaFromContent(content: string): Promise<string> {
+    const doc = document.createElement('div');
+    doc.innerHTML = content;
 
-  // Helper function for uploading media
-  const uploadMedia = async (element: HTMLImageElement | HTMLVideoElement, srcAttr = 'src') => {
-    const src = element.getAttribute(srcAttr);
-    if (!src) return;
+    // Count total media first
+    const images = doc.querySelectorAll('img');
+    const videos = doc.querySelectorAll('video');
+    const totalMedia = images.length + videos.length;
 
-    // Skip already uploaded media
-    if (src.startsWith('http') || src.startsWith('https://res.cloudinary.com')) return;
-
-    try {
-      const response = await fetch(src);
-      const blob = await response.blob();
-      const ext = blob.type.startsWith('video/') ? 'mp4' : 'png';
-      const file = new File([blob], `content-media.${ext}`, { type: blob.type });
-      const uploaded = await this.imageUploadService.uploadImage(file);
-      element.setAttribute(srcAttr, uploaded.secure_url);
-    } catch (error) {
-      console.error('Error uploading media:', error);
+    if (totalMedia === 0) {
+      return doc.innerHTML; // No media to process
     }
-  };
 
-  // Process images
-  const images = doc.querySelectorAll('img');
-  for (const img of Array.from(images)) {
-    await uploadMedia(img);
+    if (totalMedia > this.MAX_CONTENT_MEDIA) {
+      throw new Error(`You can only upload maximum ${this.MAX_CONTENT_MEDIA} images/videos in content. You have ${totalMedia}.`);
+    }
+
+    const uploadMedia = async (element: HTMLImageElement | HTMLVideoElement, srcAttr = 'src') => {
+      const src = element.getAttribute(srcAttr);
+      if (!src) return;
+
+      if (src.startsWith('http') || src.startsWith('https://res.cloudinary.com')) return;
+
+      try {
+        const response = await fetch(src);
+        const blob = await response.blob();
+        const ext = blob.type.startsWith('video/') ? 'mp4' : 'png';
+        const file = new File([blob], `content-media.${ext}`, { type: blob.type });
+
+        // Validate before uploading
+        const error = this.validateFile(file);
+        if (error) {
+          throw new Error(error);
+        }
+
+        const uploaded = await this.imageUploadService.uploadImage(file);
+        element.setAttribute(srcAttr, uploaded.secure_url);
+      } catch (error: any) {
+        throw new Error(error.message || 'Failed to upload media');
+      }
+    };
+
+    // Upload images
+    for (const img of Array.from(images)) {
+      await uploadMedia(img);
+    }
+
+    // Upload videos
+    for (const video of Array.from(videos)) {
+      await uploadMedia(video);
+    }
+
+    return doc.innerHTML;
   }
-
-  // Process videos
-  const videos = doc.querySelectorAll('video');
-  for (const video of Array.from(videos)) {
-    await uploadMedia(video);
-  }
-
-  return doc.innerHTML;
-}
-
 
   async onPublish(): Promise<void> {
     if (!this.postForm.valid) {
@@ -317,7 +419,7 @@ private async extractAndUploadMediaFromContent(content: string): Promise<string>
         bannerUrl = await this.imageUploadService.uploadImage(this.selectedFile);
       }
 
-      this.snackBar.open('Processing content images...', '', { duration: 2000 });
+      this.snackBar.open('Processing content media...', '', { duration: 2000 });
       processedContent = await this.extractAndUploadMediaFromContent(processedContent);
 
       const token = localStorage.getItem('token');
@@ -340,17 +442,18 @@ private async extractAndUploadMediaFromContent(content: string): Promise<string>
       const method = this.isEditMode ? 'patch' : 'post';
 
       this.snackBar.open(this.isEditMode ? 'Updating post...' : 'Publishing post...', '', { duration: 2000 });
-      await this.http.request(method, url, { body: postData, headers }).toPromise().then((response : any) => {
+      await this.http.request(method, url, { body: postData, headers }).toPromise().then((response: any) => {
         this.snackBar.open(this.isEditMode ? 'Post updated successfully!' : 'Post published successfully!', 'Close', { duration: 3000 });
         this.router.navigate(['/explore']);
-      }, 
-      (error : any) => {
-        this.snackBar.open(error.error, 'Close', { duration: 4000 });
-      }
-    )
+      },
+        (error: any) => {
+          this.snackBar.open(error.error, 'Close', { duration: 4000 });
+        }
+      )
 
-  } catch (error: any) {
+    } catch (error: any) {
       console.error('Error publishing post:', error);
+      this.snackBar.open(error.message || 'Failed to publish post', 'Close', { duration: 4000 });
     } finally {
       this.isPublishing = false;
       this.disableFormControls(false);
