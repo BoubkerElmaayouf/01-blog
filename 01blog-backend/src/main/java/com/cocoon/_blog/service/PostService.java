@@ -47,6 +47,10 @@ public class PostService {
             throw new UserBannedException("Your account has been banned. You cannot perform this action.");
         }
 
+        if (request.getBanner() == null || request.getBanner().trim().isEmpty()) {
+            request.setBanner("https://res.cloudinary.com/dsv24pun2/image/upload/v1765794242/posts/xszrq1xlnpix1tdjeven.png");
+        }
+
         Post post = Post.builder()
             .title(request.getTitle())
             .topic(request.getTopic())

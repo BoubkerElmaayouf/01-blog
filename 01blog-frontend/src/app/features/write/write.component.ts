@@ -12,7 +12,6 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { NavbarComponent } from "../../shared/components/navbar/navbar.component";
 import { ImageUploadService } from "../../utils/image-upload.service";
-import { LoaderComponent } from "../../shared/components/loader/loader.component";
 import { jwtDecode } from 'jwt-decode';
 
 // Quill imports
@@ -33,7 +32,6 @@ declare var Quill: any;
     MatIconModule,
     MatToolbarModule,
     MatSnackBarModule,
-    LoaderComponent
   ],
   templateUrl: "./write.component.html",
   styleUrls: ['./write.component.css'],
@@ -46,7 +44,6 @@ export class WriteComponent implements OnInit, AfterViewInit {
   selectedFile: File | null = null;
   imagePreview: string | null = null;
   isPublishing: boolean = false;
-  // isLoading: boolean = true;
 
   postId: string | null = null;
   isEditMode: boolean = false;
@@ -92,7 +89,6 @@ export class WriteComponent implements OnInit, AfterViewInit {
     this.isEditMode = !!this.postId;
     if (this.isEditMode) this.loadPostData(this.postId!);
 
-    // this.isLoading = true;
     if (typeof Quill === 'undefined') {
       const script = document.createElement('script');
       script.src = 'https://cdn.quilljs.com/1.3.6/quill.min.js';
@@ -205,12 +201,10 @@ export class WriteComponent implements OnInit, AfterViewInit {
       }
     }, 100);
 
-    // this.isLoading = false;
   }
 
   private async loadPostData(id: string) {
     try {
-      // this.isLoading = true;
       const token = localStorage.getItem('token');
       if (!token) throw new Error('Authentication required');
 
@@ -238,7 +232,6 @@ export class WriteComponent implements OnInit, AfterViewInit {
       console.error('Error loading post:', error);
       this.snackBar.open('Failed to load post', 'Close', { duration: 3000 });
     } finally {
-      // this.isLoading = false;
     }
   }
 
@@ -333,7 +326,7 @@ private async extractAndUploadMediaFromContent(content: string): Promise<string>
       const postData = {
         title: this.postForm.get('title')?.value,
         topic: this.postForm.get('category')?.value,
-        banner: bannerUrl.secure_url || this.postForm.get('banner')?.value || "https://res.cloudinary.com/dsv24pun2/image/upload/v1759512402/rw8cum1ojxkel1gaeqij.png",
+        banner: bannerUrl.secure_url || this.postForm.get('banner')?.value || "https://res.cloudinary.com/dsv24pun2/image/upload/v1765794242/posts/xszrq1xlnpix1tdjeven.png",
         description: processedContent && processedContent.length > 10 ? processedContent : "<p>No description provided</p>",
         videos: []
       };
