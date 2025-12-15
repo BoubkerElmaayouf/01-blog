@@ -181,15 +181,15 @@ export class WriteComponent implements OnInit, AfterViewInit {
             this.quillEditor.insertEmbed(range.index, 'video', localUrl, 'user');
 
             // Optionally upload to Cloudinary & replace URL
-            try {
-              const uploaded = await this.imageUploadService.uploadImage(file);
-              const videos = this.quillEditor.root.querySelectorAll('video');
-              const lastVideo = videos[videos.length - 1];
-              if (lastVideo) lastVideo.setAttribute('src', uploaded.secure_url);
-            } catch (err) {
-              console.error('Video upload failed:', err);
-              this.snackBar.open('Video preview added, but upload failed', 'Close', { duration: 3000 });
-            }
+            // try {
+            //   const uploaded = await this.imageUploadService.uploadImage(file);
+            //   const videos = this.quillEditor.root.querySelectorAll('video');
+            //   const lastVideo = videos[videos.length - 1];
+            //   if (lastVideo) lastVideo.setAttribute('src', uploaded.secure_url);
+            // } catch (err) {
+            //   console.error('Video upload failed:', err);
+            //   this.snackBar.open('Video preview added, but upload failed', 'Close', { duration: 3000 });
+            // }
           };
         });
 
