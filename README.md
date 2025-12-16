@@ -1,4 +1,4 @@
-# 01-Blog
+# 01-Blog - Cocoon
 
 A full-stack social blogging platform built with **Spring Boot**, **Angular**, and **PostgreSQL**, designed for students and developers to share posts, interact, and follow each other.
 
@@ -6,7 +6,7 @@ A full-stack social blogging platform built with **Spring Boot**, **Angular**, a
 
 ## 📌 Project Overview
 
-**01-Blog** is a modern full-stack web application using a **layered backend architecture** (Controller → Service → Repository) and a **feature-based Angular frontend architecture**.  
+**01-Blog || Cocoon** is a modern full-stack web application using a **layered backend architecture** (Controller → Service → Repository) and a **feature-based Angular frontend architecture**.  
 
 The project supports authentication with JWT, role-based access (USER / ADMIN), post interactions, notifications, reporting, and admin moderation.
 
