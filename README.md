@@ -1,77 +1,151 @@
-# 01Blog
+# 01-Blog
 
-A **social blogging platform** where students can share their learning journey, follow each other, and interact with posts.
+A full-stack social blogging platform built with **Spring Boot**, **Angular**, and **PostgreSQL**, designed for students and developers to share posts, interact, and follow each other.
 
-This project is a **fullstack application** built with:
-- **Backend**: Java Spring Boot  
-- **Frontend**: Angular  
-- **Database**: PostgreSQL
+---
+
+## 📌 Project Overview
+
+**01-Blog** is a modern full-stack web application using a **layered backend architecture** (Controller → Service → Repository) and a **feature-based Angular frontend architecture**.  
+
+The project supports authentication with JWT, role-based access (USER / ADMIN), post interactions, notifications, reporting, and admin moderation.
+
+The database is managed using **PostgreSQL**, with **Docker** used to easily provision and run the database locally.
+
+---
+
+## 🧠 Architecture
+
+### Backend Architecture (Spring Boot)
+
+- **Controller Layer** – REST APIs
+- **Service Layer** – Business logic
+- **Repository Layer** – Data access (JPA/Hibernate)
+- **DTO Layer** – Request/Response abstraction
+- **Security Layer** – JWT + Spring Security
+- **Exception Handling** – Global exception handler
+
+```
+Controller → Service → Repository → Database
+```
+
+### Frontend Architecture (Angular)
+
+- Feature-based modules
+- Services for API communication
+- Route guards for authentication
+- Angular Material UI components
+
+---
+
+## 🧱 Project Structure
+
+```
+01-blog/
+├── 01blog-backend/       # Spring Boot backend
+├── 01blog-frontend/      # Angular frontend
+├── dockerrun.sh          # PostgreSQL Docker setup
+├── run.sh                # Run backend & frontend
+└── README.md
+```
 
 ---
 
 ## 🚀 Features
 
-### User Features
-- Register, login, and manage profile
-- Create, edit, and delete posts (with media support)
+### 👤 User Features
+- Register & login (JWT authentication)
+- Create, edit, delete blog posts
 - Like and comment on posts
-- Subscribe to other users' profiles
-- Get notifications when subscribed users post
+- Follow / unfollow users
+- Receive notifications
+- Upload images (Cloudinary)
 
-### Admin Features
-- Manage users and posts
-- View and handle reports
-- Ban or delete inappropriate content
-
-### General Features
-- Role-based authentication (JWT + Spring Security)
-- Responsive frontend (Angular Material)
-- Relational database (PostgreSQL)
+### 🛠️ Admin Features
+- User management
+- Post moderation
+- Report handling
+- Ban users
 
 ---
 
-## 🛠️ Project Structure
+## ⚙️ Technologies & Tools Used
 
-```
-01-blog/
-├── 01blog-backend/     # Spring Boot backend
-├── 01blog-frontend/    # Angular frontend
-└── run.sh             # Script to run both servers
-```
+### Backend
+- Java 17
+- Spring Boot
+- Spring Security
+- Spring Data JPA
+- JWT Authentication
+- Maven
+
+### Frontend
+- Angular
+- Angular Material
+- TypeScript
+- RxJS
+
+### Database
+- PostgreSQL 15 (Dockerized)
+
+### DevOps / Tools
+- Docker
+- Bash scripts
+- Git
+- Cloudinary (image hosting)
 
 ---
 
-## ⚡ Requirements
+## 📋 Requirements
 
+Make sure you have the following installed:
+
+### Required
 - **Java 17+**
-- **Maven** (or Maven Wrapper `./mvnw`)
-- **Node.js 20+ & npm**
-- **Angular CLI** (`npm install -g @angular/cli`)
-- **PostgreSQL**
+- **Node.js 18+** (20 recommended)
+- **npm**
+- **Angular CLI**
+- **Docker**
+- **Git**
+- **Linux** (or compatible terminal for scripts)
+
+Install Angular CLI:
+```bash
+npm install -g @angular/cli
+```
+
+---
+
+## 🐳 Database Setup (Docker)
+
+The project uses PostgreSQL inside Docker.
+
+Run the database using:
+
+```bash
+./dockerrun.sh
+```
+
+This script will:
+- Check if Docker is installed
+- Pull `postgres:15` image (if not exists)
+- Remove any existing Postgres containers
+- Start a new container with:
+  - **Database:** `01blog`
+  - **User:** `01blog`
+  - **Password:** `blog123`
+  - **Port:** `5432`
+
+Postgres will be available at:
+```
+localhost:5432
+```
 
 ---
 
 ## ▶️ Running the Project
 
-### 1. Backend (Spring Boot)
-
-```bash
-cd 01blog-backend
-./mvnw spring-boot:run
-```
-
-Backend will start at: http://localhost:8080
-
-### 2. Frontend (Angular)
-
-```bash
-cd 01blog-frontend
-ng serve --open
-```
-
-Frontend will start at: http://localhost:4200
-
-### 3. Run Both with Script
+### Option 1️⃣: Run Everything Automatically
 
 From the project root:
 
@@ -79,109 +153,96 @@ From the project root:
 ./run.sh
 ```
 
-This will open two terminals:
-- Backend at port 8080
-- Frontend at port 4200
+This will:
+- Open backend in a new terminal
+- Compile and start Spring Boot
+- Open frontend in another terminal
+- Start Angular dev server
 
----
+### Option 2️⃣: Run Manually
 
-## ⚙️ Database Setup (PostgreSQL)
-
-1. Start PostgreSQL and create a database:
-
-```sql
-CREATE DATABASE blogdb;
+#### Backend
+```bash
+cd 01blog-backend
+./mvnw clean compile
+./mvnw spring-boot:run
 ```
 
-2. Update `01blog-backend/src/main/resources/application.properties`:
+Backend runs on:
+```
+http://localhost:8080
+```
 
-```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/blogdb
-spring.datasource.username=your_username
-spring.datasource.password=your_password
-spring.jpa.hibernate.ddl-auto=update
+#### Frontend
+```bash
+cd 01blog-frontend
+npm install
+ng serve --open
+```
+
+Frontend runs on:
+```
+http://localhost:4200
 ```
 
 ---
 
-## 📚 Tech Stack
+## 🔐 Authentication
 
-- **Backend**: Spring Boot, Spring Security, JPA, PostgreSQL
-- **Frontend**: Angular, Angular Material
-- **Authentication**: JWT
-- **Build Tools**: Maven, npm
-- **Deployment Ready**: Can be deployed on AWS / Docker
+- JWT-based authentication
+- Secured endpoints with Spring Security
+- Role-based access control (USER / ADMIN)
 
----
-
-## 🧑‍💻 Development Notes
-
-- Backend APIs are exposed at `/api/**`
-- Angular services consume those APIs
-- Use `ng generate component` and `ng generate service` to scaffold frontend code
-- Use layered architecture on backend (controller → service → repository)
+### Main endpoints:
+- `POST /api/auth/register`
+- `POST /api/auth/login`
 
 ---
 
-## 📋 API Endpoints
-
-### Authentication
-- `POST /api/auth/register` - User registration
-- `POST /api/auth/login` - User login
-- `POST /api/auth/logout` - User logout
+## 📡 Main API Endpoints
 
 ### Users
-- `GET /api/users/{id}` - Get user profile
-- `PUT /api/users/{id}` - Update user profile
-- `POST /api/users/{id}/subscribe` - Subscribe to user
-- `DELETE /api/users/{id}/subscribe` - Unsubscribe from user
+- `GET /api/users/{id}`
+- `PUT /api/users/{id}`
+- `POST /api/users/{id}/subscribe`
+- `DELETE /api/users/{id}/subscribe`
 
 ### Posts
-- `GET /api/posts` - Get all posts (with pagination)
-- `GET /api/posts/{id}` - Get specific post
-- `POST /api/posts` - Create new post
-- `PUT /api/posts/{id}` - Update post
-- `DELETE /api/posts/{id}` - Delete post
-- `POST /api/posts/{id}/like` - Like/unlike post
-- `POST /api/posts/{id}/comments` - Add comment
-- `DELETE /api/comments/{id}` - Delete comment
+- `GET /api/posts`
+- `GET /api/posts/{id}`
+- `POST /api/posts`
+- `PUT /api/posts/{id}`
+- `DELETE /api/posts/{id}`
+- `POST /api/posts/{id}/like`
+- `POST /api/posts/{id}/comments`
 
 ### Admin
-- `GET /api/admin/users` - Get all users
-- `DELETE /api/admin/users/{id}` - Ban user
-- `GET /api/admin/reports` - Get all reports
-- `POST /api/admin/reports/{id}/resolve` - Resolve report
+- `GET /api/admin/users`
+- `GET /api/admin/posts`
+- `GET /api/admin/reports`
 
 ---
 
-## ✅ Evaluation Criteria
+## ☁️ File Uploads
 
-- **Functionality** (all features working)
-- **Security** (proper role-based access)
-- **UI/UX** (clean & responsive)
-- **Documentation** (this README)
-
----
-
-## 🔮 Bonus Features (Optional)
-
-- Real-time notifications (WebSockets)
-- Infinite scrolling on feeds
-- Dark mode toggle
-- Basic analytics for admins
+- Image uploads are handled using **Cloudinary**
+- Configured via `CloudinaryConfig`
 
 ---
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+2. Create a feature branch
+3. Commit your changes
+4. Open a Pull Request
 
----
 
-## 📄 License
+## 👨‍💻 Author
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+**Bboubaker Elmaayouf**  
+Full-Stack Developer
+
+Portfolio: [https://boubkerelmaayouf.click/](https://boubkerelmaayouf.click/)
+
+GitHub: [https://github.com/BoubkerElmaayouf](https://github.com/BoubkerElmaayouf)
