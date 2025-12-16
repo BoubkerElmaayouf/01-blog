@@ -31,7 +31,7 @@ public class Comment {
 
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    // 🧨 Cascade delete all comment’s reactions
+    //  Cascade delete all comment’s reactions
     @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CommentReaction> reactions;
 }

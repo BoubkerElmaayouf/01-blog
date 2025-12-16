@@ -22,14 +22,14 @@ public class FollowService {
     private final NotificationService notificationService;
     private final UserRepository userRepository;
 
-    // 🔹 Follow user
+    // Follow user
     public FollowResponse follow(Long followerId, Long followingId) {
         User followerUser = userRepository.findById(followerId)
                 .orElseThrow(() -> new RuntimeException("Follower user not found"));
         User followingUser = userRepository.findById(followingId)
                 .orElseThrow(() -> new RuntimeException("Following user not found"));
 
-        // 🚫 Prevent banned users from following
+        //  Prevent banned users from following
         if (followerUser.getBanned()) {
             throw new RuntimeException("Your account has been banned. You cannot perform this action.");
         }
@@ -58,12 +58,12 @@ public class FollowService {
         return makeResponse(followerId, followingId, true, "Followed successfully");
     }
 
-    // 🔹 Unfollow user
+    // Unfollow user
     public FollowResponse unfollow(Long followerId, Long followingId) {
         User followerUser = userRepository.findById(followerId)
                 .orElseThrow(() -> new RuntimeException("Follower user not found"));
 
-        // 🚫 Prevent banned users from unfollowing
+        //  Prevent banned users from unfollowing
         if (followerUser.getBanned()) {
             throw new RuntimeException("Your account has been banned. You cannot perform this action.");
         }
@@ -78,12 +78,12 @@ public class FollowService {
         return makeResponse(followerId, followingId, true, "Unfollowed successfully");
     }
 
-    // 🔹 Check if user follows another
+    // Check if user follows another
     public boolean isFollowing(Long followerId, Long followingId) {
         return followersRepository.existsById(new FollowersId(followerId, followingId));
     }
 
-    // 🔹 Helper to build response
+    // Helper to build response
     private FollowResponse makeResponse(Long fId, Long gId, boolean success, String msg) {
         FollowResponse res = new FollowResponse();
         res.setFollowerId(fId);
@@ -93,7 +93,7 @@ public class FollowService {
         return res;
     }
 
-    // 🔹 Get followers of a user
+    // Get followers of a user
     public List<Long> getFollowers(Long userId) {
         return followersRepository.findByIdFollowingId(userId)
                 .stream()

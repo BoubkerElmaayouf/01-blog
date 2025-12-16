@@ -29,7 +29,7 @@ public class AuthService {
     private final FollowersRepository followersRepository;
     private final UserRepository userRepository;
 
-    // 🔹 Register new user
+    //  Register new user
     public User register(RegisterRequest request) {
         String profilePicture = request.getProfilePic();
 
@@ -52,7 +52,7 @@ public class AuthService {
         return userRepository.save(user);
     }
 
-    // 🔹 Login user
+    //  Login user
     public String login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmailOrUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -73,7 +73,7 @@ public class AuthService {
         );
     }
 
-    // 🔹 Get user by ID
+    //  Get user by ID
     public User getUserById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -85,7 +85,7 @@ public class AuthService {
         return user;
     }
 
-    // 🔹 Convert user to DTO
+    //  Convert user to DTO
     public UserDto toUserDto(User user) {
         int postCount = (int) postRepository.countByUser(user);
         int commentCount = (int) commentRepository.countByUser(user);
@@ -109,7 +109,7 @@ public class AuthService {
         );
     }
 
-    // 🔹 Update user profile
+    //  Update user profile
     public User updateUser(Long id, UserDto userDto) {
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -126,7 +126,7 @@ public class AuthService {
         return userRepository.save(existingUser);
     }
 
-    // 🔹 Change user password
+    //  Change user password
     public void changePassword(Long id, ChangePasswordRequest request) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -143,7 +143,7 @@ public class AuthService {
         userRepository.save(user);
     }
 
-    // 🔹 Optional: validate password strength
+    //  Optional: validate password strength
     private void validatePassword(String password) {
         String regex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!]).{8,}$";
         if (!password.matches(regex)) {
@@ -153,7 +153,7 @@ public class AuthService {
         }
     }
 
-    // 🔹 Ensure at least one admin exists
+    //  Ensure at least one admin exists
     public void ensureAdminExits() {
         if (userRepository.findByEmail("a@a.com").isEmpty()) {
             User admin = User.builder()
@@ -170,12 +170,12 @@ public class AuthService {
         }
     }
 
-    // 🔹 Check if user is admin
+    //  Check if user is admin
     public boolean isAdmin(User user) {
         return user.getRole() == Role.ADMIN;
     }
 
-    // 🔹 Check if user is banned
+    //  Check if user is banned
     public boolean isBanned(User user) {
         return user.getBanned();
     }

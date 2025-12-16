@@ -12,7 +12,7 @@ import java.util.Map;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    // 🔹 Handle banned user errors
+    //  Handle banned user errors
     @ExceptionHandler(UserBannedException.class)
     public ResponseEntity<Map<String, Object>> handleUserBanned(UserBannedException ex) {
         Map<String, Object> response = new HashMap<>();
@@ -23,7 +23,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
     }
 
-    // 🔹 Handle all other RuntimeExceptions
+    //  Handle all other RuntimeExceptions
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Map<String, Object>> handleRuntime(RuntimeException ex) {
         Map<String, Object> response = new HashMap<>();

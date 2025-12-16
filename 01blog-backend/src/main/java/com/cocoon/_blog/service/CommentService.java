@@ -30,12 +30,12 @@ public class CommentService {
     private final PostRepository postRepository;
     private final CommentReactionRepository commentReactionRepository;
 
-    // 🔹 Create a new comment
+    //  Create a new comment
     public CommentDto createComment(Long postId, CommentRequest request, Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // 🚫 Prevent banned users from commenting
+        //  Prevent banned users from commenting
         if (user.getBanned()) {
             throw new UserBannedException("Your account has been banned. You cannot comment.");
         }
@@ -54,7 +54,7 @@ public class CommentService {
         return mapToDto(savedComment, userId);
     }
 
-    // 🔹 Get comments for a post
+    //  Get comments for a post
     public ResponseEntity<List<CommentDto>> getCommentsByPost(Long postId, Long currentUserId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
@@ -68,7 +68,7 @@ public class CommentService {
         return ResponseEntity.ok(dtos);
     }
 
-    // 🔹 Like or unlike a comment
+    //  Like or unlike a comment
     public ResponseEntity<CommentDto> likeComment(Long commentId, Long userId) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new RuntimeException("Comment not found"));
@@ -76,7 +76,7 @@ public class CommentService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // 🚫 Prevent banned users from liking/unliking comments
+        // Prevent banned users from liking/unliking comments
         if (user.getBanned()) {
             throw new UserBannedException("Your account has been banned. You cannot react to comments.");
         }
@@ -101,7 +101,7 @@ public class CommentService {
         return ResponseEntity.ok(dto);
     }
 
-    // 🔹 Helper to map Comment entity to DTO
+    //  Helper to map Comment entity to DTO
     private CommentDto mapToDto(Comment comment, Long currentUserId) {
         CommentDto dto = new CommentDto();
         dto.setId(comment.getId());
@@ -121,7 +121,7 @@ public class CommentService {
         return dto;
     }
 
-    // 🔹 Get post owner's ID
+    //  Get post owner's ID
     public Long getPostOwnerId(Long postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
@@ -136,17 +136,17 @@ public ResponseEntity<?> deleteComment(Long commentId, Long currentUserId) {
     User currentUser = userRepository.findById(currentUserId)
             .orElseThrow(() -> new RuntimeException("User not found"));
 
-    // 🚫 Check if current user is banned
+    //  Check if current user is banned
     if (Boolean.TRUE.equals(currentUser.getBanned())) {
         return ResponseEntity.ok(Map.of("message", "Your account has been banned. You cannot perform this action."));
     }
 
-    // 🚫 Check if current user is not the owner of the comment
+    //  Check if current user is not the owner of the comment
     if (!commentOwner.getId().equals(currentUser.getId())) {
         return ResponseEntity.ok(Map.of("message", "You cannot delete another user's comment."));
     }
 
-    // ✅ Proceed with deletion
+    //  Proceed with deletion
     commentRepository.deleteById(commentId);
     return ResponseEntity.ok(Map.of("message", "Comment deleted successfully."));
 }

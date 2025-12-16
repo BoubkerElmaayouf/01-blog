@@ -4,7 +4,7 @@ import com.cocoon._blog.dto.NotificationDto;
 import com.cocoon._blog.entity.Notification;
 import com.cocoon._blog.entity.NotificationType;
 import com.cocoon._blog.entity.User;
-import com.cocoon._blog.exception.UserBannedException; // ✅ use your custom exception
+import com.cocoon._blog.exception.UserBannedException; //  use your custom exception
 import com.cocoon._blog.repository.NotificationRepository;
 import com.cocoon._blog.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +38,7 @@ public class NotificationService {
         User recipient = userRepository.findById(recipientId)
                 .orElseThrow(() -> new RuntimeException("Recipient not found"));
 
-        // 🚫 Prevent banned users from sending notifications
+        // Prevent banned users from sending notifications
         if (Boolean.TRUE.equals(sender.getBanned())) {
             throw new UserBannedException("Your account has been banned. You cannot perform this action.");
         }
@@ -67,7 +67,7 @@ public class NotificationService {
         notificationRepository.save(notification);
     }
 
-    // 🔹 Get notifications for a user
+    // Get notifications for a user
     public List<NotificationDto> getUserNotifications(Long userId) {
         User recipient = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -78,7 +78,7 @@ public class NotificationService {
                 .collect(Collectors.toList());
     }
 
-    // 🔹 Mark notification as read
+    // Mark notification as read
     public void markAsRead(Long id) {
         Notification n = notificationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Notification not found"));
@@ -86,7 +86,7 @@ public class NotificationService {
         notificationRepository.save(n);
     }
 
-    // 🔹 Map entity → DTO
+    // Map entity → DTO
     private NotificationDto toDto(Notification n) {
         return new NotificationDto(
                 n.getId(),
