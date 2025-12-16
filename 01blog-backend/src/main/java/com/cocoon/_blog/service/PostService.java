@@ -38,7 +38,7 @@ public class PostService {
     private final CommentRepository commentRepository;
     private final FollowersRepository followersRepository;
 
-    // 🔹 Create a post
+    //  Create a post
     public Post createPost(PostRequest request, Long userId) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("User not found"));
@@ -65,7 +65,7 @@ public class PostService {
         return post;
     }
 
-    // 🔹 Update a post
+    //  Update a post
     public Post updatePost(Long postId, PostRequest request, Long userId) {
         Post post = postRepository.findById(postId)
             .orElseThrow(() -> new RuntimeException("Post not found with id: " + postId));
@@ -92,7 +92,7 @@ public class PostService {
         return post;
     }
 
-    // 🔹 Build PostResponse with like status
+    //  Build PostResponse with like status
     public PostResponse buildPostResponse(Post post, Long currentUserId) {
         int likeCount = (int) postReactionRepository.countByPost(post);
         int commentCount = (int) commentRepository.countByPost(post);
@@ -127,7 +127,7 @@ public class PostService {
         );
     }
 
-    // 🔹 Get all posts with pagination
+    //  Get all posts with pagination
     public ResponseEntity<?> getAllPosts(Long currentUserId, int page, int size) {
         List<Long> followedIds = followersRepository.findFollowingIdsByFollowerId(currentUserId);
 
@@ -148,7 +148,6 @@ public class PostService {
         // Page<Post> postsPage = postRepository.findByUserIdIn(userIds, pageable);
         Page<Post> postsPage = postRepository.findByUserIdInAndIsHiddenFalse(userIds, pageable);
 
-
         List<PostResponse> content = postsPage.getContent().stream()
             .map(post -> buildPostResponse(post, currentUserId))
             .collect(Collectors.toList());
@@ -162,14 +161,19 @@ public class PostService {
         ));
     }
 
-    // 🔹 Get post by ID
+    //  Get post by ID
     public ResponseEntity<?> getPostsById(long id, Long currentUserId) {
         Post post = postRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Post not found with id: " + id));
+
+        if (post.isHidden()) {
+            throw new RuntimeException("Post not found with id: " + id);
+        }
+
         return ResponseEntity.ok(buildPostResponse(post, currentUserId));
     }
 
-    // 🔹 Get posts by user ID
+    //  Get posts by user ID
    public ResponseEntity<?> getPostByUserId(Long userId, Long currentUserId) {
     User user = userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
@@ -183,12 +187,12 @@ public class PostService {
         return ResponseEntity.ok(posts);
     }
 
-    // 🔹 Get current user's posts
+    //  Get current user's posts
     public ResponseEntity<?> getMyPosts(Long userId) {
         return getPostByUserId(userId, userId);
     }
 
-    // 🔹 Like or unlike a post
+    //  Like or unlike a post
     public ResponseEntity<?> likePost(Long postId, Long userId) {
         Post post = postRepository.findById(postId)
             .orElseThrow(() -> new RuntimeException("Post not found with id: " + postId));
@@ -216,14 +220,14 @@ public class PostService {
                 });
     }
 
-    // 🔹 Get post owner's ID
+    //  Get post owner's ID
     public Long getPostOwnerId(Long id) {
         Post post = postRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Post not found with id: " + id));
         return post.getUser().getId();
     }
 
-    // 🔹 Delete a post
+    //  Delete a post
     public ResponseEntity<?> deletePost(Long id, Long userId) {
         Post post = postRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Post not found with id: " + id));
