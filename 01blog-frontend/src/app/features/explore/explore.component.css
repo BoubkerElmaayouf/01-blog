@@ -111,6 +111,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  word-break: break-all;
 }
 
 /* Publication Info */

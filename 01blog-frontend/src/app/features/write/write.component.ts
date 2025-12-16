@@ -428,7 +428,7 @@ export class WriteComponent implements OnInit, AfterViewInit {
       const postData = {
         title: this.postForm.get('title')?.value,
         topic: this.postForm.get('category')?.value,
-        banner: bannerUrl.secure_url || this.postForm.get('banner')?.value || "https://res.cloudinary.com/dsv24pun2/image/upload/v1765794242/posts/xszrq1xlnpix1tdjeven.png",
+        banner: bannerUrl.secure_url || this.postForm.get('banner')?.value || "https://res.cloudinary.com/dsv24pun2/image/upload/v1765884046/posts/v2qnwcp2i5c7qdopvbcw.png",
         description: processedContent && processedContent.length > 10 ? processedContent : "<p>No description provided</p>",
         videos: []
       };

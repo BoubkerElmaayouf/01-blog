@@ -84,6 +84,7 @@
   overflow: hidden;
 }
 
+
 /* Article Header */
 .article-header {
   padding: 40px 0 30px;
@@ -111,6 +112,8 @@
   color: #1a1a1a;
   letter-spacing: -0.02em;
   word-wrap: break-word;
+    overflow-wrap: break-word; /* modern & recommended */
+  word-break: break-word;
 }
 
 /* Author Section */
