@@ -1,0 +1,49 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: blog-postgres-dev
+    environment:
+      POSTGRES_DB: 01blog
+      POSTGRES_USER: 01blog
+      POSTGRES_PASSWORD: blog123
+    ports:
+      - "5433:5432"     # host:container (fixes "5432 already in use")
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    image: maven:3.9-eclipse-temurin-17
+    container_name: blog-backend-dev
+    working_dir: /app
+    volumes:
+      - ./01blog-backend:/app
+      # optional: cache maven deps so it doesn't re-download every time
+      - maven_cache:/root/.m2
+    command: mvn spring-boot:run
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/01blog
+      SPRING_DATASOURCE_USERNAME: 01blog
+      SPRING_DATASOURCE_PASSWORD: blog123
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+
+  frontend:
+    image: node:20-alpine
+    container_name: blog-frontend-dev
+    working_dir: /app
+    volumes:
+      - ./01blog-frontend:/app
+      # keep node_modules inside the container (prevents permission + OS issues)
+      - node_modules:/app/node_modules
+    command: sh -c "npm ci && npm start -- --host 0.0.0.0 --port 4200"
+    ports:
+      - "4200:4200"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+  maven_cache:
+  node_modules:
