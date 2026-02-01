@@ -2,14 +2,21 @@ services:
   postgres:
     image: postgres:17-alpine
     container_name: blog-postgres-dev
+    env_file:
+      - .env
     environment:
-      POSTGRES_DB: 01blog
-      POSTGRES_USER: 01blog
-      POSTGRES_PASSWORD: blog123
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "5433:5432"     # host:container (fixes "5432 already in use")
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
 
   backend:
     image: maven:3.9-eclipse-temurin-17
@@ -17,17 +24,24 @@ services:
     working_dir: /app
     volumes:
       - ./01blog-backend:/app
-      # optional: cache maven deps so it doesn't re-download every time
       - maven_cache:/root/.m2
     command: mvn spring-boot:run
+    env_file:
+      - .env
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/01blog
-      SPRING_DATASOURCE_USERNAME: 01blog
-      SPRING_DATASOURCE_PASSWORD: blog123
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      # explicitly pass these so they're guaranteed available:
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
     ports:
       - "8080:8080"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
   frontend:
     image: node:20-alpine
@@ -35,7 +49,6 @@ services:
     working_dir: /app
     volumes:
       - ./01blog-frontend:/app
-      # keep node_modules inside the container (prevents permission + OS issues)
       - node_modules:/app/node_modules
     command: sh -c "npm ci && npm start -- --host 0.0.0.0 --port 4200"
     ports:

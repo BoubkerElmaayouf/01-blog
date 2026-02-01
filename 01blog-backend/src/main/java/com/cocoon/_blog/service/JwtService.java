@@ -3,31 +3,47 @@ package com.cocoon._blog.service;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.cocoon._blog.entity.Role;
 
 import javax.crypto.SecretKey;
+import jakarta.annotation.PostConstruct;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Service
 public class JwtService {
 
-    // Convert the String key to a SecretKey
-   private final SecretKey key = Keys.hmacShaKeyFor(
-    "MySuperSuperSecretKeyThatIsAtLeast32Bytes!".getBytes(StandardCharsets.UTF_8)
-);
+    @Value("${jwt.secret}")
+    private String secretKeyString;
 
-    public String generateToken(String username, Long id, Role role, boolean banned ) {
+    private SecretKey key;
+
+    @PostConstruct
+    private void init() {
+        if (secretKeyString == null || secretKeyString.length() < 32) {
+            throw new IllegalStateException(
+                "JWT secret is missing or too short. Set jwt.secret or JWT_SECRET_KEY (min 32 chars)."
+            );
+        }
+
+        this.key = Keys.hmacShaKeyFor(
+            secretKeyString.getBytes(StandardCharsets.UTF_8)
+        );
+    }
+
+    public String generateToken(String username, Long id, Role role, boolean banned) {
         return Jwts.builder()
                 .setSubject(username)
                 .claim("id", id)
                 .claim("role", role.toString())
                 .claim("banned", banned)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 3000 * 60 * 60)) // 1 hour
-                .signWith(key) // now this works
+                .setExpiration(new Date(System.currentTimeMillis() + 1000L * 60 * 60)) // 1 hour
+                .signWith(key)
                 .compact();
     }
 
@@ -52,8 +68,7 @@ public class JwtService {
     }
 
     public boolean validateToken(String token, String username) {
-        final String extractedUsername = extractUsername(token);
-        return (extractedUsername.equals(username) && !isTokenExpired(token));
+        return extractUsername(token).equals(username) && !isTokenExpired(token);
     }
 
     private boolean isTokenExpired(String token) {
@@ -61,6 +76,8 @@ public class JwtService {
     }
 
     public boolean isTokenBanned(String token) {
-        return extractAllClaims(token).get("banned", Boolean.class);
+        return Boolean.TRUE.equals(
+                extractAllClaims(token).get("banned", Boolean.class)
+        );
     }
 }
