@@ -48,7 +48,7 @@
         </dependency>
 
         <!-- JWT (JSON Web Token for Authentication) -->
-        <dependency>
+        <!-- <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
             <version>0.11.5</version>
@@ -64,7 +64,7 @@
             <artifactId>jjwt-jackson</artifactId>
             <version>0.11.5</version>
             <scope>runtime</scope>
-        </dependency>
+        </dependency> -->
 
         <!-- Lombok (auto-generate getters, setters, constructors, builders) -->
         <dependency>
